@@ -3,7 +3,7 @@
 This is an ongoing project that aims at creating a minimal _NetBSD_ virtual machine that's
 able to boot and start a service in less than a second.  
 Previous _NetBSD_ installation is not required, using the provided tools the microvm can be
-created from any GNU/Linux system.
+created from any _GNU/Linux_ system.
 
 Warning. as this method uses [multiboot][1] to boot directly the kernel from [kvm][2], only
 `i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this
@@ -37,7 +37,7 @@ Now the main trick, in order to decrease kernel boot time, we will disable all d
 the ones absolutely needed to boot a virtual machine with `VirtIO` disk and network:
 
 ```sh
-$ kstrip.sh netbsd-9.3
+$ ./kstrip.sh netbsd-9.3
 ```
 
 Once the kernel is stripped, start the virtual machine:
