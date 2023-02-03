@@ -16,7 +16,7 @@ architecture as of now.
 
 # Usage
 
-## Example of a very minimal (10MB) virtual machine
+## Example of a very minimal (10MB) virtual machine from a GNU/Linux host
 
 Create a `sets` directory and download the `rescue` set:
 
@@ -28,7 +28,7 @@ $ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/bi
 Build an `ext2` root image that will be the root filesystem device:
 
 ```sh
-# ./mkimg.sh
+$ sudo ./mkimg.sh
 ```
 
 Download a `GENERIC` _NetBSD_ kernel
