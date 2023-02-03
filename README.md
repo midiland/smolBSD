@@ -3,7 +3,11 @@
 This is an ongoing project that aims at creating a minimal _NetBSD_ virtual machine that's
 able to boot and start a service in less than a second.  
 Previous _NetBSD_ installation is not required, using the provided tools the microvm can be
-created from any _GNU/Linux_ system.  
+created from any _NetBSD_ or _GNU/Linux_ system.
+
+When creating the image on a _NetBSD_ system, the image will be formatted using FFS, when
+creating the image on a _GNU/Linux_ system, the image will be formatted using _ext2_.
+
 Note that this is currently more a proof of concept, don't judge the scripts as they are!
 
 Warning. as this method uses [multiboot][1] to boot directly the kernel from [kvm][2], only
