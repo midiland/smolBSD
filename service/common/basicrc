@@ -1,0 +1,10 @@
+export HOME=/
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
+umask 022
+
+mount -a
+
+ifconfig vioif0 192.168.1.100/24 up
+ifconfig lo0 127.0.0.1 up
+route add default 192.168.1.254
+echo 'nameserver 192.168.1.254' > /etc/resolv.conf
