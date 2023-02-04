@@ -19,6 +19,14 @@ architecture as of now.
 ## Project structure
 
 - `mkimg.sh` creates a root filesystem image
+```text
+Usage: mkimg.sh [-s service] [-m megabytes] [-n image] [-x set]
+	Create a root image
+	-s service	service name, default "rescue"
+	-m megabytes	image size in megabytes, default 10
+	-i image	image name, default root.img
+	-x sets		list of NetBSD sets, default rescue.tgz
+```
 - `kstrip.sh` strips the kernel from any useless driver to improve boot speed
 - `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x64_64`
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
