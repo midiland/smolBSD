@@ -7,20 +7,20 @@ Usage: ${0##*/} [-s service] [-m megabytes] [-n image] [-x set]
 	Create a root image
 	-s service	service name, default "rescue"
 	-m megabytes	image size in megabytes, default 10
-	-n image	image name, default root.img
+	-i image	image name, default root.img
 	-x sets		list of NetBSD sets, default rescue.tgz
 _USAGE_
 	exit 1
 }
 
-options="s:m:n:x:h"
+options="s:m:i:x:h"
 
 while getopts "$options" opt
 do
 	case $opt in
 	s) svc="$OPTARG";;
 	m) megs="$OPTARG";;
-	n) img="$OPTARG";;
+	i) img="$OPTARG";;
 	x) sets="$OPTARG";;
 	h) usage;;
 	*) usage;;
@@ -32,7 +32,8 @@ done
 [ -z "$img" ] && img=root.img
 [ -z "$sets" ] && sets=rescue.tgz
 
-[ ! -f etc/rc.${svc} ] && echo "no etc/rc.${svc} available" && exit 1
+[ ! -f service/${svc}/etc/rc ] && \
+	echo "no service/${svc}/etc/rc available" && exit 1
 
 OS=$(uname -s)
 
@@ -60,9 +61,18 @@ do
 done
 
 cd mnt
-mkdir -p sbin bin dev
+mkdir -p sbin bin dev etc/include
+
 cp -f ../etc/fstab.${OS} etc/fstab
-cp -f ../etc/rc.${svc} etc/rc
+cp -f ../service/${svc}/etc/* etc/
+cp -f ../service/common/* etc/include/
+
+[ -d ../service/${svc}/postinst ] &&
+	for x in ../service/${svc}/postinst/*.sh
+	do
+		sh $x
+	done
+
 if [ "$svc" = "rescue" ]; then
 	for b in init mount_ext2fs
 	do
@@ -85,6 +95,10 @@ mknod -m 600 klog    c 7 0
 mknod -m 444 ksyms   c 85 0
 mknod -m 444 random  c 46 0
 mknod -m 644 urandom c 46 1
+mknod -m 666 tty     c 1 0
+mknod -m 666 stdin   c 22 0
+mknod -m 666 stdout  c 22 1
+mknod -m 666 stderr  c 22 2
 mknod -m 640 ld0a    b 19 0
 mknod -m 640 ld1a    b 19 1
 
