@@ -100,6 +100,7 @@ mknod -m 666 stdin   c 22 0
 mknod -m 666 stdout  c 22 1
 mknod -m 666 stderr  c 22 2
 mknod -m 640 ld0a    b 19 0
+mknod -m 640 rld0a   c 69 0
 mknod -m 640 ld1a    b 19 1
 
 cd ../..
@@ -107,3 +108,5 @@ cd ../..
 umount mnt
 
 [ -z "$is_linux" ] && vndconfig -u $vnd
+
+exit 0

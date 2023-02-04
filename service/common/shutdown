@@ -1,0 +1,4 @@
+
+shutdown -p now
+umount -a
+fsck -q -y /dev/ld0a
