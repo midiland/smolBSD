@@ -34,7 +34,9 @@ done
 
 [ ! -f etc/rc.${svc} ] && echo "no etc/rc.${svc} available" && exit 1
 
-[ "$(uname -s)" = "Linux" ] && is_linux=1
+OS=$(uname -s)
+
+[ "$OS" = "Linux" ] && is_linux=1
 
 [ -n "$is_linux" ] && u=M || u=m
 
@@ -59,8 +61,8 @@ done
 
 cd mnt
 mkdir -p sbin bin dev
-cp -f ../etc/fstab etc/
-cp -f ../etc/rc.$svc etc/rc
+cp -f ../etc/fstab.${OS} etc/fstab
+cp -f ../etc/rc.${svc} etc/rc
 if [ "$svc" = "rescue" ]; then
 	for b in init mount_ext2fs
 	do
@@ -84,6 +86,7 @@ mknod -m 444 ksyms   c 85 0
 mknod -m 444 random  c 46 0
 mknod -m 644 urandom c 46 1
 mknod -m 640 ld0a    b 19 0
+mknod -m 640 ld1a    b 19 1
 
 cd ../..
 
