@@ -86,7 +86,7 @@ $ mkdir sets
 $ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/rescue.tgz
 ```
 
-Build an `ext2` root image that will be the root filesystem device:
+Build an `ext2` or `ffs` root image that will be the root filesystem device:
 
 ```sh
 $ sudo ./mkimg.sh
@@ -113,6 +113,20 @@ $ sudo ./startnb.sh netbsd-9.3
 ```
 
 You should be granted a shell.
+
+## Example of an image filled with the `base` set
+
+```sh
+$ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/base.tgz
+```
+
+Build an `ext2` or `ffs` root image that will be the root filesystem device:
+
+```sh
+$ sudo ./mkimg.sh -i base.img -s base -m 300 -x base.tgz
+```
+
+Following steps are identical to the previous example.
 
 [1]: https://man.netbsd.org/x86/multiboot.8
 [2]: https://www.linux-kvm.org/page/Main_Page
