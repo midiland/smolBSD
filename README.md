@@ -16,6 +16,63 @@ architecture as of now.
 
 # Usage
 
+## Project structure
+
+- `mkimg.sh` creates a root filesystem image
+- `kstrip.sh` strips the kernel from any useless driver to improve boot speed
+- `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x64_64`
+- `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
+- `etc` holds common `/etc` files to be installed in the root filesystem
+- `service` structure:
+
+```sh
+service
+├── base
+│   ├── etc
+│   │   └── rc
+│   └── postinst
+├── common
+│   └── basicrc
+├── imgbuilder
+│   ├── etc
+│   │   └── rc
+│   └── postinst
+│       └── prepare.sh
+└── rescue
+    └── etc
+            └── rc
+```
+A microvm is seen as a "service", for each one:
+
+- there **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
+- there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
+
+In the `service` directory, `common/` contains scripts that will be bundled in the
+`/etc/include` directory of the microvm, this would be a perfect place to have something like:
+
+```shell
+$ cat common/basicrc
+export HOME=/
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
+umask 022
+
+mount -a
+
+ifconfig vioif0 192.168.1.100/24 up
+ifconfig lo0 127.0.0.1 up
+route add default 192.168.1.254
+echo 'nameserver 192.168.1.254' > /etc/resolv.conf
+```
+
+And then add this to your `rc`:
+```sh
+. /etc/include/basicrc
+```
+
+## Warning
+
+`postinst` operations are run as `root` **in the build host only use relative paths** in order **not** to impair your host's filesystem.
+
 ## Example of a very minimal (10MB) virtual machine from a GNU/Linux host
 
 Create a `sets` directory and download the `rescue` set:
