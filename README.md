@@ -39,16 +39,12 @@ service
 │   ├── etc
 │   │   └── rc
 │   └── postinst
+│       └── dostuff.sh
 ├── common
 │   └── basicrc
-├── imgbuilder
-│   ├── etc
-│   │   └── rc
-│   └── postinst
-│       └── prepare.sh
 └── rescue
     └── etc
-            └── rc
+        └── rc
 ```
 A microvm is seen as a "service", for each one:
 
