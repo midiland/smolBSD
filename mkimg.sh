@@ -46,7 +46,7 @@ dd if=/dev/zero of=./${img} bs=1${u} count=${megs}
 mkdir -p mnt
 
 if [ -n "$is_linux" ]; then
-	mke2fs $img
+	mke2fs -O none $img
 	mount -o loop $img mnt
 else
 	vnd=$(vndconfig -l|grep -m1 'not'|cut -f1 -d:)
