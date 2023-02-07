@@ -130,7 +130,7 @@ $ sudo ./mkimg.sh -i base.img -s base -m 300 -x base.tgz
 
 Following steps are identical to the previous example.
 
-## Example of an image used to create an nginx microvm [sailor][3]
+## Example of an image used to create an nginx microvm with [sailor][3]
 
 Fetch the `base` and `etc` sets:
 
