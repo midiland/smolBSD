@@ -101,7 +101,11 @@ mknod -m 666 stdout  c 22 1
 mknod -m 666 stderr  c 22 2
 mknod -m 640 ld0a    b 19 0
 mknod -m 640 rld0a   c 69 0
-mknod -m 640 ld1a    b 19 1
+mknod -m 640 ld1     b 19 11
+mknod -m 640 ld1a    b 19 8
+mknod -m 640 ld1d    b 19 11
+mknod -m 640 rld1a   c 69 8
+mknod -m 640 rld1d   c 69 11
 
 cd ../..
 
