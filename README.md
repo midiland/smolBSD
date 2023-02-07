@@ -69,7 +69,7 @@ echo 'nameserver 192.168.1.254' > /etc/resolv.conf
 ```
 
 And then add this to your `rc`:
-```sh
+```shell
 . /etc/include/basicrc
 ```
 
@@ -81,20 +81,20 @@ And then add this to your `rc`:
 
 Create a `sets` directory and download the `rescue` set:
 
-```sh
+```shell
 $ mkdir sets
 $ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/rescue.tgz
 ```
 
 Build an `ext2` or `ffs` root image that will be the root filesystem device:
 
-```sh
+```shell
 $ sudo ./mkimg.sh
 ```
 
 Download a `GENERIC` _NetBSD_ kernel
 
-```sh
+```shell
 $ curl -o- https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-9.3
 
 ```
@@ -102,13 +102,13 @@ $ curl -o- https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/kernel/netbs
 Now the main trick, in order to decrease kernel boot time, we will disable all drivers except
 the ones absolutely needed to boot a virtual machine with `VirtIO` disk and network:
 
-```sh
+```shell
 $ ./kstrip.sh netbsd-9.3
 ```
 
 Once the kernel is stripped, start the virtual machine:
 
-```sh
+```shell
 $ sudo ./startnb.sh netbsd-9.3
 ```
 
@@ -116,17 +116,129 @@ You should be granted a shell.
 
 ## Example of an image filled with the `base` set
 
-```sh
+Fetch the `base` set:
+
+```shell
 $ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/base.tgz
 ```
 
 Build an `ext2` or `ffs` root image that will be the root filesystem device:
 
-```sh
+```shell
 $ sudo ./mkimg.sh -i base.img -s base -m 300 -x base.tgz
 ```
 
 Following steps are identical to the previous example.
 
+## Example of an image used to create an nginx microvm [sailor][3]
+
+Fetch the `base` and `etc` sets:
+
+```shell
+$ for s in base.tgz etc.tgz; do curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/${s}; done
+```
+
+Prepare [sailor][3] setup:
+
+```shell
+$ cat service/imgbuilder/postinst/prepare.sh
+#!/bin/sh
+
+git clone https://gitlab.com/iMil/sailor.git
+
+pkginrepo="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/i386/9.3/All"
+
+mkdir -p usr/pkg/etc/pkgin
+echo $pkginrepo > usr/pkg/etc/pkgin/repositories.conf
+
+cat >sailor/examples/test.conf<<EOF
+shipname=fakecracker
+shippath="/sailor/fakecracker"
+shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail"
+packages="nginx"
+
+run_at_build="echo 'creating devices'"
+run_at_build="cd /dev && sh MAKEDEV all_md"
+run_at_build="echo $pkginrepo >/usr/pkg/etc/pkgin/repositories.conf"
+EOF
+
+mkdir -p sailor/ships/fakecracker/etc
+
+cat >sailor/ships/fakecracker/etc/rc<<EOF
+#!/bin/sh
+
+export HOME=/
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin
+umask 022
+
+mount -a
+ifconfig vioif0 192.168.2.100/24 up
+ifconfig lo0 127.0.0.1 up
+printf "\nstarting nginx.. "
+/usr/pkg/sbin/nginx
+echo "done"
+printf "\nTesting web server:\n"
+printf "HEAD / HTTP/1.0\r\n\r\n"|nc -n 127.0.0.1 80
+echo
+tail -f /var/log/nginx/access.log
+EOF
+
+cat >sailor/ships/fakecracker/etc/fstab<<EOF
+/dev/ld0a / ffs rw 1 1
+EOF
+```
+
+Create the `etc/rc` `init` file
+
+```shell
+$ cat service/imgbuilder/etc/rc
+#!/bin/sh
+
+. /etc/include/basicrc
+
+ver=$(/usr/bin/uname -r)
+url="http://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/i386/${ver}/All"
+
+for pkg in pkg_install pkgin mozilla-rootcerts pkg_tarup rsync curl
+do
+	pkg_info $pkg >/dev/null 2>&1 || pkg_add -v ${url}/${pkg}*
+done
+
+cd sailor
+mkdir fakecracker
+newfs /dev/ld1a
+mount /dev/ld1a fakecracker
+/bin/sh ./sailor.sh build examples/test.conf
+
+ksh # not necessary, only for check
+
+. /etc/include/shutdown
+```
+
+Create the image maker:
+
+```shell
+$ sudo ./mkimg.sh -i imgbuilder.img -s imgbuilder -m 500 -x "etc.tgz base.tgz"
+```
+
+Create a blank image:
+
+```shell
+$ dd if=/dev/zero of=nginx.img bs=1M count=100
+```
+
+Start the image builder with the blank image as a third parameter:
+
+```shell
+$ sudo ./startnb.sh netbsd-9.3 imgbuilder.img nginx.img
+```
+
+Once the `nginx` image is baked, simply run it:
+
+```shell
+$ sudo ./startnb.sh netbsd-9.3 nginx.img
+```
+
 [1]: https://man.netbsd.org/x86/multiboot.8
 [2]: https://www.linux-kvm.org/page/Main_Page
+[3]: https://gitlab.com/iMil/sailor/-/tree/master/
