@@ -75,7 +75,7 @@ And then add this to your `rc`:
 
 ## Warning
 
-`postinst` operations are run as `root` **in the build host only use relative paths** in order **not** to impair your host's filesystem.
+`postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
 
 ## Example of a very minimal (10MB) virtual machine from a GNU/Linux host
 
