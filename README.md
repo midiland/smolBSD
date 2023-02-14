@@ -79,6 +79,14 @@ And then add this to your `rc`:
 
 ## Example of a very minimal (10MB) virtual machine from a GNU/Linux host
 
+### TL;DR
+
+```shell
+$ make rescue
+```
+
+### Long version
+
 Create a `sets` directory and download the `rescue` set:
 
 ```shell
@@ -95,26 +103,37 @@ $ sudo ./mkimg.sh
 Download a `GENERIC` _NetBSD_ kernel
 
 ```shell
-$ curl -o- https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-9.3
+$ curl -o- https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-GENERIC
 
 ```
 
 Now the main trick, in order to decrease kernel boot time, we will disable all drivers except
-the ones absolutely needed to boot a virtual machine with `VirtIO` disk and network:
+the ones absolutely needed to boot a virtual machine with `VirtIO` disk and network, using
+https://gitlab.com/0xDRRB/confkerndev
 
 ```shell
-$ ./kstrip.sh netbsd-9.3
+$ git clone https://gitlab.com/0xDRRB/confkerndev.git
+$ cd confkerndev && make i386
+$ cp netbsd-GENERIC netbsd-SMOL
+$ confkerndev/confkerndevi386 -v -i netbsd-SMOL -K virtio.list -w
 ```
 
 Once the kernel is stripped, start the virtual machine:
 
 ```shell
-$ sudo ./startnb.sh netbsd-9.3
+$ sudo ./startnb.sh netbsd-SMOL
 ```
 
 You should be granted a shell.
 
 ## Example of an image filled with the `base` set
+
+### TL;DR
+
+```shell
+$ make base
+```
+### Long version
 
 Fetch the `base` set:
 
@@ -131,6 +150,16 @@ $ sudo ./mkimg.sh -i base.img -s base -m 300 -x base.tgz
 Following steps are identical to the previous example.
 
 ## Example of an image used to create an nginx microvm with [sailor][3]
+
+### TL;DR
+
+```shell
+$ make nginx
+```
+
+BUT you still need to prepare `service/imgbuilder/postinst/prepare.sh` and  `service/imgbuilder/etc/rc` beforehand, see below.
+
+### Long version
 
 Fetch the `base` and `etc` sets:
 
@@ -230,13 +259,13 @@ $ dd if=/dev/zero of=nginx.img bs=1M count=100
 Start the image builder with the blank image as a third parameter:
 
 ```shell
-$ sudo ./startnb.sh netbsd-9.3 imgbuilder.img nginx.img
+$ sudo ./startnb.sh netbsd-SMOL imgbuilder.img nginx.img
 ```
 
 Once the `nginx` image is baked, simply run it:
 
 ```shell
-$ sudo ./startnb.sh netbsd-9.3 nginx.img
+$ sudo ./startnb.sh netbsd-SMOL nginx.img
 ```
 
 [1]: https://man.netbsd.org/x86/multiboot.8
