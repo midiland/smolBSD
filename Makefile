@@ -8,6 +8,7 @@ kernfetch:
 	[ -f ${GENERIC} ] || curl -s -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
 
 setfetch:
+	[ -d sets ] || mkdir sets
 	for s in ${SETS}; do \
 		if [ ! -f sets/$$s ]; then \
 			curl -s -O --output-dir sets ${DIST}/sets/$$s; \
