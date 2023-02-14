@@ -19,4 +19,11 @@ do
 
 	echo "removing $drv"
 	gdb -n $kern --write --batch -x drvdig.gdb -ex "fstate 3 0x$addr"
+
+        status=$?
+        if [ $status -ne 0 ]
+        then
+                echo "Something terribly wrong has happened! GDB return $status"
+                exit 1
+        fi
 done
