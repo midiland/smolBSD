@@ -27,11 +27,11 @@ Usage: mkimg.sh [-s service] [-m megabytes] [-n image] [-x set]
 	-i image	image name, default root.img
 	-x sets		list of NetBSD sets, default rescue.tgz
 ```
-- `kstrip.sh` strips the kernel from any useless driver to improve boot speed
 - `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x64_64`
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
 - `etc` holds common `/etc` files to be installed in the root filesystem
 - `service` structure:
+- `kstrip.sh` (**legacy**, now use [confkerndev][0]) strips the kernel from any useless driver to improve boot speed
 
 ```sh
 service
@@ -268,6 +268,7 @@ Once the `nginx` image is baked, simply run it:
 $ sudo ./startnb.sh netbsd-SMOL nginx.img
 ```
 
+[0]: https://gitlab.com/0xDRRB/confkerndev
 [1]: https://man.netbsd.org/x86/multiboot.8
 [2]: https://www.linux-kvm.org/page/Main_Page
 [3]: https://gitlab.com/iMil/sailor/-/tree/master/
