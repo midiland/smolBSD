@@ -16,6 +16,16 @@ architecture as of now.
 
 # Usage
 
+## Requirements
+
+- A GNU/Linux or NetBSD operating system
+- The following tools installed
+  - `curl`
+  - `git`
+  - `qemu-system-x86_64` or `qemu-system-i386`
+  - `sudo`
+- A VT-capable CPU is recommended
+
 ## Project structure
 
 - `mkimg.sh` creates a root filesystem image
