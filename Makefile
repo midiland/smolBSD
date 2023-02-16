@@ -25,7 +25,7 @@ smol:	kernfetch
 	}
 
 rescue:	smol
-	./mkimg.sh
+	sudo ./mkimg.sh
 
 base:	smol
 	$(MAKE) setfetch SETS="base.tgz etc.tgz"
