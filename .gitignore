@@ -1,0 +1,4 @@
+mnt/
+*.img
+sets/
+netbsd-*
