@@ -1,17 +1,21 @@
 GENERIC=netbsd-GENERIC
 SMOL=	netbsd-SMOL
 LIST=	virtio.list
-VERS=	9.3
-DIST=	https://cdn.netbsd.org/pub/NetBSD/NetBSD-${VERS}/i386/binary
+# use a specific version
+# VERS=	9.3
+# DIST=	https://cdn.netbsd.org/pub/NetBSD/NetBSD-${VERS}/i386/binary
+#
+# current
+DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/i386/binary
 
 kernfetch:
-	[ -f ${GENERIC} ] || curl -s -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
+	[ -f ${GENERIC} ] || curl -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
 
 setfetch:
 	[ -d sets ] || mkdir sets
 	for s in ${SETS}; do \
 		if [ ! -f sets/$$s ]; then \
-			curl -s -O --output-dir sets ${DIST}/sets/$$s; \
+			curl -O --output-dir sets ${DIST}/sets/$$s; \
 		fi; \
 	done
 
@@ -30,6 +34,10 @@ rescue:	smol
 base:	smol
 	$(MAKE) setfetch SETS="base.tgz etc.tgz"
 	sudo ./mkimg.sh -i $@.img -s $@ -m 300 -x "base.tgz etc.tgz"
+
+prof:	smol
+	$(MAKE) setfetch SETS="base.tgz etc.tgz comp.tgz"
+	sudo ./mkimg.sh -i $@.img -s $@ -m 1000 -k ${KERN} -x "base.tgz etc.tgz comp.tgz"
 
 imgbuilder: smol
 	$(MAKE) setfetch SETS="base.tgz etc.tgz"

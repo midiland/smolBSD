@@ -9,11 +9,12 @@ Usage: ${0##*/} [-s service] [-m megabytes] [-n image] [-x set]
 	-m megabytes	image size in megabytes, default 10
 	-i image	image name, default root.img
 	-x sets		list of NetBSD sets, default rescue.tgz
+	-k kernel	kernel to copy in the image
 _USAGE_
 	exit 1
 }
 
-options="s:m:i:x:h"
+options="s:m:i:x:k:h"
 
 while getopts "$options" opt
 do
@@ -22,6 +23,7 @@ do
 	m) megs="$OPTARG";;
 	i) img="$OPTARG";;
 	x) sets="$OPTARG";;
+	k) kernel="$OPTARG";;
 	h) usage;;
 	*) usage;;
 	esac
@@ -59,6 +61,8 @@ for s in ${sets}
 do
 	tar zxvfp sets/${s} -C mnt/
 done
+
+[ -n "$kernel" ] && cp -f $kernel mnt/
 
 cd mnt
 mkdir -p sbin bin dev etc/include
