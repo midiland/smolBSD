@@ -9,13 +9,13 @@ LIST=	virtio.list
 DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/i386/binary
 
 kernfetch:
-	[ -f ${GENERIC} ] || curl -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
+	[ -f ${GENERIC} ] || curl -L -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
 
 setfetch:
 	[ -d sets ] || mkdir sets
 	for s in ${SETS}; do \
 		if [ ! -f sets/$$s ]; then \
-			curl -O --output-dir sets ${DIST}/sets/$$s; \
+			curl -L -O --output-dir sets ${DIST}/sets/$$s; \
 		fi; \
 	done
 
