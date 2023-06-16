@@ -31,7 +31,7 @@ done
 
 [ -z "$svc" ] && svc=rescue
 [ -z "$megs" ] && megs=10
-[ -z "$img" ] && img=root.img
+[ -z "$img" ] && img=rescue.img
 [ -z "$sets" ] && sets=rescue.tgz
 
 [ ! -f service/${svc}/etc/rc ] && \
