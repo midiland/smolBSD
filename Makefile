@@ -2,11 +2,11 @@ GENERIC=netbsd-GENERIC
 SMOL=	netbsd-SMOL
 LIST=	virtio.list
 # use a specific version
-# VERS=	9.3
-# DIST=	https://cdn.netbsd.org/pub/NetBSD/NetBSD-${VERS}/i386/binary
+VERS=	9.3
+DIST=	https://cdn.netbsd.org/pub/NetBSD/NetBSD-${VERS}/i386/binary
 #
 # current
-DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/i386/binary
+#DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/i386/binary
 
 kernfetch:
 	[ -f ${GENERIC} ] || curl -L -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
