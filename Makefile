@@ -2,11 +2,8 @@ GENERIC=netbsd-GENERIC
 SMOL=	netbsd-SMOL
 LIST=	virtio.list
 # use a specific version
-VERS=	9.3
-DIST=	https://cdn.netbsd.org/pub/NetBSD/NetBSD-${VERS}/i386/binary
-#
-# current
-#DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/i386/binary
+VERS=	10
+DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${vers}/latest/i386/binary
 
 kernfetch:
 	[ -f ${GENERIC} ] || curl -L -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
@@ -23,7 +20,7 @@ smol:	kernfetch
 	test -f ${SMOL} || { \
 		[ -d confkerndev ] || \
 		git clone https://gitlab.com/0xDRRB/confkerndev.git; \
-		cd confkerndev && make i386; cd ..; \
+		cd confkerndev && make NBVERS=${VERS} i386; cd ..; \
 		cp -f ${GENERIC} ${SMOL}; \
 		confkerndev/confkerndevi386 -v -i ${SMOL} -K virtio.list -w; \
 	}
