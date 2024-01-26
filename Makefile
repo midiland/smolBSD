@@ -1,18 +1,24 @@
 GENERIC=netbsd-GENERIC
-SMOL=	netbsd-SMOL
+#SMOL=	netbsd-SMOL
+SMOL=	netbsd-perf
 LIST=	virtio.list
 # use a specific version
 VERS=	10
-DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${vers}/latest/i386/binary
+ARCH=	amd64
+DIST=	https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
+SUDO=	sudo -E ARCH=${ARCH}
+KERNURL=	https://imil.net/NetBSD
 
 kernfetch:
+	[ -n ${KERNURL} ] && curl -L -O ${KERNURL}/${SMOL} || \
 	[ -f ${GENERIC} ] || curl -L -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
 
 setfetch:
-	[ -d sets ] || mkdir sets
-	for s in ${SETS}; do \
-		if [ ! -f sets/$$s ]; then \
-			curl -L -O --output-dir sets ${DIST}/sets/$$s; \
+	setsdir=sets/${ARCH} && \
+	[ -d $${setsdir} ] || mkdir -p $${setsdir} && \
+	for s in $${SETS}; do \
+		if [ ! -f $${setsdir}/$$s ]; then \
+			curl -L -O --output-dir $${setsdir} ${DIST}/sets/$$s; \
 		fi; \
 	done
 
@@ -26,21 +32,21 @@ smol:	kernfetch
 	}
 
 rescue:	smol
-	$(MAKE) setfetch SETS="rescue.tgz etc.tgz"
-	sudo ./mkimg.sh
+	$(MAKE) setfetch SETS="rescue.tar.xz etc.tar.xz"
+	${SUDO} ./mkimg.sh
 
 base:	smol
-	$(MAKE) setfetch SETS="base.tgz etc.tgz"
-	sudo ./mkimg.sh -i $@.img -s $@ -m 300 -x "base.tgz etc.tgz"
+	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
+	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 300 -x "base.tar.xz etc.tar.xz"
 
 prof:	smol
-	$(MAKE) setfetch SETS="base.tgz etc.tgz comp.tgz"
-	sudo ./mkimg.sh -i $@.img -s $@ -m 1000 -k ${KERN} -x "base.tgz etc.tgz comp.tgz"
+	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz comp.tar.xz"
+	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 1000 -k ${KERN} -x "base.tar.xz etc.tar.xz comp.tar.xz"
 
 imgbuilder: smol
-	$(MAKE) setfetch SETS="base.tgz etc.tgz"
-	sudo ./mkimg.sh -i $@.img -s $@ -m 500 -x "base.tgz etc.tgz"
+	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
+	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 500 -x "base.tar.xz etc.tar.xz"
 
 nginx:	imgbuilder
 	dd if=/dev/zero of=$@.img bs=1M count=100
-	sudo ./startnb.sh ${SMOL} $<.img $@.img
+	${SUDO} ./startnb.sh ${SMOL} $<.img $@.img
