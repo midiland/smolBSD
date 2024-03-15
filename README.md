@@ -159,6 +159,7 @@ You should be granted a shell.
 
 ```shell
 $ make base
+$ ./startnb.sh netbsd-SMOL base.img
 ```
 ### Long version
 
