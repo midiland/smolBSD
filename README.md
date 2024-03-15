@@ -133,6 +133,11 @@ $ cp netbsd-GENERIC netbsd-SMOL
 $ confkerndev/confkerndevi386 -v -i netbsd-SMOL -K virtio.list -w
 ```
 
+Then start the virtual machine:
+```shell
+$ sudo ./startnb_nommio.sh netbsd-SMOL
+```
+
 **For `amd64`/`PVH`**
 
 Download the `MICROVM` kernel
@@ -142,7 +147,6 @@ $ curl -O https://imil.net/NetBSD/netbsd-SMOL
 ```
 
 Then start the virtual machine:
-
 ```shell
 $ sudo ./startnb.sh netbsd-SMOL
 ```
