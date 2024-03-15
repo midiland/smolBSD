@@ -10,9 +10,10 @@ creating the image on a _GNU/Linux_ system, the image will be formatted using _e
 
 Note that this is currently more a proof of concept, don't judge the scripts as they are!
 
-Warning. as this method uses [multiboot][1] to boot directly the kernel from [kvm][2], only
-`i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this
-architecture as of now.
+As of March 2024, this method can use:
+
+* [multiboot][1] to boot directly the kernel from [kvm][2], but warning, only `i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this architecture as of now.
+* [PVH][4] this newer method works with _NetBSD/amd64_ and is available in my [NetBSD development branch][5] but you can still fetch a pre-built kernel at https://imil.net/NetBSD/netbsd-perf, warning this is a _NetBSD-current_ kernel
 
 # Usage
 
@@ -37,7 +38,7 @@ Usage: mkimg.sh [-s service] [-m megabytes] [-n image] [-x set]
 	-i image	image name, default root.img
 	-x sets		list of NetBSD sets, default rescue.tgz
 ```
-- `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x64_64`
+- `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x86_64`
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
 - `etc` holds common `/etc` files to be installed in the root filesystem
 - `service` structure:
@@ -101,7 +102,9 @@ Create a `sets` directory and download the `rescue` set:
 
 ```shell
 $ mkdir sets
-$ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/rescue.tgz
+$ rel=$(uname -r)
+$ arch=$(uname -r)
+$ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/sets/rescue.tgz
 ```
 
 Build an `ext2` or `ffs` root image that will be the root filesystem device:
@@ -109,6 +112,8 @@ Build an `ext2` or `ffs` root image that will be the root filesystem device:
 ```shell
 $ sudo ./mkimg.sh
 ```
+
+**For `i386`/`multiboot`**
 
 Download a `GENERIC` _NetBSD_ kernel
 
@@ -128,7 +133,15 @@ $ cp netbsd-GENERIC netbsd-SMOL
 $ confkerndev/confkerndevi386 -v -i netbsd-SMOL -K virtio.list -w
 ```
 
-Once the kernel is stripped, start the virtual machine:
+**For `amd64`/`PVH`**
+
+Download the `MICROVM` kernel
+
+```shell
+$ curl -O https://imil.net/NetBSD/netbsd-SMOL
+```
+
+Then start the virtual machine:
 
 ```shell
 $ sudo ./startnb.sh netbsd-SMOL
@@ -282,3 +295,4 @@ $ sudo ./startnb.sh netbsd-SMOL nginx.img
 [1]: https://man.netbsd.org/x86/multiboot.8
 [2]: https://www.linux-kvm.org/page/Main_Page
 [3]: https://gitlab.com/iMil/sailor/-/tree/master/
+[4]: https://xenbits.xen.org/docs/4.6-testing/misc/pvh.html

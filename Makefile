@@ -1,6 +1,5 @@
 GENERIC=netbsd-GENERIC
-#SMOL=	netbsd-SMOL
-SMOL=	netbsd-perf
+SMOL=	netbsd-SMOL
 LIST=	virtio.list
 # use a specific version
 VERS=	10
