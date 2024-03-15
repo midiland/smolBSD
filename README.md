@@ -103,7 +103,7 @@ Create a `sets` directory and download the `rescue` set:
 ```shell
 $ mkdir sets
 $ rel=$(uname -r)
-$ arch=$(uname -r)
+$ arch=$(uname -m)
 $ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/sets/rescue.tgz
 ```
 
@@ -118,7 +118,7 @@ $ sudo ./mkimg.sh
 Download a `GENERIC` _NetBSD_ kernel
 
 ```shell
-$ curl -o- https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-GENERIC
+$ curl -o- https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-GENERIC
 
 ```
 
@@ -161,7 +161,7 @@ $ make base
 Fetch the `base` set:
 
 ```shell
-$ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/base.tgz
+$ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/sets/base.tgz
 ```
 
 Build an `ext2` or `ffs` root image that will be the root filesystem device:
@@ -187,7 +187,7 @@ BUT you still need to prepare `service/imgbuilder/postinst/prepare.sh` and  `ser
 Fetch the `base` and `etc` sets:
 
 ```shell
-$ for s in base.tgz etc.tgz; do curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/i386/binary/sets/${s}; done
+$ for s in base.tgz etc.tgz; do curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/sets/${s}; done
 ```
 
 Prepare [sailor][3] setup:
@@ -198,7 +198,8 @@ $ cat service/imgbuilder/postinst/prepare.sh
 
 git clone https://gitlab.com/iMil/sailor.git
 
-pkginrepo="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/i386/9.3/All"
+vers=$(uname -r)
+pkginrepo="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -m)/${vers%_*}/All"
 
 mkdir -p usr/pkg/etc/pkgin
 echo $pkginrepo > usr/pkg/etc/pkgin/repositories.conf
@@ -248,8 +249,8 @@ $ cat service/imgbuilder/etc/rc
 
 . /etc/include/basicrc
 
-ver=$(/usr/bin/uname -r)
-url="http://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/i386/${ver}/All"
+ver=$(uname -r)
+url="http://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/$(uname -m)/${ver%_*}/All"
 
 for pkg in pkg_install pkgin mozilla-rootcerts pkg_tarup rsync curl
 do
