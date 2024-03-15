@@ -6,7 +6,7 @@ img=${2:-"root.img"}
 
 [ -n "$3" ] && \
 	drive2="\
-		-device virtio-blk-device,drive=hd1a \
+		-device virtio-blk-device,drive=hd1 \
 		-drive file=${3},if=virtio,format=raw,id=hd1"
 
 qemu-system-x86_64 \
