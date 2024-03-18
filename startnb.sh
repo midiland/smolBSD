@@ -9,9 +9,25 @@ img=${2:-"root.img"}
 		-device virtio-blk-device,drive=smolhd1 \
 		-drive file=${3},if=virtio,format=raw,id=smolhd1"
 
+OS=$(uname -s)
+
+case $OS in
+Linux)
+	accel=kvm
+	;;
+Darwin)
+	accel=hvf
+	;;
+NetBSD)
+	accel=nvmm
+	;;
+*)
+	echo "Unknown hypervisor"
+esac
+
 qemu-system-x86_64 \
-	-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off \
-	-enable-kvm -m 256 -cpu host,+invtsc \
+	-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off,accel=$accel \
+	-m 256 -cpu host,+invtsc \
 	-kernel $kernel -append "console=com root=ld0a -z" \
 	-serial mon:stdio -display none \
 	-device virtio-blk-device,drive=smolhd0 \
