@@ -8,6 +8,7 @@ variables:
   DEFARCH: "amd64"
   DEFVERS: "10"
   DEFSETS: "rescue.tar.xz"
+  DEFSIZE: "20"
 
 
 build_img:
@@ -20,6 +21,7 @@ build_img:
       [ -z "${SETS}" ] && SETS=${DEFSETS}
       [ -z "${VERS}" ] && VERS=${DEFVERS}
       [ -z "${ARCH}" ] && ARCH=${DEFARCH}
+      [ -z "${SIZE}" ] && SIZE=${DEFSIZE}
       mkdir -p sets
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
@@ -27,7 +29,7 @@ build_img:
         curl -L -O --output-dir sets ${DIST}/${set}
       done
     - chmod +x mkimg.sh
-    - ./mkimg.sh
+    - ./mkimg.sh -x ${SETS} -m ${SIZE}
   artifacts:
     name: "${IMG}"
     paths:
