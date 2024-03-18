@@ -23,6 +23,7 @@ build_img:
       do
         curl -L -O --output-dir sets/${ARCH} ${DIST}/${set}
       done
+    - ls -l sets/amd64
     - chmod +x mkimg.sh
     - ./mkimg.sh 
   artifacts:
