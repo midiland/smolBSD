@@ -2,9 +2,7 @@ stages:
   - build
 
 variables:
-  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/mksmolnb/${CI_COMMIT_TAG}"
-  IMG: "rescue"
-  UPURL: "${PACKAGE_REGISTRY_URL}/${IMG}.img"
+  DEFIMG: "rescue"
   DEFARCH: "amd64"
   DEFVERS: "10"
   DEFSETS: "rescue.tar.xz"
@@ -22,6 +20,7 @@ build_img:
       [ -z "${VERS}" ] && VERS=${DEFVERS}
       [ -z "${ARCH}" ] && ARCH=${DEFARCH}
       [ -z "${SIZE}" ] && SIZE=${DEFSIZE}
+      [ -z "${IMG}" ] && IMG=${DEFIMG}
       mkdir -p sets
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
@@ -29,7 +28,7 @@ build_img:
         curl -L -O --output-dir sets ${DIST}/${set}
       done
     - chmod +x mkimg.sh
-    - ./mkimg.sh -x ${SETS} -m ${SIZE}
+    - ./mkimg.sh -x ${SETS} -m ${SIZE} -i ${IMG}
   artifacts:
     name: "${IMG}"
     paths:
