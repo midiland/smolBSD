@@ -21,7 +21,7 @@ build_img:
     - |
       [ -z "${SETS}" ] && SETS=${DEFSETS}
       [ -z "${VERS}" ] && VERS=${DEFVERS}
-      [ -z "${ARCH}" ] && VERS=${DEFARCH}
+      [ -z "${ARCH}" ] && ARCH=${DEFARCH}
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
       do
