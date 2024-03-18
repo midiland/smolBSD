@@ -32,7 +32,7 @@ done
 [ -z "$svc" ] && svc=rescue
 [ -z "$megs" ] && megs=10
 [ -z "$img" ] && img=rescue.img
-[ -z "$sets" ] && sets=rescue.tgz
+[ -z "$sets" ] && sets=rescue.tar.xz
 
 [ ! -f service/${svc}/etc/rc ] && \
 	echo "no service/${svc}/etc/rc available" && exit 1

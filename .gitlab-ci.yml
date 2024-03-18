@@ -9,6 +9,7 @@ variables:
   VERS: "10"
   ARCH: "amd64"
   DIST: "https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary"
+  SETS: "etc.tar.xz rescue.tar.xz"
 
 
 build_img:
@@ -16,11 +17,11 @@ build_img:
   stage: build
   script:
     - apt update && apt install -y curl
-    - mkdir sets
+    - mkdir -p sets/${ARCH}
     - |
       for set in etc rescue
       do
-        curl -L -O --output-dir sets ${DIST}/${set}.tar.xz
+        curl -L -O --output-dir sets/${ARCH} ${DIST}/${set}
       done
     - chmod +x mkimg.sh
     - ./mkimg.sh 
