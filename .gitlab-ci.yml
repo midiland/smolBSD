@@ -9,14 +9,15 @@ variables:
   VERS: "10"
   ARCH: "amd64"
   DIST: "https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
-  SETS: "etc.tar.xz rescue.tar.xz"
+  SETS: "rescue.tar.xz"
 
 
 build_img:
-  image: debian:latest
+  image: alpine:latest
   stage: build
   script:
-    - apt update && apt install -y curl xz-utils file
+#    - apt update && apt install -y curl xz-utils
+    - apk add --no-cache curl xz
     - mkdir -p sets/${ARCH}
     - |
       for set in ${SETS}
@@ -24,8 +25,6 @@ build_img:
         echo "fetching: ${DIST}/${set}"
         curl -L -O --output-dir sets/${ARCH} ${DIST}/${set}
       done
-    - ls -l sets/amd64
-    - file sets/amd64/*.xz
     - chmod +x mkimg.sh
     - ./mkimg.sh 
   artifacts:

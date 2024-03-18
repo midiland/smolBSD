@@ -60,7 +60,8 @@ fi
 for s in ${sets}
 do
 	[ -n "$ARCH" ] && s="${ARCH}/${s}"
-	tar Jxvfp sets/${s} -C mnt/
+	tar Jxfp sets/${s} -C mnt/ || exit 1
+	rm -f sets/${s}
 done
 
 [ -n "$kernel" ] && cp -f $kernel mnt/
