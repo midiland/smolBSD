@@ -28,7 +28,7 @@ build_img:
         curl -L -O --output-dir sets ${DIST}/${set}
       done
     - chmod +x mkimg.sh
-    - ./mkimg.sh 
+    - ./mkimg.sh
   artifacts:
     name: "${IMG}"
     paths:
