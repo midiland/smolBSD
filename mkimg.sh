@@ -30,7 +30,7 @@ do
 done
 
 [ -z "$svc" ] && svc=rescue
-[ -z "$megs" ] && megs=10
+[ -z "$megs" ] && megs=20
 [ -z "$img" ] && img=rescue.img
 [ -z "$sets" ] && sets=rescue.tar.xz
 
