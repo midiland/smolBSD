@@ -15,6 +15,7 @@ build_img:
   image: debian:latest
   stage: build
   script:
+    - apt install -y curl
     - mkdir sets
     - |
       for set in etc rescue
