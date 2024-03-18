@@ -19,7 +19,7 @@ build_img:
     - apt update && apt install -y curl
     - mkdir -p sets/${ARCH}
     - |
-      for set in etc rescue
+      for set in ${SETS}
       do
         curl -L -O --output-dir sets/${ARCH} ${DIST}/${set}
       done
