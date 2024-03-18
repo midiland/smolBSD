@@ -21,12 +21,11 @@ build_img:
       [ -z "${SETS}" ] && SETS=${DEFSETS}
       [ -z "${VERS}" ] && VERS=${DEFVERS}
       [ -z "${ARCH}" ] && ARCH=${DEFARCH}
-      mkdir -p sets/${ARCH}
+      mkdir -p sets
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
       do
-        echo "fetching: ${DIST}/${set}"
-        curl -L -O --output-dir sets/${ARCH} ${DIST}/${set}
+        curl -L -O --output-dir sets ${DIST}/${set}
       done
     - chmod +x mkimg.sh
     - ./mkimg.sh 
