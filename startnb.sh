@@ -23,6 +23,7 @@ NetBSD)
 	;;
 *)
 	echo "Unknown hypervisor"
+	exit 1
 esac
 
 qemu-system-x86_64 \
