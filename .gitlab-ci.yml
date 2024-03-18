@@ -16,8 +16,7 @@ build_img:
   image: alpine:latest
   stage: build
   script:
-#    - apt update && apt install -y curl xz-utils
-    - apk add --no-cache curl xz
+    - apk add --no-cache curl xz e2fsprogs
     - mkdir -p sets/${ARCH}
     - |
       for set in ${SETS}
