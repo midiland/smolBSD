@@ -6,10 +6,9 @@ variables:
   PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/mksmolnb/${CI_COMMIT_TAG}"
   IMG: "rescue"
   UPURL: "${PACKAGE_REGISTRY_URL}/${IMG}.img"
-  VERS: "10"
-  ARCH: "amd64"
-  DIST: "https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
-  SETS: "rescue.tar.xz"
+  DEFARCH: "amd64"
+  DEFVERS: "10"
+  DEFSETS: "rescue.tar.xz"
 
 
 build_img:
@@ -20,6 +19,10 @@ build_img:
     - rm -rf /var/cache
     - mkdir -p sets/${ARCH}
     - |
+      [ -z "${SETS}" ] && SETS=${DEFSETS}
+      [ -z "${VERS}" ] && VERS=${DEFVERS}
+      [ -z "${ARCH}" ] && VERS=${DEFARCH}
+      DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
       do
         echo "fetching: ${DIST}/${set}"
