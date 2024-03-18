@@ -16,11 +16,12 @@ build_img:
   image: debian:latest
   stage: build
   script:
-    - apt update && apt install -y curl xz-utils
+    - apt update && apt install -y curl xz-utils file
     - mkdir -p sets/${ARCH}
     - |
       for set in ${SETS}
       do
+        echo "fetching: ${DIST}/${set}"
         curl -L -O --output-dir sets/${ARCH} ${DIST}/${set}
       done
     - ls -l sets/amd64
