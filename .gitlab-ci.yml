@@ -33,13 +33,3 @@ build_img:
     name: "${IMG}"
     paths:
       - ${IMG}.img
-
-release_img:
-  stage: release
-  image: curlimages/curl:latest
-  script:
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${IMG}.img "${UPURL}"
-
-
-
