@@ -7,6 +7,7 @@ variables:
   DEFVERS: "10"
   DEFSETS: "rescue.tar.xz"
   DEFSIZE: "20"
+  IMG: ""
 
 
 build_img:
