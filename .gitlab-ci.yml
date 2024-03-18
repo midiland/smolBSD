@@ -13,10 +13,11 @@ variables:
 
 
 build_img:
-  image: alpine:latest
+  image: debian:latest
   stage: build
   script:
-    - apk add --no-cache curl xz e2fsprogs
+    - apt update && apt install -y curl xz-utils
+    - rm -rf /var/cache
     - mkdir -p sets/${ARCH}
     - |
       for set in ${SETS}
