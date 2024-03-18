@@ -14,8 +14,9 @@ build_img:
     - chmod +x mkimg.sh
     - ./mkimg.sh 
   artifacts:
+    name: "${IMG}"
     paths:
-      - *.img
+      - ${IMG}.img
 
 release_img:
   stage: release
