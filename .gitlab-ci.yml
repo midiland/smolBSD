@@ -17,11 +17,11 @@ build_img:
   script:
     - apt update && apt install -y curl xz-utils
     - rm -rf /var/cache
-    - mkdir -p sets/${ARCH}
     - |
       [ -z "${SETS}" ] && SETS=${DEFSETS}
       [ -z "${VERS}" ] && VERS=${DEFVERS}
       [ -z "${ARCH}" ] && ARCH=${DEFARCH}
+      mkdir -p sets/${ARCH}
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
       do
