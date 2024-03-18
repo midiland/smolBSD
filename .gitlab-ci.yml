@@ -16,7 +16,7 @@ build_img:
   image: debian:latest
   stage: build
   script:
-    - apt update && apt install -y curl
+    - apt update && apt install -y curl xz
     - mkdir -p sets/${ARCH}
     - |
       for set in ${SETS}
