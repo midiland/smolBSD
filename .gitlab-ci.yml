@@ -7,7 +7,6 @@ variables:
   DEFVERS: "10"
   DEFSETS: "rescue.tar.xz"
   DEFSIZE: "20"
-  IMG: ""
 
 
 build_img:
@@ -21,7 +20,8 @@ build_img:
       [ -z "${VERS}" ] && VERS=${DEFVERS}
       [ -z "${ARCH}" ] && ARCH=${DEFARCH}
       [ -z "${SIZE}" ] && SIZE=${DEFSIZE}
-      [ -z "${IMG}" ] && IMG=${DEFIMG}
+      [ -z "${IMG}" ] && IMG=${DEFSIZE}
+      : export ${IMG:=${DEFIMG}}
       mkdir -p sets
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
