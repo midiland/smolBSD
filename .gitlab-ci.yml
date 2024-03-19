@@ -5,9 +5,9 @@ variables:
   IMG: "rescue"
   ARCH: "amd64"
   VERS: "10"
-  SETS: "${IMG}"
-  SIZE: "20"
+  SETS: "rescue"
   EXT: "tar.xz"
+  SIZE: "20"
 
 build_img:
   image: debian:latest
@@ -16,7 +16,7 @@ build_img:
     - apt update && apt install -y curl xz-utils
     - rm -rf /var/cache
     - |
-      echo "building ${IMG}.img for NetBSD ${VERS} on ${ARCH}"
+      echo "building ${IMG}.img (${SIZE}m) for NetBSD ${VERS} on ${ARCH}"
       export SETSEXT=""
       SETSDIR="sets/${ARCH}"
       mkdir -p ${SETSDIR}
