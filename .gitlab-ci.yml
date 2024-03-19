@@ -20,8 +20,8 @@ build_img:
       [ -z "${VERS}" ] && VERS=${DEFVERS}
       [ -z "${ARCH}" ] && ARCH=${DEFARCH}
       [ -z "${SIZE}" ] && SIZE=${DEFSIZE}
-      [ -z "${IMG}" ] && IMG=${DEFSIZE}
       : export ${IMG:=${DEFIMG}}
+      echo "IMG: "$IMG"
       mkdir -p sets
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
@@ -31,6 +31,5 @@ build_img:
     - chmod +x mkimg.sh
     - ./mkimg.sh -x ${SETS} -m ${SIZE} -i ${IMG}
   artifacts:
-    name: "${IMG}"
     paths:
-      - ${IMG}.img
+      - *.img
