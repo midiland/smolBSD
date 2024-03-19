@@ -27,7 +27,7 @@ build_img:
         SETSEXT="${set}.${EXT} ${SETSEXT}"
       done
     - chmod +x mkimg.sh
-    - ./mkimg.sh -x ${SETSEXT} -m ${SIZE} -i ${IMG}.img
+    - ./mkimg.sh -x "${SETSEXT}" -m ${SIZE} -i ${IMG}.img
   artifacts:
     paths:
       - "*.img"
