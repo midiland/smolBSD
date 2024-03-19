@@ -21,7 +21,7 @@ build_img:
       [ -z "${ARCH}" ] && ARCH=${DEFARCH}
       [ -z "${SIZE}" ] && SIZE=${DEFSIZE}
       : export ${IMG:=${DEFIMG}}
-      echo "IMG: "$IMG"
+      echo "IMG: $IMG"
       mkdir -p sets
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
