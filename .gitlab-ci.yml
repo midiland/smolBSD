@@ -32,4 +32,4 @@ build_img:
     - ./mkimg.sh -x ${SETS} -m ${SIZE} -i ${IMG}
   artifacts:
     paths:
-      - *.img
+      - "*.img"
