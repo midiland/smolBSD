@@ -2,12 +2,12 @@ stages:
   - build
 
 variables:
-  DEFIMG: "rescue"
-  DEFARCH: "amd64"
-  DEFVERS: "10"
-  DEFSETS: "${DEFIMG}"
-  DEFSIZE: "20"
-  DEFEXT: "tar.xz"
+  IMG: "rescue"
+  ARCH: "amd64"
+  VERS: "10"
+  SETS: "${IMG}"
+  SIZE: "20"
+  EXT: "tar.xz"
 
 build_img:
   image: debian:latest
@@ -16,12 +16,7 @@ build_img:
     - apt update && apt install -y curl xz-utils
     - rm -rf /var/cache
     - |
-      : export ${SETS:=${DEFSETS}}
-      : export ${VERS:=${DEFVERS}}
-      : export ${ARCH:=${DEFARCH}}
-      : export ${SIZE:=${DEFSIZE}}
-      : export ${IMG:=${DEFIMG}}
-      : export ${EXT:=${DEFEXT}}
+      echo "building ${IMG}.img for NetBSD ${VERS} on ${ARCH}"
       export SETSEXT=""
       mkdir -p sets
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
