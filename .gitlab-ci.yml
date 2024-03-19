@@ -18,11 +18,12 @@ build_img:
     - |
       echo "building ${IMG}.img for NetBSD ${VERS} on ${ARCH}"
       export SETSEXT=""
-      mkdir -p sets
+      SETSDIR="sets/${ARCH}"
+      mkdir -p ${SETSDIR}
       DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
       for set in ${SETS}
       do
-        curl -L -O --output-dir sets ${DIST}/${set}.${EXT}
+        curl -L -O --output-dir ${SETSDIR} ${DIST}/${set}.${EXT}
         SETSEXT="${set}.${EXT} ${SETSEXT}"
       done
     - chmod +x mkimg.sh
