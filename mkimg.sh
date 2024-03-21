@@ -72,6 +72,8 @@ cp -f ../etc/fstab.${OS} etc/fstab
 cp -f ../service/${svc}/etc/* etc/
 cp -f ../service/common/* etc/include/
 
+# warning, postinst operations are done on the builder
+
 [ -d ../service/${svc}/postinst ] &&
 	for x in ../service/${svc}/postinst/*.sh
 	do
