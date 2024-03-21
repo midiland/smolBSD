@@ -8,6 +8,7 @@ variables:
   SETS: "rescue"
   EXT: "tar.xz"
   SIZE: "20"
+  SVC: "rescue"
 
 build_img:
   image: debian:latest
@@ -27,7 +28,7 @@ build_img:
         SETSEXT="${set}.${EXT} ${SETSEXT}"
       done
     - chmod +x mkimg.sh
-    - ./mkimg.sh -x "${SETSEXT}" -m ${SIZE} -i ${IMG}.img
+    - ./mkimg.sh -x "${SETSEXT}" -m ${SIZE} -i ${IMG}.img -s ${SVC}
   artifacts:
     paths:
       - "*.img"
