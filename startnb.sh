@@ -30,7 +30,7 @@ do
 		-drive file=${OPTARG},if=virtio,format=raw,id=smolhd1";;
 	p) network="\
 		-device virtio-net-device,netdev=smolnet0 \
-		-netdev user,id=smolnet0,hostfwd=${OPTARGS}";;
+		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
 	h) usage;;
 	*) usage;;
 	esac
