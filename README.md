@@ -115,6 +115,8 @@ $ sudo ./mkimg.sh
 
 **For `i386`/`multiboot`**
 
+> &#x26A0; Unless demand arises, `i386` version of this project is considered archived and will not evolve anymore
+
 Download a `GENERIC` _NetBSD_ kernel
 
 ```shell
@@ -148,7 +150,7 @@ $ curl -O https://imil.net/NetBSD/netbsd-SMOL
 
 Then start the virtual machine:
 ```shell
-$ sudo ./startnb.sh netbsd-SMOL
+$ sudo ./startnb.sh -k netbsd-SMOL -i root.img
 ```
 
 You should be granted a shell.
@@ -159,7 +161,7 @@ You should be granted a shell.
 
 ```shell
 $ make base
-$ ./startnb.sh netbsd-SMOL base.img
+$ ./startnb.sh -k netbsd-SMOL -i base.img
 ```
 ### Long version
 
@@ -288,13 +290,13 @@ $ dd if=/dev/zero of=nginx.img bs=1M count=100
 Start the image builder with the blank image as a third parameter:
 
 ```shell
-$ sudo ./startnb.sh netbsd-SMOL imgbuilder.img nginx.img
+$ sudo ./startnb.sh -k netbsd-SMOL -i imgbuilder.img -d nginx.img
 ```
 
 Once the `nginx` image is baked, simply run it:
 
 ```shell
-$ sudo ./startnb.sh netbsd-SMOL nginx.img
+$ sudo ./startnb.sh -k netbsd-SMOL -i nginx.img
 ```
 
 [0]: https://gitlab.com/0xDRRB/confkerndev

@@ -1,13 +1,40 @@
 #!/bin/sh
 
-kernel=$1
+usage()
+{
+	cat 1>&2 << _USAGE_
+Usage: ${0##*/} -k kernel -i image [-m memory in MB] [-d drive2] [-p port]
+	Boot a microvm
+	-k kernel	kernel to boot on
+	-i image	image to use as root filesystem
+	-d drive2	second drive to pass to image
+	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
+_USAGE_
+	# as per https://www.qemu.org/docs/master/system/invocation.html
+	# hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
+	exit 1
+}
 
-img=${2:-"root.img"}
+[ $# -lt 4 ] && usage
 
-[ -n "$3" ] && \
-	drive2="\
+options="k:i:m:d:p:h"
+
+while getopts "$options" opt
+do
+	case $opt in
+	k) kernel="$OPTARG";;
+	i) img="$OPTARG";;
+	m) mem="$OPTARG";;
+	d) drive2="\
 		-device virtio-blk-device,drive=smolhd1 \
-		-drive file=${3},if=virtio,format=raw,id=smolhd1"
+		-drive file=${OPTARG},if=virtio,format=raw,id=smolhd1";;
+	p) network="\
+		-device virtio-net-device,netdev=smolnet0 \
+		-netdev user,id=smolnet0,hostfwd=${OPTARGS}";;
+	h) usage;;
+	*) usage;;
+	esac
+done
 
 OS=$(uname -s)
 
@@ -25,12 +52,12 @@ NetBSD)
 	echo "Unknown hypervisor, no acceleration"
 esac
 
+mem=${mem:-"256"}
+
 qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off${ACCEL} \
-	-m 256 -cpu host,+invtsc \
+	-m $mem -cpu host,+invtsc \
 	-kernel $kernel -append "console=com root=ld0a -z" \
 	-serial mon:stdio -display none \
 	-device virtio-blk-device,drive=smolhd0 \
-	-drive file=${img},format=raw,id=smolhd0 $drive2 \
-	-device virtio-net-device,netdev=smolnet0 \
-	-netdev user,id=smolnet0,hostfwd=tcp::2022-:22 \
+	-drive file=${img},format=raw,id=smolhd0 $drive2 $network
