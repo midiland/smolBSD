@@ -39,10 +39,19 @@ Usage: mkimg.sh [-s service] [-m megabytes] [-n image] [-x set]
 	-x sets		list of NetBSD sets, default rescue.tgz
 ```
 - `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x86_64`
+```text
+Usage: startnb.sh -k kernel -i image [-m memory in MB] [-d drive2] [-p port]
+        Boot a microvm
+        -k kernel       kernel to boot on
+        -i image        image to use as root filesystem
+        -d drive2       second drive to pass to image
+        -p ports        [tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
+```
+- `startnb_nommio.sh` starts a _NetBSD_ virtual machine with no support for _MMIO_
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
 - `etc` holds common `/etc` files to be installed in the root filesystem
+- `kstrip.sh` (**legacy**, now use [confkerndev][0]) strips the kernel from any useless driver to improve boot speed on `i386`
 - `service` structure:
-- `kstrip.sh` (**legacy**, now use [confkerndev][0]) strips the kernel from any useless driver to improve boot speed
 
 ```sh
 service
@@ -73,7 +82,10 @@ umask 022
 
 mount -a
 
-ifconfig vioif0 192.168.1.100/24 up
+# default qemu user network
+ifconfig vioif0 10.0.2.15/24 up
+route add default 10.0.2.2
+
 ifconfig lo0 127.0.0.1 up
 route add default 192.168.1.254
 echo 'nameserver 192.168.1.254' > /etc/resolv.conf
@@ -212,8 +224,8 @@ mkdir -p usr/pkg/etc/pkgin
 echo $pkginrepo > usr/pkg/etc/pkgin/repositories.conf
 
 cat >sailor/examples/test.conf<<EOF
-shipname=fakecracker
-shippath="/sailor/fakecracker"
+shipname=micronginx
+shippath="/sailor/micronginx"
 shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail"
 packages="nginx"
 
@@ -222,9 +234,9 @@ run_at_build="cd /dev && sh MAKEDEV all_md"
 run_at_build="echo $pkginrepo >/usr/pkg/etc/pkgin/repositories.conf"
 EOF
 
-mkdir -p sailor/ships/fakecracker/etc
+mkdir -p sailor/ships/micronginx/etc
 
-cat >sailor/ships/fakecracker/etc/rc<<EOF
+cat >sailor/ships/micronginx/etc/rc<<EOF
 #!/bin/sh
 
 export HOME=/
@@ -232,7 +244,8 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin
 umask 022
 
 mount -a
-ifconfig vioif0 192.168.2.100/24 up
+ifconfig vioif0 10.0.2.15/24 up
+route add default 10.0.2.2
 ifconfig lo0 127.0.0.1 up
 printf "\nstarting nginx.. "
 /usr/pkg/sbin/nginx
@@ -243,7 +256,7 @@ echo
 tail -f /var/log/nginx/access.log
 EOF
 
-cat >sailor/ships/fakecracker/etc/fstab<<EOF
+cat >sailor/ships/micronginx/etc/fstab<<EOF
 /dev/ld0a / ffs rw 1 1
 EOF
 ```
@@ -265,9 +278,9 @@ do
 done
 
 cd sailor
-mkdir fakecracker
+mkdir micronginx
 newfs /dev/ld1a
-mount /dev/ld1a fakecracker
+mount /dev/ld1a micronginx
 /bin/sh ./sailor.sh build examples/test.conf
 
 ksh # not necessary, only for check
@@ -296,7 +309,7 @@ $ sudo ./startnb.sh -k netbsd-SMOL -i imgbuilder.img -d nginx.img
 Once the `nginx` image is baked, simply run it:
 
 ```shell
-$ sudo ./startnb.sh -k netbsd-SMOL -i nginx.img
+$ sudo ./startnb.sh -k netbsd-SMOL -i nginx.img -p tcp::8080-:80
 ```
 
 [0]: https://gitlab.com/0xDRRB/confkerndev
