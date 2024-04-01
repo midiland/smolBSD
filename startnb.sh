@@ -31,7 +31,6 @@ do
 	p) network="\
 		-device virtio-net-device,netdev=smolnet0 \
 		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
-	h) usage;;
 	*) usage;;
 	esac
 done
