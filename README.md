@@ -317,4 +317,4 @@ $ sudo ./startnb.sh -k netbsd-SMOL -i nginx.img -p tcp::8080-:80
 [2]: https://www.linux-kvm.org/page/Main_Page
 [3]: https://gitlab.com/iMil/sailor/-/tree/master/
 [4]: https://xenbits.xen.org/docs/4.6-testing/misc/pvh.html
-[5]: https://github.com/NetBSDfr/NetBSD-src/tree/perf
+[5]: https://github.com/NetBSDfr/NetBSD-src/tree/nbfr_master
