@@ -3,9 +3,10 @@
 usage()
 {
 	cat 1>&2 << _USAGE_
-Usage: ${0##*/} -k kernel -i image [-m memory in MB] [-d drive2] [-p port]
+Usage: ${0##*/} -k kernel -i image [-a kernel parameters] [-m memory in MB] [-d drive2] [-p port]
 	Boot a microvm
 	-k kernel	kernel to boot on
+	-a parameters	append kernel parameters
 	-i image	image to use as root filesystem
 	-d drive2	second drive to pass to image
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
@@ -17,12 +18,13 @@ _USAGE_
 
 [ $# -lt 4 ] && usage
 
-options="k:i:m:d:p:h"
+options="k:a:p:i:m:d:p:h"
 
 while getopts "$options" opt
 do
 	case $opt in
 	k) kernel="$OPTARG";;
+	a) append="$OPTARG";;
 	i) img="$OPTARG";;
 	m) mem="$OPTARG";;
 	d) drive2="\
@@ -31,6 +33,7 @@ do
 	p) network="\
 		-device virtio-net-device,netdev=smolnet0 \
 		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
+	h) usage;;
 	*) usage;;
 	esac
 done
@@ -52,11 +55,12 @@ NetBSD)
 esac
 
 mem=${mem:-"256"}
+append=${append:-"-z"}
 
 qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off${ACCEL} \
 	-m $mem -cpu host,+invtsc \
-	-kernel $kernel -append "console=com root=ld0a -z" \
+	-kernel $kernel -append "console=com root=ld0a ${append}" \
 	-serial mon:stdio -display none \
 	-device virtio-blk-device,drive=smolhd0 \
 	-drive file=${img},format=raw,id=smolhd0 $drive2 $network
