@@ -29,7 +29,7 @@ do
 	m) mem="$OPTARG";;
 	d) drive2="\
 		-device virtio-blk-device,drive=smolhd1 \
-		-drive file=${OPTARG},if=virtio,format=raw,id=smolhd1";;
+		-drive file=${OPTARG},format=raw,id=smolhd1";;
 	p) network="\
 		-device virtio-net-device,netdev=smolnet0 \
 		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
