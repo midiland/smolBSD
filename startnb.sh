@@ -3,13 +3,16 @@
 usage()
 {
 	cat 1>&2 << _USAGE_
-Usage: ${0##*/} -k kernel -i image [-a kernel parameters] [-m memory in MB] [-d drive2] [-p port]
+Usage:	${0##*/} -k kernel -i image [-a kernel parameters] [-m memory in MB]
+	[-d drive2] [-p port] [-w path]
+
 	Boot a microvm
 	-k kernel	kernel to boot on
 	-a parameters	append kernel parameters
 	-i image	image to use as root filesystem
 	-d drive2	second drive to pass to image
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
+	-w path		host path to share with guest (9p)
 _USAGE_
 	# as per https://www.qemu.org/docs/master/system/invocation.html
 	# hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
@@ -18,7 +21,7 @@ _USAGE_
 
 [ $# -lt 4 ] && usage
 
-options="k:a:p:i:m:d:p:h"
+options="k:a:p:i:m:d:p:w:h"
 
 while getopts "$options" opt
 do
@@ -34,6 +37,9 @@ do
 		-device virtio-net-device,netdev=smolnet0 \
 		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
 	h) usage;;
+	w) share="\
+		-fsdev local,path=${OPTARG},security_model=mapped,id=shar0 \
+		-device virtio-9p-device,fsdev=shar0,mount_tag=shar0";;
 	*) usage;;
 	esac
 done
@@ -62,5 +68,6 @@ qemu-system-x86_64 \
 	-m $mem -cpu host,+invtsc \
 	-kernel $kernel -append "console=com root=ld0a ${append}" \
 	-serial mon:stdio -display none \
+	-global virtio-mmio.force-legacy=false ${share} \
 	-device virtio-blk-device,drive=smolhd0 \
 	-drive file=${img},format=raw,id=smolhd0 $drive2 $network
