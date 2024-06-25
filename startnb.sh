@@ -32,7 +32,7 @@ do
 	m) mem="$OPTARG";;
 	d) drive2="\
 		-device virtio-blk-device,drive=smolhd1 \
-		-drive file=${OPTARG},format=raw,id=smolhd1";;
+		-drive if=none,file=${OPTARG},format=raw,id=smolhd1";;
 	p) network="\
 		-device virtio-net-device,netdev=smolnet0 \
 		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
@@ -63,11 +63,27 @@ esac
 mem=${mem:-"256"}
 append=${append:-"-z"}
 
-qemu-system-x86_64 \
-	-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off${ACCEL} \
-	-m $mem -cpu host,+invtsc \
-	-kernel $kernel -append "console=com root=ld0a ${append}" \
+MACHINE=$(uname -m)
+
+case $MACHINE in
+x86_64|i386)
+	mflags="-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off${ACCEL}"
+	cpuflags="-cpu host,+invtsc"
+	root="ld0a"
+	;;
+aarch64)
+	mflags="-M virt${ACCEL}"
+	cpuflags="-cpu host"
+	root="ld4a"
+	;;
+*)
+	echo "Unknown architecture"
+esac
+
+qemu-system-${MACHINE} \
+	$mflags -m $mem $cpuflags \
+	-kernel $kernel -append "console=com root=${root} ${append}" \
 	-serial mon:stdio -display none \
 	-global virtio-mmio.force-legacy=false ${share} \
 	-device virtio-blk-device,drive=smolhd0 \
-	-drive file=${img},format=raw,id=smolhd0 $drive2 $network
+	-drive if=none,file=${img},format=raw,id=smolhd0 $drive2 $network

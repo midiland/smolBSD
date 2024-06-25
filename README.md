@@ -10,7 +10,7 @@ creating the image on a _GNU/Linux_ system, the image will be formatted using _e
 
 Note that this is currently more a proof of concept, don't judge the scripts as they are!
 
-As of March 2024, this method can use:
+As of March 2024, this method can use to create or fetch a low footprint kernel for use with the images:
 
 * [multiboot][1] to boot directly the kernel from [kvm][2], but warning, only `i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this architecture as of now.
 * [PVH][4] this newer method works with _NetBSD/amd64_ and is available in my [NetBSD development branch][5] but you can still fetch a pre-built kernel at https://imil.net/NetBSD/netbsd-SMOL, warning this is a _NetBSD-current_ kernel
@@ -47,10 +47,10 @@ Usage: startnb.sh -k kernel -i image [-m memory in MB] [-d drive2] [-p port]
         -d drive2       second drive to pass to image
         -p ports        [tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
 ```
-- `startnb_nommio.sh` starts a _NetBSD_ virtual machine with no support for _MMIO_
+- `startnb_nommio.sh` (**deprecated**) starts a _NetBSD_ virtual machine with no support for _MMIO_
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
 - `etc` holds common `/etc` files to be installed in the root filesystem
-- `kstrip.sh` (**legacy**, now use [confkerndev][0]) strips the kernel from any useless driver to improve boot speed on `i386`
+- `kstrip.sh` (**deprecated**, now use [confkerndev][0]) strips the kernel from any useless driver to improve boot speed on `i386`
 - `service` structure:
 
 ```sh
@@ -82,6 +82,8 @@ umask 022
 
 mount -a
 
+[ ! -f /dev/null ] && cd /dev && ./MAKEDEV all && cd /
+
 # default qemu user network
 ifconfig vioif0 10.0.2.15/24 up
 route add default 10.0.2.2
@@ -102,11 +104,18 @@ And then add this to your `rc`:
 
 ## Example of a very minimal (10MB) virtual machine from a GNU/Linux host
 
+> Note: you can use the ARCH variable to specify an architecture to build your image for, default is amd64.
+
 ### TL;DR
 
 ```shell
 $ make rescue
 ```
+Will create a `rescue.img` file for use with an _amd64_ kernel.
+```shell
+$ make ARCH=evbarm-aarch64 rescue
+```
+Will create a `rescue.img` file for use with an _aarch64_ kernel.
 
 ### Long version
 
@@ -149,7 +158,7 @@ $ confkerndev/confkerndevi386 -v -i netbsd-SMOL -K virtio.list -w
 
 Then start the virtual machine:
 ```shell
-$ sudo ./startnb_nommio.sh netbsd-SMOL
+$ ./startnb_nommio.sh netbsd-SMOL
 ```
 
 **For `amd64`/`PVH`**
@@ -162,10 +171,22 @@ $ curl -O https://imil.net/NetBSD/netbsd-SMOL
 
 Then start the virtual machine:
 ```shell
-$ sudo ./startnb.sh -k netbsd-SMOL -i root.img
+$ ./startnb.sh -k netbsd-SMOL -i rescue.img
 ```
 
 You should be granted a shell.
+
+**For `aarch64`**
+
+Download a regular `netbsd-GENERIC64.img` kernel
+
+```shell
+$ curl -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/kernel/netbsd-GENERIC64.img.gz|gunzip -c >netbsd.img
+```
+And start your virtual machine:
+```shell
+$ ./startnb.sh -k netbsd-SMOL -i rescue.img
+```
 
 ## Example of an image filled with the `base` set
 
@@ -303,13 +324,13 @@ $ dd if=/dev/zero of=nginx.img bs=1M count=100
 Start the image builder with the blank image as a third parameter:
 
 ```shell
-$ sudo ./startnb.sh -k netbsd-SMOL -i imgbuilder.img -d nginx.img
+$ ./startnb.sh -k netbsd-SMOL -i imgbuilder.img -d nginx.img
 ```
 
 Once the `nginx` image is baked, simply run it:
 
 ```shell
-$ sudo ./startnb.sh -k netbsd-SMOL -i nginx.img -p tcp::8080-:80
+$ ./startnb.sh -k netbsd-SMOL -i nginx.img -p tcp::8080-:80
 ```
 
 [0]: https://gitlab.com/0xDRRB/confkerndev
