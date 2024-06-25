@@ -23,7 +23,7 @@ As of March 2024, this method can use to create or fetch a low footprint kernel 
 - The following tools installed
   - `curl`
   - `git`
-  - `qemu-system-x86_64` or `qemu-system-i386`
+  - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo`
 - A VT-capable CPU is recommended
 
@@ -38,7 +38,7 @@ Usage: mkimg.sh [-s service] [-m megabytes] [-n image] [-x set]
 	-i image	image name, default root.img
 	-x sets		list of NetBSD sets, default rescue.tgz
 ```
-- `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x86_64`
+- `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x86_64` or `qemu-system-aarch64`
 ```text
 Usage: startnb.sh -k kernel -i image [-m memory in MB] [-d drive2] [-p port]
         Boot a microvm
