@@ -9,6 +9,7 @@ Usage:	${0##*/} -k kernel -i image [-a kernel parameters] [-m memory in MB]
 	Boot a microvm
 	-k kernel	kernel to boot on
 	-a parameters	append kernel parameters
+	-m memory	memory in MB
 	-i image	image to use as root filesystem
 	-d drive2	second drive to pass to image
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
