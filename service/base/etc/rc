@@ -6,6 +6,8 @@ umask 022
 
 mount -a
 
+[ ! -f /dev/null ] && cd /dev && ./MAKEDEV all && cd /
+
 ksh
 
 . /etc/include/shutdown

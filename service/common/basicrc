@@ -4,6 +4,8 @@ umask 022
 
 mount -a
 
+[ ! -f /dev/null ] && cd /dev && ./MAKEDEV all && cd /
+
 # default qemu addresses and routing
 ifconfig vioif0 10.0.2.15/24
 route add default 10.0.2.2

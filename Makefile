@@ -3,7 +3,7 @@ SMOL=		netbsd-SMOL
 LIST=		virtio.list
 # use a specific version
 VERS=		10
-ARCH=		amd64
+ARCH?=		amd64
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 SUDO=		sudo -E ARCH=${ARCH}
 KERNURL=	https://imil.net/NetBSD
@@ -31,27 +31,27 @@ smol:	kernfetch
 		confkerndev/confkerndevi386 -v -i ${SMOL} -K virtio.list -w; \
 	}
 
-rescue:	smol
+rescue:
 	$(MAKE) setfetch SETS="rescue.tar.xz etc.tar.xz"
-	${SUDO} ./mkimg.sh
+	${SUDO} ./mkimg.sh -m 20 -x "rescue.tar.xz etc.tar.xz"
 
-base:	smol
+base:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 300 -x "base.tar.xz etc.tar.xz"
 
-prof:	smol
+prof:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz comp.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 1000 -k ${KERN} -x "base.tar.xz etc.tar.xz comp.tar.xz"
 
-bozohttpd: smol
+bozohttpd:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 300 -x "base.tar.xz etc.tar.xz"
 	${SUDO} chown ${WHOAMI} $@.img
 
-imgbuilder: smol
+imgbuilder:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 500 -x "base.tar.xz etc.tar.xz"
 
-nginx:	imgbuilder
+nginx: imgbuilder
 	dd if=/dev/zero of=$@.img bs=1M count=100
-	${SUDO} ./startnb.sh ${SMOL} $<.img $@.img
+	${SUDO} ./startnb.sh -k ${SMOL} -i $<.img -d $@.img

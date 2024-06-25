@@ -88,33 +88,7 @@ if [ "$svc" = "rescue" ]; then
 	ln -s /rescue/sh bin/
 fi
 
-cd dev
-
-mknod -m 600 console c 0 0
-mknod -m 600 constty c 0 1
-mknod -m 640 drum    c 4 0
-mknod -m 640 kmem    c 2 1
-mknod -m 640 mem     c 2 0
-mknod -m 666 null    c 2 2
-mknod -m 666 full    c 2 11
-mknod -m 666 zero    c 2 12
-mknod -m 600 klog    c 7 0
-mknod -m 444 ksyms   c 85 0
-mknod -m 444 random  c 46 0
-mknod -m 644 urandom c 46 1
-mknod -m 666 tty     c 1 0
-mknod -m 666 stdin   c 22 0
-mknod -m 666 stdout  c 22 1
-mknod -m 666 stderr  c 22 2
-mknod -m 640 ld0a    b 19 0
-mknod -m 640 rld0a   c 69 0
-mknod -m 640 ld1     b 19 11
-mknod -m 640 ld1a    b 19 8
-mknod -m 640 ld1d    b 19 11
-mknod -m 640 rld1a   c 69 8
-mknod -m 640 rld1d   c 69 11
-
-cd ../..
+cd ..
 
 umount mnt
 
