@@ -13,7 +13,7 @@ Note that this is currently more a proof of concept, don't judge the scripts as 
 As of March 2024, this method can use to create or fetch a low footprint kernel for use with the images:
 
 * [multiboot][1] to boot directly the kernel from [kvm][2], but warning, only `i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this architecture as of now.
-* [PVH][4] this newer method works with _NetBSD/amd64_ and is available in my [NetBSD development branch][5] but you can still fetch a pre-built kernel at https://imil.net/NetBSD/netbsd-SMOL, warning this is a _NetBSD-current_ kernel
+* [PVH][4] this newer method works with _NetBSD/amd64_ and is available in my [NetBSD development branch][5] but you can still fetch a pre-built kernel at https://smolbsd.org/assets/netbsd-SMOL, warning this is a _NetBSD-current_ kernel
 
 `aarch64` `netbsd-GENERIC64` kernels are able to boot directly to the kernel with no modification
 
@@ -168,7 +168,7 @@ $ ./startnb_nommio.sh netbsd-SMOL
 Download the `MICROVM` kernel
 
 ```shell
-$ curl -O https://imil.net/NetBSD/netbsd-SMOL
+$ curl -O https://smolbsd.org/assets/netbsd-SMOL
 ```
 
 Then start the virtual machine:
