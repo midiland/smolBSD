@@ -75,6 +75,7 @@ aarch64)
 	mflags="-M virt${ACCEL}"
 	cpuflags="-cpu host"
 	root="ld4a"
+	extra="-device virtio-rng-pci"
 	;;
 *)
 	echo "Unknown architecture"
@@ -83,7 +84,7 @@ esac
 qemu-system-${MACHINE} \
 	$mflags -m $mem $cpuflags \
 	-kernel $kernel -append "console=com root=${root} ${append}" \
-	-serial mon:stdio -display none \
+	-serial mon:stdio -display none ${extra} \
 	-global virtio-mmio.force-legacy=false ${share} \
 	-device virtio-blk-device,drive=smolhd0 \
 	-drive if=none,file=${img},format=raw,id=smolhd0 $drive2 $network
