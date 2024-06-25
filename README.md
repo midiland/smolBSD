@@ -15,6 +15,8 @@ As of March 2024, this method can use to create or fetch a low footprint kernel 
 * [multiboot][1] to boot directly the kernel from [kvm][2], but warning, only `i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this architecture as of now.
 * [PVH][4] this newer method works with _NetBSD/amd64_ and is available in my [NetBSD development branch][5] but you can still fetch a pre-built kernel at https://imil.net/NetBSD/netbsd-SMOL, warning this is a _NetBSD-current_ kernel
 
+`aarch64` `netbsd-GENERIC64` kernels are able to boot directly to the kernel with no modification
+
 # Usage
 
 ## Requirements
@@ -185,7 +187,7 @@ $ curl -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch
 ```
 And start your virtual machine:
 ```shell
-$ ./startnb.sh -k netbsd-SMOL -i rescue.img
+$ ./startnb.sh -k netbsd-GENERIC64.img -i rescue.img
 ```
 
 ## Example of an image filled with the `base` set
