@@ -34,24 +34,29 @@ smol:	kernfetch
 rescue:
 	$(MAKE) setfetch SETS="rescue.tar.xz etc.tar.xz"
 	${SUDO} ./mkimg.sh -m 20 -x "rescue.tar.xz etc.tar.xz"
+	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 base:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 300 -x "base.tar.xz etc.tar.xz"
+	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 prof:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz comp.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 1000 -k ${KERN} -x "base.tar.xz etc.tar.xz comp.tar.xz"
+	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 bozohttpd:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 300 -x "base.tar.xz etc.tar.xz"
-	${SUDO} chown ${WHOAMI} $@.img
+	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 imgbuilder:
 	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
 	${SUDO} ./mkimg.sh -i $@.img -s $@ -m 500 -x "base.tar.xz etc.tar.xz"
+	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 nginx: imgbuilder
 	dd if=/dev/zero of=$@.img bs=1M count=100
 	${SUDO} ./startnb.sh -k ${SMOL} -i $<.img -d $@.img
+	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
