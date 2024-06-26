@@ -61,7 +61,7 @@ Linux)
 Darwin)
 	ACCEL=",accel=hvf"
 	# Mac M1
-	[ "$MACHINE" = "arm64" ] && MACHINE="aarch64" cputype="cortex-a76"
+	[ "$MACHINE" = "arm64" ] && MACHINE="aarch64" cputype="cortex-a710"
 	;;
 NetBSD)
 	ACCEL=",accel=nvmm"
