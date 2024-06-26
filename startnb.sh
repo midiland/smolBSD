@@ -80,7 +80,7 @@ x86_64|i386)
 	root=${root:-"ld0a"}
 	;;
 aarch64)
-	mflags="-M virt${ACCEL}"
+	mflags="-M virt${ACCEL},highmem=off"
 	cpuflags="-cpu ${cputype}"
 	root=${root:-"ld4a"}
 	extra="-device virtio-rng-pci"
