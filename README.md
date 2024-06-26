@@ -39,15 +39,22 @@ Usage: mkimg.sh [-s service] [-m megabytes] [-n image] [-x set]
 	-m megabytes	image size in megabytes, default 10
 	-i image	image name, default root.img
 	-x sets		list of NetBSD sets, default rescue.tgz
+	-k kernel	kernel to copy in the image
 ```
 - `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x86_64` or `qemu-system-aarch64`
 ```text
-Usage: startnb.sh -k kernel -i image [-m memory in MB] [-d drive2] [-p port]
-        Boot a microvm
-        -k kernel       kernel to boot on
-        -i image        image to use as root filesystem
-        -d drive2       second drive to pass to image
-        -p ports        [tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
+Usage:	startnb.sh -k kernel -i image [-a kernel parameters] [-m memory in MB]
+	[-r root disk] [-d drive2] [-p port] [-w path]
+
+	Boot a microvm
+	-k kernel	kernel to boot on
+	-a parameters	append kernel parameters
+	-m memory	memory in MB
+	-r root disk	root disk to boot on
+	-i image	image to use as root filesystem
+	-d drive2	second drive to pass to image
+	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
+	-w path		host path to share with guest (9p)
 ```
 - `startnb_nommio.sh` (**deprecated**) starts a _NetBSD_ virtual machine with no support for _MMIO_
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
