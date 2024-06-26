@@ -29,10 +29,12 @@ do
 	esac
 done
 
-[ -z "$svc" ] && svc=rescue
-[ -z "$megs" ] && megs=20
-[ -z "$img" ] && img=rescue.img
-[ -z "$sets" ] && sets=rescue.tar.xz
+arch=${ARCH:-"amd64"}
+
+svc=${svc:-"rescue"}
+megs=${megs:-"20"}
+img=${img:-"rescue-${arch}.img"}
+sets=${sets:-"rescue.tar.xz"}
 
 [ ! -f service/${svc}/etc/rc ] && \
 	echo "no service/${svc}/etc/rc available" && exit 1
@@ -59,8 +61,7 @@ fi
 
 for s in ${sets}
 do
-	[ -n "$ARCH" ] && s="${ARCH}/${s}"
-	tar xfp sets/${s} -C mnt/ || exit 1
+	tar xfp sets/${arch}/${s} -C mnt/ || exit 1
 done
 
 [ -n "$kernel" ] && cp -f $kernel mnt/
