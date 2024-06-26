@@ -25,6 +25,8 @@ _USAGE_
 
 options="k:a:p:i:m:r:d:p:w:h"
 
+diskuid="hd$(uuidgen | cut -d- -f1)"
+
 while getopts "$options" opt
 do
 	case $opt in
@@ -34,8 +36,8 @@ do
 	m) mem="$OPTARG";;
 	r) root="$OPTARG";;
 	d) drive2="\
-		-device virtio-blk-device,drive=smolhd1 \
-		-drive if=none,file=${OPTARG},format=raw,id=smolhd1";;
+		-device virtio-blk-device,drive=${diskuid}1 \
+		-drive if=none,file=${OPTARG},format=raw,id=${diskuid}1";;
 	p) network="\
 		-device virtio-net-device,netdev=smolnet0 \
 		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
@@ -89,5 +91,5 @@ qemu-system-${MACHINE} \
 	-kernel $kernel -append "console=com root=${root} ${append}" \
 	-serial mon:stdio -display none ${extra} \
 	-global virtio-mmio.force-legacy=false ${share} \
-	-device virtio-blk-device,drive=smolhd0 \
-	-drive if=none,file=${img},format=raw,id=smolhd0 $drive2 $network
+	-device virtio-blk-device,drive=${diskuid}0 \
+	-drive if=none,file=${img},format=raw,id=${diskuid}0 $drive2 $network
