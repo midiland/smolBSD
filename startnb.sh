@@ -50,6 +50,9 @@ do
 done
 
 OS=$(uname -s)
+MACHINE=$(uname -m)
+
+cputype="host"
 
 case $OS in
 Linux)
@@ -57,6 +60,8 @@ Linux)
 	;;
 Darwin)
 	ACCEL=",accel=hvf"
+	# Mac M1
+	[ "$MACHINE" = "arm64" ] && MACHINE="aarch64" cputype="cortex-a76"
 	;;
 NetBSD)
 	ACCEL=",accel=nvmm"
@@ -68,17 +73,15 @@ esac
 mem=${mem:-"256"}
 append=${append:-"-z"}
 
-MACHINE=$(uname -m)
-
 case $MACHINE in
 x86_64|i386)
 	mflags="-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off${ACCEL}"
-	cpuflags="-cpu host,+invtsc"
+	cpuflags="-cpu ${cputype},+invtsc"
 	root=${root:-"ld0a"}
 	;;
 aarch64)
 	mflags="-M virt${ACCEL}"
-	cpuflags="-cpu host"
+	cpuflags="-cpu ${cputype}"
 	root=${root:-"ld4a"}
 	extra="-device virtio-rng-pci"
 	;;
