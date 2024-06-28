@@ -21,6 +21,12 @@ _USAGE_
 	exit 1
 }
 
+which uuidgen 1>/dev/null
+if [ $? -eq 1 ]; then
+	echo "uuidgen not available"
+	exit 1
+fi
+
 [ $# -lt 4 ] && usage
 
 options="k:a:p:i:m:r:d:p:w:h"
