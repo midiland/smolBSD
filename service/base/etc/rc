@@ -1,12 +1,6 @@
 #!/bin/sh
 
-export HOME=/
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/rescue
-umask 022
-
-mount -a
-
-[ ! -f /dev/null ] && cd /dev && ./MAKEDEV all && cd /
+. /etc/include/basicrc
 
 ksh
 
