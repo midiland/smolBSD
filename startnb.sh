@@ -25,7 +25,7 @@ _USAGE_
 
 options="k:a:p:i:m:r:d:p:w:h"
 
-diskuid="hd$(uuidgen | cut -d- -f1)"
+uuid="$(uuidgen | cut -d- -f1)"
 
 while getopts "$options" opt
 do
@@ -36,35 +36,43 @@ do
 	m) mem="$OPTARG";;
 	r) root="$OPTARG";;
 	d) drive2="\
-		-device virtio-blk-device,drive=${diskuid}1 \
-		-drive if=none,file=${OPTARG},format=raw,id=${diskuid}1";;
+		-device virtio-blk-device,drive=hd${uuid}1 \
+		-drive if=none,file=${OPTARG},format=raw,id=hd${uuid}1"
+		;;
 	p) network="\
-		-device virtio-net-device,netdev=smolnet0 \
-		-netdev user,id=smolnet0,hostfwd=${OPTARG}";;
+		-device virtio-net-device,netdev=net${uuid}0 \
+		-netdev user,id=net${uuid}0,hostfwd=${OPTARG}"
+		;;
 	h) usage;;
 	w) share="\
-		-fsdev local,path=${OPTARG},security_model=mapped,id=shar0 \
-		-device virtio-9p-device,fsdev=shar0,mount_tag=shar0";;
+		-fsdev local,path=${OPTARG},security_model=mapped,id=shar${uuid}0 \
+		-device virtio-9p-device,fsdev=shar${uuid}0,mount_tag=shar${uuid}0"
+		;;
 	*) usage;;
 	esac
 done
 
 OS=$(uname -s)
-MACHINE=$(uname -m)
+MACHINE=$(uname -p)
+
+# Linux on RPi
+[ "$MACHINE" = "unknown" ] && MACHINE=$(uname -m)
 
 cputype="host"
 
 case $OS in
+NetBSD)
+	ACCEL=",accel=nvmm"
+	;;
 Linux)
 	ACCEL=",accel=kvm"
 	;;
 Darwin)
 	ACCEL=",accel=hvf"
+	# Mac x86 uname -p returns i386
+	[ "$MACHINE" = "i386" ] && MACHINE="x86_64"
 	# Mac M1
-	[ "$MACHINE" = "arm64" ] && MACHINE="aarch64" cputype="cortex-a710"
-	;;
-NetBSD)
-	ACCEL=",accel=nvmm"
+	[ "$MACHINE" = "arm" ] && MACHINE="aarch64" cputype="cortex-a710"
 	;;
 *)
 	echo "Unknown hypervisor, no acceleration"
@@ -94,5 +102,5 @@ qemu-system-${MACHINE} \
 	-kernel $kernel -append "console=com root=${root} ${append}" \
 	-serial mon:stdio -display none ${extra} \
 	-global virtio-mmio.force-legacy=false ${share} \
-	-device virtio-blk-device,drive=${diskuid}0 \
-	-drive if=none,file=${img},format=raw,id=${diskuid}0 $drive2 $network
+	-device virtio-blk-device,drive=hd${uuid}0 \
+	-drive if=none,file=${img},format=raw,id=hd${uuid}0 $drive2 $network
