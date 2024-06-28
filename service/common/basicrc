@@ -4,11 +4,12 @@ umask 022
 
 mount -a
 
-[ ! -f /dev/null ] && cd /dev && ./MAKEDEV all && cd /
-
-# default qemu addresses and routing
-ifconfig vioif0 10.0.2.15/24
-route add default 10.0.2.2
+if ifconfig vioif0 >/dev/null 2>&1; then
+	# default qemu addresses and routing
+	ifconfig vioif0 10.0.2.15/24
+	route add default 10.0.2.2
+	echo "nameserver 10.0.2.3" > /etc/resolv.conf
+fi
 
 ifconfig lo0 127.0.0.1 up
 
