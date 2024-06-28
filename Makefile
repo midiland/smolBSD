@@ -5,8 +5,8 @@ LIST=		virtio.list
 VERS=		10
 ARCH?=		amd64
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
-SUDO=		sudo -E ARCH=${ARCH}
-KERNURL=	https://imil.net/NetBSD
+SUDO=		sudo -E ARCH=${ARCH} VERS=${VERS}
+KERNURL=	https://smolbsd.org/assets
 WHOAMI!=	whoami
 
 kernfetch:
