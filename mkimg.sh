@@ -89,6 +89,9 @@ if [ "$svc" = "rescue" ]; then
 	ln -s /rescue/sh bin/
 fi
 
+# union with ext2 leads to i/o error
+[ -n "$is_linux" ] && sed -i 's/-o union//g' dev/MAKEDEV
+
 cd ..
 
 umount mnt
