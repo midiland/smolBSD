@@ -8,24 +8,18 @@ ship=fakecracker
 cat >sailor/examples/${ship}.conf<<EOF
 shipname=$ship
 shippath="/sailor/$ship"
-shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail /sbin/poweroff /sbin/umount /sbin/fsck /usr/bin/netstat /sbin/dhcpcd /sbin/route"
+shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail /sbin/poweroff /sbin/umount /sbin/fsck /usr/bin/netstat /sbin/dhcpcd /sbin/route /sbin/mount_tmpfs"
 packages="nginx"
-
-run_at_build="echo 'creating devices'"
-run_at_build="cd /dev && sh MAKEDEV all_md"
-run_at_build="echo $pkginrepo >/usr/pkg/etc/pkgin/repositories.conf"
 EOF
 
 # boot setup
 mkdir -p sailor/ships/$ship/etc
-
-cp dev/MAKEDEV etc/
-
 cp etc/include/basicrc sailor/ships/$ship/etc/rc
 cat >sailor/ships/$ship/etc/fstab<<EOF
-/dev/ld0a / ffs rw 1 1
+ROOT.a / ffs rw 1 1
 EOF
 
+# system and service startup
 cat >>sailor/ships/$ship/etc/rc<<EOF
 
 # service startup

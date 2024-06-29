@@ -26,8 +26,8 @@ if [ ! -d /var/db/pkgin ]; then
 		pkg_info $pkg >/dev/null 2>&1 || pkg_add -v ${url}/${pkg}*
 	done
 
-	mkdir -p usr/pkg/etc/pkgin
-	echo $url >usr/pkg/etc/pkgin/repositories.conf
+	mkdir -p /usr/pkg/etc/pkgin
+	echo $url >/usr/pkg/etc/pkgin/repositories.conf
 	pkgin up
 fi
 
@@ -40,6 +40,7 @@ mkdir $ship
 newfs /dev/ld1a
 mount /dev/ld1a $ship
 /bin/sh ./sailor.sh build examples/${ship}.conf
+
 
 echo -e "\nImage created! you can now ^D to cleanly shutdown.\n"
 
