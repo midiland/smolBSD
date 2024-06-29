@@ -58,5 +58,5 @@ imgbuilder:
 
 nginx: imgbuilder
 	dd if=/dev/zero of=$@-${ARCH}.img bs=1M count=100
-	${SUDO} ./startnb.sh -k ${SMOL} -i $<-${ARCH}.img -d $@-${ARCH}.img
+	${SUDO} ./startnb.sh -k ${SMOL} -i $<-${ARCH}.img -d $@-${ARCH}.img -p ::22022-:22
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img

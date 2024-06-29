@@ -1,4 +1,3 @@
-
-shutdown -p now
+poweroff
 umount -a
 fsck -q -y /dev/ld0a
