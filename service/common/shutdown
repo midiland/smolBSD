@@ -1,3 +1,4 @@
+root=$(mount|awk '{print $1}')
 poweroff
 umount -a
-fsck -q -y /dev/ld0a
+fsck -q -y $root
