@@ -34,15 +34,15 @@ fi
 # newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
 cp /etc/MAKEDEV /dev/
 
-ship=fakecracker
 cd sailor
+ship=$(basename *.conf .conf)
 mkdir $ship
 newfs /dev/ld1a
 mount /dev/ld1a $ship
-/bin/sh ./sailor.sh build examples/${ship}.conf
+/bin/sh ./sailor.sh build ${ship}.conf
 
 
-echo -e "\nImage created! you can now ^D to cleanly shutdown.\n"
+echo -e "\n$ship image created! You can now ^D to cleanly shutdown.\n"
 
 ksh
 
