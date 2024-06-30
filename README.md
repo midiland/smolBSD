@@ -27,7 +27,7 @@ As of March 2024, this method can use to create or fetch a low footprint kernel 
   - `git`
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo`
-- A VT-capable CPU is recommended
+- A x86 VT-capable, or ARM64 CPU is recommended
 
 ## Project structure
 
@@ -91,15 +91,16 @@ umask 022
 
 mount -a
 
-[ ! -f /dev/null ] && cd /dev && ./MAKEDEV all && cd /
-
-# default qemu user network
-ifconfig vioif0 10.0.2.15/24 up
-route add default 10.0.2.2
+if ifconfig vioif0 >/dev/null 2>&1; then
+        # default qemu addresses and routing
+        ifconfig vioif0 10.0.2.15/24
+        route add default 10.0.2.2
+        echo "nameserver 10.0.2.3" > /etc/resolv.conf
+fi
 
 ifconfig lo0 127.0.0.1 up
-route add default 192.168.1.254
-echo 'nameserver 192.168.1.254' > /etc/resolv.conf
+
+export TERM=dumb
 ```
 
 And then add this to your `rc`:
@@ -107,43 +108,15 @@ And then add this to your `rc`:
 . /etc/include/basicrc
 ```
 
-## Warning
+## ⚠️  Warning ⚠️
 
 `postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
 
-## Example of a very minimal (10MB) virtual machine from a GNU/Linux host
+## Prerequisite
 
-> Note: you can use the ARCH variable to specify an architecture to build your image for, default is amd64.
+For the microvm to start instantly, you will need a kernel that is capable of "direct booting" with the `qemu -kernel` flag.
 
-### TL;DR
-
-```shell
-$ make rescue
-```
-Will create a `rescue.img` file for use with an _amd64_ kernel.
-```shell
-$ make ARCH=evbarm-aarch64 rescue
-```
-Will create a `rescue.img` file for use with an _aarch64_ kernel.
-
-### Long version
-
-Create a `sets` directory and download the `rescue` set:
-
-```shell
-$ mkdir sets
-$ rel=$(uname -r)
-$ arch=$(uname -m)
-$ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/sets/rescue.tgz
-```
-
-Build an `ext2` or `ffs` root image that will be the root filesystem device:
-
-```shell
-$ sudo ./mkimg.sh
-```
-
-**For `i386`/`multiboot`**
+**For `i386`/`multiboot` (deprecated)**
 
 > &#x26A0; Unless demand arises, `i386` version of this project is considered archived and will not evolve anymore
 
@@ -165,81 +138,75 @@ $ cp netbsd-GENERIC netbsd-SMOL
 $ confkerndev/confkerndevi386 -v -i netbsd-SMOL -K virtio.list -w
 ```
 
-Then start the virtual machine:
-```shell
-$ ./startnb_nommio.sh netbsd-SMOL
-```
-
 **For `amd64`/`PVH`**
 
-Download the `MICROVM` kernel
+Download the `SMOL` kernel
 
 ```shell
 $ curl -O https://smolbsd.org/assets/netbsd-SMOL
 ```
-
-Then start the virtual machine:
-```shell
-$ ./startnb.sh -k netbsd-SMOL -i rescue.img
-```
-
-You should be granted a shell.
 
 **For `aarch64`**
 
 Download a regular `netbsd-GENERIC64.img` kernel
 
 ```shell
-$ curl -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/kernel/netbsd-GENERIC64.img.gz|gunzip -c >netbsd.img
+$ curl -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/kernel/netbsd-GENERIC64.img.gz|gunzip -c >netbsd-GENERIC64.img
 ```
-And start your virtual machine:
+
+## Example of a very minimal (10MB) virtual machine
+
+> Note: you can use the ARCH variable to specify an architecture to build your image for, default is amd64.
+
 ```shell
-$ ./startnb.sh -k netbsd-GENERIC64.img -i rescue.img
+$ make rescue
+```
+Will create a `rescue-amd64.img` file for use with an _amd64_ kernel.
+```shell
+$ make ARCH=evbarm-aarch64 rescue
+```
+Will create a `rescue-evbarm-aarch64.img` file for use with an _aarch64_ kernel.
+
+```shell
+$ ./startnb.sh -k netbsd-SMOL -i rescue-amd64.img
 ```
 
 ## Example of an image filled with the `base` set
 
-### TL;DR
-
 ```shell
 $ make base
-$ ./startnb.sh -k netbsd-SMOL -i base.img
+$ ./startnb.sh -k netbsd-GENERIC64.img -i base-evbarm-aarch64.img
 ```
-### Long version
-
-Fetch the `base` set:
-
-```shell
-$ curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/sets/base.tgz
-```
-
-Build an `ext2` or `ffs` root image that will be the root filesystem device:
-
-```shell
-$ sudo ./mkimg.sh -i base.img -s base -m 300 -x base.tgz
-```
-
-Following steps are identical to the previous example.
 
 ## Example of an image used to create an nginx microvm with [sailor][3]
-
-### TL;DR
 
 ```shell
 $ make nginx
 ```
+This will spawn an image builder host which will populate an `nginx` minimal image.
 
-BUT you still need to prepare `service/imgbuilder/postinst/prepare.sh` and  `service/imgbuilder/etc/rc` beforehand, see below.
-
-### Long version
-
-Fetch the `base` and `etc` sets:
+Once the `nginx` image is baked, simply run it:
 
 ```shell
-$ for s in base.tgz etc.tgz; do curl -O --output-dir sets https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/sets/${s}; done
+$ ./startnb.sh -k netbsd-SMOL -i nginx.img -p tcp::8080-:80
 ```
 
-Prepare [sailor][3] setup:
+And try it:
+
+```shell
+$ curl -I http://localhost:8008
+HTTP/1.1 200 OK
+Server: nginx/1.24.0
+Date: Sun, 30 Jun 2024 07:58:14 GMT
+Content-Type: text/html
+Content-Length: 615
+Last-Modified: Mon, 08 Apr 2024 14:01:28 GMT
+Connection: keep-alive
+ETag: "6613f8b8-267"
+Accept-Ranges: bytes
+```
+
+### Example configuration for the `nginx` service
 
 ```shell
 $ cat service/imgbuilder/postinst/prepare.sh
@@ -247,99 +214,33 @@ $ cat service/imgbuilder/postinst/prepare.sh
 
 git clone https://gitlab.com/iMil/sailor.git
 
-vers=$(uname -r)
-pkginrepo="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -m)/${vers%_*}/All"
+ship=fakecracker
 
-mkdir -p usr/pkg/etc/pkgin
-echo $pkginrepo > usr/pkg/etc/pkgin/repositories.conf
-
-cat >sailor/examples/test.conf<<EOF
-shipname=micronginx
-shippath="/sailor/micronginx"
-shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail"
+# create sailor base config - https://gitlab.com/iMil/sailor
+cat >sailor/${ship}.conf<<EOF
+shipname=$ship
+shippath="/sailor/$ship"
+shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail /sbin/poweroff /sbin/umount /sbin/fsck /usr/bin/netstat /sbin/dhcpcd /sbin/route /sbin/mount_tmpfs"
 packages="nginx"
-
-run_at_build="echo 'creating devices'"
-run_at_build="cd /dev && sh MAKEDEV all_md"
-run_at_build="echo $pkginrepo >/usr/pkg/etc/pkgin/repositories.conf"
 EOF
 
-mkdir -p sailor/ships/micronginx/etc
+# system and service startup
+mkdir -p sailor/ships/${ship}/etc
+cat >>sailor/ships/${ship}/etc/rc<<EOF
+. /etc/include/basicrc
 
-cat >sailor/ships/micronginx/etc/rc<<EOF
-#!/bin/sh
+# service startup
 
-export HOME=/
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin
-umask 022
-
-mount -a
-ifconfig vioif0 10.0.2.15/24 up
-route add default 10.0.2.2
-ifconfig lo0 127.0.0.1 up
 printf "\nstarting nginx.. "
 /usr/pkg/sbin/nginx
 echo "done"
 printf "\nTesting web server:\n"
 printf "HEAD / HTTP/1.0\r\n\r\n"|nc -n 127.0.0.1 80
-echo
-tail -f /var/log/nginx/access.log
-EOF
-
-cat >sailor/ships/micronginx/etc/fstab<<EOF
-/dev/ld0a / ffs rw 1 1
-EOF
-```
-
-Create the `etc/rc` `init` file
-
-```shell
-$ cat service/imgbuilder/etc/rc
-#!/bin/sh
-
-. /etc/include/basicrc
-
-ver=$(uname -r)
-url="http://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/$(uname -m)/${ver%_*}/All"
-
-for pkg in pkg_install pkgin mozilla-rootcerts pkg_tarup rsync curl
-do
-	pkg_info $pkg >/dev/null 2>&1 || pkg_add -v ${url}/${pkg}*
-done
-
-cd sailor
-mkdir micronginx
-newfs /dev/ld1a
-mount /dev/ld1a micronginx
-/bin/sh ./sailor.sh build examples/test.conf
-
-ksh # not necessary, only for check
+printf "^D to cleanly shutdown\n\n"
+sh
 
 . /etc/include/shutdown
-```
-
-Create the image maker:
-
-```shell
-$ sudo ./mkimg.sh -i imgbuilder.img -s imgbuilder -m 500 -x "etc.tgz base.tgz"
-```
-
-Create a blank image:
-
-```shell
-$ dd if=/dev/zero of=nginx.img bs=1M count=100
-```
-
-Start the image builder with the blank image as a third parameter:
-
-```shell
-$ ./startnb.sh -k netbsd-SMOL -i imgbuilder.img -d nginx.img
-```
-
-Once the `nginx` image is baked, simply run it:
-
-```shell
-$ ./startnb.sh -k netbsd-SMOL -i nginx.img -p tcp::8080-:80
+EOF
 ```
 
 [0]: https://gitlab.com/0xDRRB/confkerndev
