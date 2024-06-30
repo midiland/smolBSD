@@ -12,15 +12,10 @@ shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls
 packages="nginx"
 EOF
 
-# boot setup
-mkdir -p sailor/ships/$ship/etc
-cp etc/include/basicrc sailor/ships/$ship/etc/rc
-cat >sailor/ships/$ship/etc/fstab<<EOF
-ROOT.a / ffs rw 1 1
-EOF
-
 # system and service startup
-cat >>sailor/ships/$ship/etc/rc<<EOF
+mkdir -p sailor/ships/${ship}/etc
+cat >>sailor/ships/${ship}/etc/rc<<EOF
+. /etc/include/basicrc
 
 # service startup
 
@@ -29,12 +24,8 @@ printf "\nstarting nginx.. "
 echo "done"
 printf "\nTesting web server:\n"
 printf "HEAD / HTTP/1.0\r\n\r\n"|nc -n 127.0.0.1 80
-echo
-echo "^D to cleanly shutdown"
-#tail -f /var/log/nginx/access.log
+printf "^D to cleanly shutdown\n\n"
 sh
-poweroff
-umount -a
-fsck -q -y /dev/ld0a
-EOF
 
+. /etc/include/shutdown
+EOF

@@ -39,8 +39,14 @@ ship=$(basename *.conf .conf)
 mkdir $ship
 newfs /dev/ld1a
 mount /dev/ld1a $ship
+# use sailor to create a minimal root fs
 /bin/sh ./sailor.sh build ${ship}.conf
-
+# copy basicrc and shutdown
+mkdir -p ${ship}/etc/include
+cp /etc/include/* ${ship}/etc/include
+cat >${ship}/etc/fstab<<EOF
+ROOT.a / ffs rw 1 1
+EOF
 
 echo -e "\n$ship image created! You can now ^D to cleanly shutdown.\n"
 
