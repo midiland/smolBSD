@@ -180,6 +180,8 @@ $ ./startnb.sh -k netbsd-GENERIC64.img -i base-evbarm-aarch64.img
 
 ## Example of an image used to create an nginx microvm with [sailor][3]
 
+➡️  `amd64` only for now, `aarch64` coming soon.
+
 ```shell
 $ make nginx
 ```
