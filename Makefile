@@ -1,17 +1,31 @@
-GENERIC=	netbsd-GENERIC
-SMOL=		netbsd-SMOL
-LIST=		virtio.list
-# use a specific version
 VERS=		10
 ARCH?=		amd64
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 SUDO=		sudo -E ARCH=${ARCH} VERS=${VERS}
-KERNURL=	https://smolbsd.org/assets
 WHOAMI!=	whoami
+# sets to fetch
+RESCUE=		rescue.tar.xz etc.tar.xz
+BASE=		base.tar.xz etc.tar.xz
+PROF=		${BASE} comp.tar.xz
+BOZO=		${BASE}
+IMGBUILDER=	${BASE}
+
+ifeq (${ARCH}, evbarm-aarch64)
+KERNEL=		netbsd-GENERIC64.img
+else ifeq (${ARCH}, i386)
+KERNEL=		netbsd-GENERIC
+else
+KERNEL=		netbsd-SMOL
+DIST=		https://smolbsd.org/assets
+endif
 
 kernfetch:
-	[ -n ${KERNURL} ] && curl -L -O ${KERNURL}/${SMOL} || \
-	[ -f ${GENERIC} ] || curl -L -o- ${DIST}/kernel/${GENERIC}.gz | gzip -dc > ${GENERIC}
+	[ -f ${KERNEL} ] || ( \
+		[ "${ARCH}" = "amd64" ] && \
+			curl -L -O ${DIST}/${KERNEL} || \
+			curl -L -o- ${DIST}/kernel/${KERNEL}.gz | \
+				gzip -dc > ${KERNEL} \
+	)
 
 setfetch:
 	setsdir=sets/${ARCH} && \
@@ -32,31 +46,31 @@ smol:	kernfetch
 	}
 
 rescue:
-	$(MAKE) setfetch SETS="rescue.tar.xz etc.tar.xz"
-	${SUDO} ./mkimg.sh -m 20 -x "rescue.tar.xz etc.tar.xz"
+	$(MAKE) setfetch SETS="${RESCUE}"
+	${SUDO} ./mkimg.sh -m 20 -x "${RESCUE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 base:
-	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 300 -x "base.tar.xz etc.tar.xz"
+	$(MAKE) setfetch SETS="${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 300 -x "${BASE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 prof:
-	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz comp.tar.xz"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1000 -k ${KERN} -x "base.tar.xz etc.tar.xz comp.tar.xz"
+	$(MAKE) setfetch SETS="${PROF}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1000 -k ${KERN} -x "${PROF}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 bozohttpd:
-	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 300 -x "base.tar.xz etc.tar.xz"
+	$(MAKE) setfetch SETS="${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 300 -x "${BASE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 imgbuilder:
-	$(MAKE) setfetch SETS="base.tar.xz etc.tar.xz"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 500 -x "base.tar.xz etc.tar.xz"
+	$(MAKE) setfetch SETS="${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 500 -x "${BASE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 nginx: imgbuilder
 	dd if=/dev/zero of=$@-${ARCH}.img bs=1M count=100
-	${SUDO} ./startnb.sh -k ${SMOL} -i $<-${ARCH}.img -d $@-${ARCH}.img -p ::22022-:22
+	${SUDO} ./startnb.sh -k ${KERNEL} -i $<-${ARCH}.img -d $@-${ARCH}.img -p ::22022-:22 -r 'NAME=netbsd-root'
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
