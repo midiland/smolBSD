@@ -123,7 +123,7 @@ For the microvm to start instantly, you will need a kernel that is capable of "d
 Download a `GENERIC` _NetBSD_ kernel
 
 ```shell
-$ curl -o- https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-GENERIC
+$ curl -L -o- https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-GENERIC
 
 ```
 
@@ -151,7 +151,7 @@ $ curl -O https://smolbsd.org/assets/netbsd-SMOL
 Download a regular `netbsd-GENERIC64.img` kernel
 
 ```shell
-$ curl -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/kernel/netbsd-GENERIC64.img.gz|gunzip -c >netbsd-GENERIC64.img
+$ curl -L -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/kernel/netbsd-GENERIC64.img.gz|gunzip -c >netbsd-GENERIC64.img
 ```
 
 ## Example of a very minimal (10MB) virtual machine
@@ -179,6 +179,8 @@ $ ./startnb.sh -k netbsd-GENERIC64.img -i base-evbarm-aarch64.img
 ```
 
 ## Example of an image used to create an nginx microvm with [sailor][3]
+
+➡️  `amd64` only for now, `aarch64` coming soon.
 
 ```shell
 $ make nginx
