@@ -78,5 +78,5 @@ nginx: imgbuilder
 	[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \
 		rootfs="-r ld5a" || rootfs="-r ld0a" && \
 	${SUDO} ./startnb.sh -k ${KERNEL} -i $<-${ARCH}.img -d $@-${ARCH}.img \
-		-p ::22022-:22 $$rootfs -m 1024
+		-p ::22022-:22 $$rootfs -m 256
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
