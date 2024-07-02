@@ -188,7 +188,7 @@ This will spawn an image builder host which will populate an `nginx` minimal ima
 Once the `nginx` image is baked, simply run it:
 
 ```shell
-$ ./startnb.sh -k netbsd-SMOL -i nginx.img -p tcp::8080-:80
+$ ./startnb.sh -k netbsd-SMOL -i nginx-amd64.img -p tcp::8080-:80
 ```
 
 And try it:
