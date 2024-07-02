@@ -1,5 +1,6 @@
 VERS=		10
 ARCH?=		amd64
+SMOLI386=	netbsd-SMOLi386
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 SUDO=		sudo -E ARCH=${ARCH} VERS=${VERS}
 WHOAMI!=	whoami
@@ -36,13 +37,14 @@ setfetch:
 		fi; \
 	done
 
-smol:	kernfetch
-	test -f ${SMOL} || { \
+smoli386:	kernfetch
+	[ -f ${SMOLI386} ] || { \
 		[ -d confkerndev ] || \
 		git clone https://gitlab.com/0xDRRB/confkerndev.git; \
 		cd confkerndev && make NBVERS=${VERS} i386; cd ..; \
-		cp -f ${GENERIC} ${SMOL}; \
-		confkerndev/confkerndevi386 -v -i ${SMOL} -K virtio.list -w; \
+		cp -f ${KERNEL} ${SMOLI386}; \
+		confkerndev/confkerndevi386 -v -i ${SMOLI386} -K virtio.list -w; \
+		cp -f ${SMOLI386} ${KERNEL}
 	}
 
 rescue:
