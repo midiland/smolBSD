@@ -52,25 +52,29 @@ rescue:
 
 base:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 300 -x "${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 prof:
 	$(MAKE) setfetch SETS="${PROF}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1000 -k ${KERN} -x "${PROF}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k ${KERN} -x "${PROF}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 bozohttpd:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 300 -x "${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 imgbuilder:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 500 -x "${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 nginx: imgbuilder
-	dd if=/dev/zero of=$@-${ARCH}.img bs=1M count=100
-	${SUDO} ./startnb.sh -k ${KERNEL} -i $<-${ARCH}.img -d $@-${ARCH}.img -p ::22022-:22 -r 'NAME=netbsd-root'
+	[ "$$(uname)" = "Linux" ] && u=M || u=m && \
+	dd if=/dev/zero of=$@-${ARCH}.img bs=1$$u count=128
+	[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \
+		rootfs="-r ld5a" || rootfs="-r ld0a" && \
+	${SUDO} ./startnb.sh -k ${KERNEL} -i $<-${ARCH}.img -d $@-${ARCH}.img \
+		-p ::22022-:22 -a '-v' $$rootfs -m 1024
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
