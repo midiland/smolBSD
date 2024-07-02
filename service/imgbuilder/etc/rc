@@ -16,7 +16,10 @@ if [ ! -d /var/db/pkgin ]; then
 		;;
 	esac
 
-	arch=$(uname -m)
+	# repository path differs for amd64 or aarch64/evbarm
+	machine=$(uname -m)
+	proc=$(uname -p)
+	[ "$machine" = "amd64" ] && arch=$machine || arch=$proc
 	url="http://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${arch}/${ver}/All"
 	
 	echo "fetching $url"
