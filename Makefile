@@ -77,6 +77,6 @@ nginx: imgbuilder
 	dd if=/dev/zero of=$@-${ARCH}.img bs=1$$u count=128
 	[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \
 		rootfs="-r ld5a" || rootfs="-r ld0a" && \
-	${SUDO} ./startnb.sh -k ${KERNEL} -i $<-${ARCH}.img -d $@-${ARCH}.img \
+	${SUDO} ./startnb.sh -k ${KERNEL} -i $<-${ARCH}.img -f $@-${ARCH}.img \
 		-p ::22022-:22 $$rootfs -m 256
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img

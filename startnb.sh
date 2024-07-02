@@ -4,17 +4,18 @@ usage()
 {
 	cat 1>&2 << _USAGE_
 Usage:	${0##*/} -k kernel -i image [-a kernel parameters] [-m memory in MB]
-	[-r root disk] [-d drive2] [-p port] [-w path]
+	[-r root disk] [-f drive2] [-p port] [-w path] [-d]
 
 	Boot a microvm
 	-k kernel	kernel to boot on
 	-a parameters	append kernel parameters
 	-m memory	memory in MB
 	-r root disk	root disk to boot on
-	-i image	image to use as root filesystem
+	-f image	image to use as root filesystem
 	-d drive2	second drive to pass to image
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
 	-w path		host path to share with guest (9p)
+	-d		don't daemonize
 _USAGE_
 	# as per https://www.qemu.org/docs/master/system/invocation.html
 	# hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
@@ -23,7 +24,7 @@ _USAGE_
 
 [ $# -lt 4 ] && usage
 
-options="k:a:p:i:m:r:d:p:w:h"
+options="k:a:p:i:m:r:f:p:w:hd"
 
 uuid="$(uuidgen | cut -d- -f1)"
 
@@ -35,7 +36,7 @@ do
 	a) append="$OPTARG";;
 	m) mem="$OPTARG";;
 	r) root="$OPTARG";;
-	d) drive2="\
+	f) drive2="\
 		-device virtio-blk-device,drive=hd${uuid}1 \
 		-drive if=none,file=${OPTARG},format=raw,id=hd${uuid}1"
 		;;
@@ -43,6 +44,7 @@ do
 		-device virtio-net-device,netdev=net${uuid}0 \
 		-netdev user,id=net${uuid}0,hostfwd=${OPTARG}"
 		;;
+	d) DAEMON=yes;;
 	h) usage;;
 	w) share="\
 		-fsdev local,path=${OPTARG},security_model=mapped,id=shar${uuid}0 \
@@ -97,10 +99,13 @@ aarch64)
 	echo "Unknown architecture"
 esac
 
+d="-display none"
+[ -n "$DAEMON" ] && d="$d -daemonize" || d="$d -serial mon:stdio"
+
 qemu-system-${MACHINE} \
 	$mflags -m $mem $cpuflags \
 	-kernel $kernel -append "console=com root=${root} ${append}" \
-	-serial mon:stdio -display none ${extra} \
 	-global virtio-mmio.force-legacy=false ${share} \
 	-device virtio-blk-device,drive=hd${uuid}0 \
-	-drive if=none,file=${img},format=raw,id=hd${uuid}0 $drive2 $network
+	-drive if=none,file=${img},format=raw,id=hd${uuid}0 $drive2 $network \
+	${d} ${extra}
