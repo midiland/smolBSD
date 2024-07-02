@@ -40,8 +40,9 @@ cp /etc/MAKEDEV /dev/
 cd sailor
 ship=$(basename *.conf .conf)
 mkdir $ship
-newfs /dev/ld1a
-mount /dev/ld1a $ship
+[ "$(uname -p)" = "aarch64" ] && dsk=ld4 || dsk=ld1
+newfs /dev/${dsk}a
+mount /dev/${dsk}a $ship
 # use sailor to create a minimal root fs
 /bin/sh ./sailor.sh build ${ship}.conf
 # copy basicrc and shutdown
