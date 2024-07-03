@@ -52,6 +52,11 @@ cat >${ship}/etc/fstab<<EOF
 ROOT.a / ffs rw 1 1
 EOF
 
+# customize image
+
+. /etc/svc
+. /etc/rc.${SVCIMG}
+
 echo -e "\n$ship image created! You can now ^D to cleanly shutdown.\n"
 
 ksh

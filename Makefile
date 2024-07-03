@@ -69,14 +69,16 @@ bozohttpd:
 
 imgbuilder:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}"
+	# build the building image
+	${SUDO} SVCIMG=$$SVCIMG ./mkimg.sh -i $@-${ARCH}.img -s $@ \
+		-m 512 -x "${BASE}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
-
-nginx: imgbuilder
+	# create the empty, minimal blank image
 	[ "$$(uname)" = "Linux" ] && u=M || u=m && \
-	dd if=/dev/zero of=$@-${ARCH}.img bs=1$$u count=128
+	dd if=/dev/zero of=$$SVCIMG-${ARCH}.img bs=1$$u count=128
 	[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \
 		rootfs="-r ld5a" || rootfs="-r ld0a" && \
-	${SUDO} ./startnb.sh -k ${KERNEL} -i $<-${ARCH}.img -f $@-${ARCH}.img \
+	# start the build image with blank image as disk 2
+	${SUDO} ./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -f $$SVCIMG-${ARCH}.img \
 		-p ::22022-:22 $$rootfs -m 256
-	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
+	${SUDO} chown ${WHOAMI} $$SVCIMG-${ARCH}.img

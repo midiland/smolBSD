@@ -182,7 +182,7 @@ $ ./startnb.sh -k netbsd-GENERIC64.img -i base-evbarm-aarch64.img
 ## Example of an image used to create an nginx microvm with [sailor][3]
 
 ```shell
-$ make nginx
+$ make SVCIMG=nginx imgbuilder
 ```
 This will spawn an image builder host which will populate an `nginx` minimal image.
 
@@ -210,7 +210,7 @@ Accept-Ranges: bytes
 ### Example configuration for the `nginx` service
 
 ```shell
-$ cat service/imgbuilder/postinst/prepare.sh
+$ cat service/imgbuilder/postinst/nginx.sh
 #!/bin/sh
 
 git clone https://gitlab.com/iMil/sailor.git
@@ -221,7 +221,7 @@ ship=fakecracker
 cat >sailor/${ship}.conf<<EOF
 shipname=$ship
 shippath="/sailor/$ship"
-shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail /sbin/poweroff /sbin/umount /sbin/fsck /usr/bin/netstat /sbin/dhcpcd /sbin/route /sbin/mount_tmpfs"
+shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail /sbin/poweroff /sbin/umount /sbin/fsck /usr/bin/netstat /sbin/dhcpcd /sbin/route"
 packages="nginx"
 EOF
 
@@ -242,6 +242,23 @@ sh
 
 . /etc/include/shutdown
 EOF
+```
+You might also want to add an `service/imgbuilder/etc/rc.nginx`
+```
+$ cat service/imgbuilder/etc/rc.nginx
+
+# do stuff
+
+cat >${ship}/usr/pkg/share/examples/nginx/html/index.html<<_HTML
+<html>
+<body>
+<pre>
+Welcome to $(uname -s) $(uname -r) on $(uname -m) / $(uname -p)!
+</pre>
+</body>
+</html>
+_HTML
+
 ```
 
 [0]: https://gitlab.com/0xDRRB/confkerndev

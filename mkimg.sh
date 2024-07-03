@@ -78,6 +78,11 @@ cp -f ../service/common/* etc/include/
 [ -d ../service/${svc}/postinst ] &&
 	for x in ../service/${svc}/postinst/*.sh
 	do
+		# if SVCIMG variable exists, only process its script
+		if [ -n "$SVCIMG" ]; then
+			[ "${x##*/}" != "${SVCIMG}.sh" ] && continue
+			echo "SVCIMG=$SVCIMG" > etc/svc
+		fi
 		sh $x
 	done
 
