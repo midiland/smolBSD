@@ -69,16 +69,19 @@ bozohttpd:
 
 imgbuilder:
 	$(MAKE) setfetch SETS="${BASE}"
-	# build the building image
-	${SUDO} SVCIMG=$$SVCIMG ./mkimg.sh -i $@-${ARCH}.img -s $@ \
-		-m 512 -x "${BASE}"
-	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
-	# create the empty, minimal blank image
-	[ "$$(uname)" = "Linux" ] && u=M || u=m && \
-	dd if=/dev/zero of=$$SVCIMG-${ARCH}.img bs=1$$u count=128
-	# start the build image with blank image as disk 2
-	[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \
-		rootfs="-r ld5a" || rootfs="-r ld0a" && \
-	${SUDO} ./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -f $$SVCIMG-${ARCH}.img \
-		-p ::22022-:22 $$rootfs -m 256
-	${SUDO} chown ${WHOAMI} $$SVCIMG-${ARCH}.img
+	# build the building image if ${NOIMGBUILDER} is not defined
+	if [ -z "${NOIMGBUILDER}" ]; then \
+		${SUDO} SVCIMG=${SVCIMG} ./mkimg.sh -i $@-${ARCH}.img -s $@ \
+			-m 512 -x "${BASE}" && \
+		${SUDO} chown ${WHOAMI} $@-${ARCH}.img; \
+	fi
+	# only build the image builder (probably a GL pipeline)
+	if [ -z "${NOSVCIMG}" ]; then \
+		[ "$$(uname)" = "Linux" ] && u=M || u=m && \
+		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1$$u count=128; \
+		[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \
+			rootfs="-r ld5a" || rootfs="-r ld0a"; \
+		${SUDO} ./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img \
+			-f ${SVCIMG}-${ARCH}.img -p ::22022-:22 $$rootfs -m 256; \
+		${SUDO} chown ${WHOAMI} ${SVCIMG}-${ARCH}.img; \
+	fi
