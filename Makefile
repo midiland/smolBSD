@@ -69,14 +69,14 @@ bozohttpd:
 
 imgbuilder:
 	$(MAKE) setfetch SETS="${BASE}"
-	# build the building image if ${NOIMGBUILDER} is not defined
-	if [ -z "${NOIMGBUILDER}" ]; then \
+	# build the building image if ${NOIMGBUILDERBUILD} is not defined
+	if [ -z "${NOIMGBUILDERBUILD}" ]; then \
 		${SUDO} SVCIMG=${SVCIMG} ./mkimg.sh -i $@-${ARCH}.img -s $@ \
 			-m 512 -x "${BASE}" && \
 		${SUDO} chown ${WHOAMI} $@-${ARCH}.img; \
 	fi
 	# only build the image builder (probably a GL pipeline)
-	if [ -z "${NOSVCIMG}" ]; then \
+	if [ -z "${NOSVCIMGBUILD}" ]; then \
 		[ "$$(uname)" = "Linux" ] && u=M || u=m && \
 		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1$$u count=128; \
 		[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \

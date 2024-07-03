@@ -3,32 +3,14 @@ stages:
 
 variables:
   IMG: "rescue"
-  ARCH: "amd64"
-  VERS: "10"
-  SETS: "rescue"
-  EXT: "tar.xz"
-  SIZE: "20"
-  SVC: "rescue"
 
 build_img:
   image: debian:latest
   stage: build
   script:
-    - apt update && apt install -y curl xz-utils
+    - apt update && apt install -y curl xz-utils make
     - rm -rf /var/cache
-    - |
-      echo "building ${IMG}.img (${SIZE}m) for NetBSD ${VERS} on ${ARCH}"
-      export SETSEXT=""
-      SETSDIR="sets/${ARCH}"
-      mkdir -p ${SETSDIR}
-      DIST="https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary/sets"
-      for set in ${SETS}
-      do
-        curl -L -O --output-dir ${SETSDIR} ${DIST}/${set}.${EXT}
-        SETSEXT="${set}.${EXT} ${SETSEXT}"
-      done
-    - chmod +x mkimg.sh
-    - ./mkimg.sh -x "${SETSEXT}" -m ${SIZE} -i ${IMG}.img -s ${SVC}
+    - make NOSVCIMGBUILD=yes SVCIMG=${SVCIMG} ${IMG}
   artifacts:
     paths:
       - "*.img"
