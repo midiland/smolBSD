@@ -54,7 +54,7 @@ EOF
 
 # customize image
 
-. /etc/svc
+[ -f /etc/svc ] && . /etc/svc
 [ -f /etc/rc.${SVCIMG} ] && . /etc/rc.${SVCIMG}
 
 echo -e "\n$ship image created! You can now ^D to cleanly shutdown.\n"
