@@ -2,6 +2,7 @@ VERS=		10
 ARCH?=		amd64
 SMOLI386=	netbsd-SMOLi386
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
+KDIST=		${DIST}
 SUDO=		sudo -E ARCH=${ARCH} VERS=${VERS}
 WHOAMI!=	whoami
 # sets to fetch
@@ -17,14 +18,14 @@ else ifeq (${ARCH}, i386)
 KERNEL=		netbsd-GENERIC
 else
 KERNEL=		netbsd-SMOL
-DIST=		https://smolbsd.org/assets
+KDIST=		https://smolbsd.org/assets
 endif
 
 kernfetch:
 	[ -f ${KERNEL} ] || ( \
 		[ "${ARCH}" = "amd64" ] && \
-			curl -L -O ${DIST}/${KERNEL} || \
-			curl -L -o- ${DIST}/kernel/${KERNEL}.gz | \
+			curl -L -O ${KDIST}/${KERNEL} || \
+			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
 				gzip -dc > ${KERNEL} \
 	)
 
