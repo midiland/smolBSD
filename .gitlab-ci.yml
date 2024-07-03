@@ -3,6 +3,7 @@ stages:
 
 variables:
   IMG: "rescue"
+  ARCH: "amd64"
 
 build_img:
   image: debian:latest
@@ -10,7 +11,7 @@ build_img:
   script:
     - apt update && apt install -y curl xz-utils make sudo git
     - rm -rf /var/cache
-    - make NOSVCIMGBUILD=yes SVCIMG=${SVCIMG} ${IMG}
+    - make NOSVCIMGBUILD=yes ARCH=${ARCH} SVCIMG=${SVCIMG} ${IMG}
   artifacts:
     paths:
       - "*.img"
