@@ -81,6 +81,8 @@ NetBSD)
 	;;
 Linux)
 	ACCEL=",accel=kvm"
+	# Some weird Ryzen CPUs
+	[ "$MACHINE" = "AMD" ] && MACHINE="x86_64"
 	;;
 Darwin)
 	ACCEL=",accel=hvf"
