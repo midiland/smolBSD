@@ -43,6 +43,8 @@ OS=$(uname -s)
 
 [ "$OS" = "Linux" ] && is_linux=1
 
+[ "$OS" = "Darwin" ] && echo "mkimg.sh: MacOS is not supported" && exit 1
+
 [ -n "$is_linux" ] && u=M || u=m
 
 dd if=/dev/zero of=./${img} bs=1${u} count=${megs}
