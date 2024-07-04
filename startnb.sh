@@ -89,6 +89,14 @@ Darwin)
 	# Mac M1
 	[ "$MACHINE" = "arm" ] && MACHINE="aarch64" cputype="cortex-a710"
 	;;
+OpenBSD)
+	ACCEL=",accel=tcg"
+	# uname -m == "amd64" but qemu-system is "qemu-system-x86_64"
+	if [ "$MACHINE" = "amd64" ]; then
+		MACHINE="x86_64"
+	fi
+	cputype="qemu64"
+	;;
 *)
 	echo "Unknown hypervisor, no acceleration"
 esac
