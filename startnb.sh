@@ -22,6 +22,19 @@ _USAGE_
 	exit 1
 }
 
+which uuidgen 1>/dev/null
+if [ $? -eq 1 ]; then
+	echo "uuidgen not available"
+	exit 1
+fi
+
+# Check if VirtualBox VM is running
+vbox=$(pgrep -c VirtualBoxVM)
+if [ "$vbox" -gt 0 ]; then
+	echo "Unable to start KVM: VirtualBox is running"
+	exit 1
+fi
+
 [ $# -lt 4 ] && usage
 
 options="k:a:p:i:m:r:f:p:w:hd"
