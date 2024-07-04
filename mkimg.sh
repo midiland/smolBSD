@@ -3,7 +3,7 @@
 usage()
 {
 	cat 1>&2 << _USAGE_
-Usage: ${0##*/} [-s service] [-m megabytes] [-n image] [-x set]
+Usage: ${0##*/} [-s service] [-m megabytes] [-i image] [-x set] [-k kernel]
 	Create a root image
 	-s service	service name, default "rescue"
 	-m megabytes	image size in megabytes, default 10
