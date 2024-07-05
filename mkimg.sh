@@ -1,9 +1,11 @@
 #!/bin/sh
 
+progname=${0##*/}
+
 usage()
 {
 	cat 1>&2 << _USAGE_
-Usage: ${0##*/} [-s service] [-m megabytes] [-i image] [-x set] [-k kernel]
+Usage: $progname [-s service] [-m megabytes] [-i image] [-x set] [-k kernel]
 	Create a root image
 	-s service	service name, default "rescue"
 	-m megabytes	image size in megabytes, default 10
@@ -41,9 +43,22 @@ sets=${sets:-"rescue.tar.xz"}
 
 OS=$(uname -s)
 
-[ "$OS" = "Linux" ] && is_linux=1
+case $OS in
+NetBSD)
+	is_netbsd=1;;
+Linux)
+	is_linux=1;;
+Darwin)
+	# might be supported in the future
+	is_darwin=1;;
+OpenBSD)
+	is_openbsd=1;;
+*)
+	is_unknown=1;
+esac
 
-[ "$OS" = "Darwin" ] && echo "mkimg.sh: MacOS is not supported" && exit 1
+[ -n "$is_darwin" -o -n "$is_unknown" ] && \
+	echo "${progname}: OS is not supported" && exit 1
 
 [ -n "$is_linux" ] && u=M || u=m
 
@@ -99,8 +114,8 @@ fi
 # newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
 # backup MAKEDEV so imgbuilder rc can copy it
 cp dev/MAKEDEV etc/
-# union with ext2 leads to i/o error
-[ -n "$is_linux" ] && sed -i 's/-o union//g' dev/MAKEDEV
+# unionfs with ext2 leads to i/o error
+[ -z "$is_netbsd" ] && sed -i 's/-o union//g' dev/MAKEDEV
 
 cd ..
 
