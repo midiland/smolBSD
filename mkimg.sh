@@ -1,9 +1,11 @@
 #!/bin/sh
 
+progname=${0##*/}
+
 usage()
 {
 	cat 1>&2 << _USAGE_
-Usage: ${0##*/} [-s service] [-m megabytes] [-n image] [-x set]
+Usage: $progname [-s service] [-m megabytes] [-n image] [-x set]
 	Create a root image
 	-s service	service name, default "rescue"
 	-m megabytes	image size in megabytes, default 10
@@ -41,9 +43,22 @@ sets=${sets:-"rescue.tar.xz"}
 
 OS=$(uname -s)
 
-[ "$OS" = "Linux" ] && is_linux=1
+case $OS in
+NetBSD)
+	is_netbsd=1;;
+Linux)
+	is_linux=1;;
+Darwin)
+	# might be supported in the future
+	is_darwin=1;;
+OpenBSD)
+	is_openbsd=1;;
+*)
+	is_unknown=1;
+esac
 
-[ "$OS" = "Darwin" ] && echo "mkimg.sh: MacOS is not supported" && exit 1
+[ -n "$is_darwin" -o -n "$is_unknown" ] && \
+	echo "${progname}: OS is not supported" && exit 1
 
 [ -n "$is_linux" ] && u=M || u=m
 
