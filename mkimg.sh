@@ -114,8 +114,8 @@ fi
 # newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
 # backup MAKEDEV so imgbuilder rc can copy it
 cp dev/MAKEDEV etc/
-# union with ext2 leads to i/o error
-[ -n "$is_linux" ] && sed -i 's/-o union//g' dev/MAKEDEV
+# unionfs with ext2 leads to i/o error
+[ -z "$is_netbsd" ] && sed -i 's/-o union//g' dev/MAKEDEV
 
 cd ..
 
