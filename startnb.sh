@@ -29,8 +29,7 @@ if [ $? -eq 1 ]; then
 fi
 
 # Check if VirtualBox VM is running
-vbox=$(pgrep -c VirtualBoxVM)
-if [ "$vbox" -gt 0 ]; then
+if pgrep VirtualBoxVM >/dev/null 2>&1; then
 	echo "Unable to start KVM: VirtualBox is running"
 	exit 1
 fi
