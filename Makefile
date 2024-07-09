@@ -21,18 +21,16 @@ KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
 endif
 
-ifeq ($(shell uname -p), aarch64)
+# unknown / aarch64
 ROOTFS?=	-r ld5a
-else ifeq ($(shell uname -m), aarch64)
-ROOTFS?=	-r ld5a
-else
+ifeq ($(shell uname -m), x86_64)
 ROOTFS?=	-r ld0a
 endif
 
+# any BSD variant including MacOS
+DDUNIT=		m
 ifeq ($(shell uname), Linux)
 DDUNIT=		M
-else
-DDUNIT=		m
 endif
 
 
