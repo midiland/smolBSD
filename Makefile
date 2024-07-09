@@ -93,7 +93,6 @@ imgbuilder:
 	# only build the image builder (probably a GL pipeline)
 	if [ -z "${NOSVCIMGBUILD}" ]; then \
 		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=128; \
-		${SUDO} ./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
+		./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
 			-f ${SVCIMG}-${ARCH}.img -p ::22022-:22 ${ROOTFS} -m 256; \
-		${SUDO} chown ${WHOAMI} ${SVCIMG}-${ARCH}.img; \
 	fi
