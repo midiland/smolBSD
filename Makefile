@@ -1,4 +1,4 @@
-VERS=		10
+VERS?=		10
 ARCH?=		amd64
 SMOLI386=	netbsd-SMOLi386
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
@@ -20,6 +20,21 @@ else
 KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
 endif
+
+ifeq ($(shell uname -p), aarch64)
+ROOTFS?=	-r ld5a
+else ifeq ($(shell uname -m), aarch64)
+ROOTFS?=	-r ld5a
+else
+ROOTFS?=	-r ld0a
+endif
+
+ifeq ($(shell uname), Linux)
+DDUNIT=		M
+else
+DDUNIT=		m
+endif
+
 
 kernfetch:
 	[ -f ${KERNEL} ] || ( \
@@ -78,11 +93,8 @@ imgbuilder:
 	fi
 	# only build the image builder (probably a GL pipeline)
 	if [ -z "${NOSVCIMGBUILD}" ]; then \
-		[ "$$(uname)" = "Linux" ] && u=M || u=m && \
-		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1$$u count=128; \
-		[ "$$(uname -p)" = "aarch64" -o "$$(uname -m)" = "aarch64" ] && \
-			rootfs="-r ld5a" || rootfs="-r ld0a"; \
-		${SUDO} ./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img \
-			-f ${SVCIMG}-${ARCH}.img -p ::22022-:22 $$rootfs -m 256; \
+		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=128; \
+		${SUDO} ./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
+			-f ${SVCIMG}-${ARCH}.img -p ::22022-:22 ${ROOTFS} -m 256; \
 		${SUDO} chown ${WHOAMI} ${SVCIMG}-${ARCH}.img; \
 	fi
