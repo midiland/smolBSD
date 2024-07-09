@@ -21,10 +21,11 @@ KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
 endif
 
-# unknown / aarch64
-ROOTFS?=	-r ld5a
 ifeq ($(shell uname -m), x86_64)
 ROOTFS?=	-r ld0a
+else
+# unknown / aarch64
+ROOTFS?=	-r ld5a
 endif
 
 # any BSD variant including MacOS
