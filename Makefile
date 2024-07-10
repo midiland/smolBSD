@@ -34,6 +34,10 @@ ifeq ($(shell uname), Linux)
 DDUNIT=		M
 endif
 
+# default memory amount for a guest
+MEM?=		256
+# default port redirect, gives network to the guest
+PORT?=		::22022-:22
 
 kernfetch:
 	[ -f ${KERNEL} ] || ( \
@@ -94,5 +98,5 @@ imgbuilder:
 	if [ -z "${NOSVCIMGBUILD}" ]; then \
 		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=128; \
 		./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
-			-f ${SVCIMG}-${ARCH}.img -p ::22022-:22 ${ROOTFS} -m 256; \
+			-f ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
 	fi
