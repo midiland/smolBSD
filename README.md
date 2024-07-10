@@ -172,11 +172,38 @@ Will create a `rescue-evbarm-aarch64.img` file for use with an _aarch64_ kernel.
 $ ./startnb.sh -k netbsd-SMOL -i rescue-amd64.img
 ```
 
-## Example of an image filled with the `base` set
+## Example of an image filled with the `base` set on an `x86_64` CPU
 
 ```shell
 $ make base
 $ ./startnb.sh -k netbsd-GENERIC64.img -i base-evbarm-aarch64.img
+```
+
+## Example of an image running the `bozohttpd` web server on an `aarch64` CPU
+
+```shell
+$ make ARCH=evbarm-aarch64 bozohttpd
+$ ./startnb.sh -k netbsd-GENERIC64.img -i bozohttpd-evbarm-aarch64.img -p ::8080-:80
+[   1.0000000] NetBSD/evbarm (fdt) booting ...
+[   1.0000000] NetBSD 10.99.11 (GENERIC64)     Notice: this software is protected by copyright
+[   1.0000000] Detecting hardware...[   1.0000040] entropy: ready
+[   1.0000040]  done.
+Created tmpfs /dev (1359872 byte, 2624 inodes)
+add net default: gateway 10.0.2.2
+started in daemon mode as `' port `http' root `/var/www'
+got request ``HEAD / HTTP/1.1'' from host 10.0.2.2 to port 80
+```
+Try it from the host
+```shell
+$ curl -I localhost:8080
+HTTP/1.1 200 OK
+Date: Wed, 10 Jul 2024 05:25:04 GMT
+Server: bozohttpd/20220517
+Accept-Ranges: bytes
+Last-Modified: Wed, 10 Jul 2024 05:24:51 GMT
+Content-Type: text/html
+Content-Length: 30
+Connection: close
 ```
 
 ## Example of an image used to create an nginx microvm with [sailor][3]
