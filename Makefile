@@ -5,6 +5,8 @@ DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/b
 KDIST=		${DIST}
 SUDO=		sudo -E ARCH=${ARCH} VERS=${VERS}
 WHOAMI!=	whoami
+USER!= 		id -un
+GROUP!= 	id -gn
 # sets to fetch
 RESCUE=		rescue.tar.xz etc.tar.xz
 BASE=		base.tar.xz etc.tar.xz
@@ -76,12 +78,12 @@ smoli386:	kernfetch
 rescue:
 	$(MAKE) setfetch SETS="${RESCUE}"
 	${SUDO} ./mkimg.sh -m 20 -x "${RESCUE}" ${EXTRAS}
-	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
+	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 base:
 	$(MAKE) setfetch SETS="${BASE}"
 	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
-	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
+	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 prof:
 	$(MAKE) setfetch SETS="${PROF}"
@@ -91,12 +93,12 @@ prof:
 bozohttpd:
 	$(MAKE) setfetch SETS="${BASE}"
 	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
-	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
+	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 tslog:
 	$(MAKE) setfetch SETS="${BASE}"
 	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
-	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
+	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 imgbuilder:
 	$(MAKE) setfetch SETS="${BASE}"
@@ -104,7 +106,7 @@ imgbuilder:
 	if [ -z "${NOIMGBUILDERBUILD}" ]; then \
 		${SUDO} SVCIMG=${SVCIMG} ./mkimg.sh -i $@-${ARCH}.img -s $@ \
 			-m 512 -x "${BASE}" && \
-		${SUDO} chown ${WHOAMI} $@-${ARCH}.img; \
+		${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img; \
 	fi
 	# now start an imgbuilder microvm and build the actual service
 	# image unless $NOSVCIMGBUILD is set (probably a GL pipeline)
