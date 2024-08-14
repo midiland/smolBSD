@@ -16,6 +16,7 @@ Usage:	${0##*/} -k kernel -i image [-c CPUs] [-m memory]
 	-f drive2	second drive to pass to image
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
 	-w path		host path to share with guest (9p)
+	-b		bridge mode
 	-d		daemonize
 _USAGE_
 	# as per https://www.qemu.org/docs/master/system/invocation.html
@@ -37,7 +38,7 @@ fi
 
 [ $# -lt 4 ] && usage
 
-options="k:a:p:i:m:c:r:f:p:w:hd"
+options="k:a:p:i:m:c:r:f:p:w:hbd"
 
 uuid="$(uuidgen | cut -d- -f1)"
 
@@ -57,6 +58,10 @@ do
 	p) network="\
 		-device virtio-net-device,netdev=net${uuid}0 \
 		-netdev user,id=net${uuid}0,hostfwd=${OPTARG}"
+		;;
+	b) network="\
+		-device virtio-net-device,netdev=net${uuid}1 \
+		-netdev type=tap,id=net${uuid}1"
 		;;
 	d) DAEMON=yes;;
 	h) usage;;
