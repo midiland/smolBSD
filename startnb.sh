@@ -60,7 +60,7 @@ do
 		-device virtio-net-device,netdev=net${uuid}0 \
 		-netdev user,id=net${uuid}0,hostfwd=${OPTARG}"
 		;;
-	b) network="\
+	b) network="$network \
 		-device virtio-net-device,netdev=net${uuid}1 \
 		-netdev type=tap,id=net${uuid}1"
 		;;
@@ -121,7 +121,7 @@ x86_64|i386)
 	root=${root:-"ld0a"}
 	;;
 aarch64)
-	mflags="-M virt${ACCEL},highmem=off"
+	mflags="-M virt${ACCEL},highmem=off,gic-version=3"
 	cpuflags="-cpu ${cputype}"
 	root=${root:-"ld4a"}
 	extra="-device virtio-rng-pci"
