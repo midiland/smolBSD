@@ -4,7 +4,8 @@ usage()
 {
 	cat 1>&2 << _USAGE_
 Usage:	${0##*/} -k kernel -i image [-c CPUs] [-m memory]
-	[-a parameters] [-r root disk] [-f drive2] [-p port] [-w path] [-d]
+	[-a parameters] [-r root disk] [-f drive2] [-p port] [-b]
+	[-w path] [-d]
 
 	Boot a microvm
 	-k kernel	kernel to boot on
