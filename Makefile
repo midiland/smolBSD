@@ -38,6 +38,8 @@ endif
 MEM?=		256
 # default port redirect, gives network to the guest
 PORT?=		::22022-:22
+# default size for disk built by imgbuilder
+SVCSZ?=		128
 
 kernfetch:
 	[ -f ${KERNEL} ] || ( \
@@ -94,9 +96,10 @@ imgbuilder:
 			-m 512 -x "${BASE}" && \
 		${SUDO} chown ${WHOAMI} $@-${ARCH}.img; \
 	fi
-	# only build the image builder (probably a GL pipeline)
+	# now start an imgbuilder microvm and build the actual service
+	# image unless $NOSVCIMGBUILD is set (probably a GL pipeline)
 	if [ -z "${NOSVCIMGBUILD}" ]; then \
-		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=128; \
+		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=${SVCSZ}; \
 		./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
 			-f ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
 	fi
