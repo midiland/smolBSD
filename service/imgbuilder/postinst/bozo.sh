@@ -63,6 +63,8 @@ echo \$count >/tmp/count
 echo "\$HTTP_X_FORWARDED_FOR \
 \$QUERY_STRING \$SCRIPT_NAME \$HTTP_USER_AGENT \$HTTP_REFERER" \
 	>>/var/log/http.log
+echo
+cat /var/log/http.log
 
 exit 0
 _CGI
