@@ -27,7 +27,7 @@ mkdir -p \${wwwroot}
 [ ! -f /var/www/index.html ] && \
         echo "<html><body>up!</body></html>" >\${wwwroot}/index.html
 
-/usr/pkg/libexec/bozohttpd -b \${wwwroot}
+/usr/pkg/libexec/bozohttpd -b -c /cgi-bin \${wwwroot}
 echo "done"
 printf "\nTesting web server:\n"
 printf "HEAD / HTTP/1.0\r\n\r\n"|nc -n 127.0.0.1 80
@@ -36,3 +36,34 @@ sh
 
 . /etc/include/shutdown
 EOF
+
+# cgi-bin example
+mkdir -p sailor/ships/${ship}/cgi-bin
+cat >sailor/ships/${ship}/cgi-bin/hello.sh<<_CGI
+#!/bin/sh
+
+PATH=\$PATH:/bin:/sbin
+
+echo "Content-Type: text/plain"
+echo
+echo -n "kern.version: "
+sysctl kern.version
+echo -n "vm.loadavg: "
+sysctl vm.loadavg
+echo -n "hw.physmem: "
+sysctl hw.physmem
+echo
+
+[ -f /tmp/count ] && count=\$((1 + \$(cat /tmp/count))) || \
+	count=1
+
+echo "requests: \$count"
+echo \$count >/tmp/count
+
+echo "\$HTTP_X_FORWARDED_FOR \
+\$QUERY_STRING \$SCRIPT_NAME \$HTTP_USER_AGENT \$HTTP_REFERER" \
+	>>/var/log/http.log
+
+exit 0
+_CGI
+chmod +x sailor/ships/${ship}/cgi-bin/hello.sh
