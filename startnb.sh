@@ -5,7 +5,7 @@ usage()
 	cat 1>&2 << _USAGE_
 Usage:	${0##*/} -k kernel -i image [-c CPUs] [-m memory]
 	[-a parameters] [-r root disk] [-f drive2] [-p port] [-b]
-	[-w path] [-d]
+	[-w path] [-d] [-v]
 
 	Boot a microvm
 	-k kernel	kernel to boot on
@@ -19,6 +19,7 @@ Usage:	${0##*/} -k kernel -i image [-c CPUs] [-m memory]
 	-w path		host path to share with guest (9p)
 	-b		bridge mode
 	-d		daemonize
+	-v		verbose
 _USAGE_
 	# as per https://www.qemu.org/docs/master/system/invocation.html
 	# hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
@@ -39,7 +40,7 @@ fi
 
 [ $# -lt 4 ] && usage
 
-options="k:a:p:i:m:c:r:f:p:w:hbd"
+options="k:a:p:i:m:c:r:f:p:w:hbdv"
 
 uuid="$(uuidgen | cut -d- -f1)"
 
@@ -65,6 +66,7 @@ do
 		-netdev type=tap,id=net${uuid}1"
 		;;
 	d) DAEMON=yes;;
+	v) VERBOSE=yes;;
 	h) usage;;
 	w) share="\
 		-fsdev local,path=${OPTARG},security_model=mapped,id=shar${uuid}0 \
@@ -133,10 +135,14 @@ esac
 d="-display none"
 [ -n "$DAEMON" ] && d="$d -daemonize" || d="$d -serial mon:stdio"
 
-qemu-system-${MACHINE} -smp $cpus \
+cmd="qemu-system-${MACHINE} -smp $cpus \
 	$mflags -m $mem $cpuflags \
-	-kernel $kernel -append "console=com root=${root} ${append}" \
+	-kernel $kernel -append \"console=com root=${root} ${append}\" \
 	-global virtio-mmio.force-legacy=false ${share} \
 	-device virtio-blk-device,drive=hd${uuid}0 \
 	-drive if=none,file=${img},format=raw,id=hd${uuid}0 $drive2 $network \
-	${d} ${extra}
+	${d} ${extra}"
+
+[ -n "$VERBOSE" ] && echo "$cmd" && exit
+
+eval $cmd
