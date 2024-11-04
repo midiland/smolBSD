@@ -2,11 +2,6 @@
 
 . /etc/include/basicrc
 
-wwwroot=/var/www
-
-[ ! -f /var/www/index.html ] && \
-	echo "<html><body>up!</body></html>" >${wwwroot}/index.html
-
-/usr/libexec/bozohttpd -f ${wwwroot}
+/usr/libexec/bozohttpd -f /var/www
 
 . /etc/include/shutdown

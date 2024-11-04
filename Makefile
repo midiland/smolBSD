@@ -34,6 +34,11 @@ ifeq ($(shell uname), Linux)
 DDUNIT=		M
 endif
 
+# guest root filesystem will be read-only
+ifeq (${MOUNTRO}, y)
+EXTRAS+=	-o
+endif
+
 # default memory amount for a guest
 MEM?=		256
 # default port redirect, gives network to the guest
@@ -70,12 +75,12 @@ smoli386:	kernfetch
 
 rescue:
 	$(MAKE) setfetch SETS="${RESCUE}"
-	${SUDO} ./mkimg.sh -m 20 -x "${RESCUE}"
+	${SUDO} ./mkimg.sh -m 20 -x "${RESCUE}" ${EXTRAS}
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 base:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 prof:
@@ -85,7 +90,12 @@ prof:
 
 bozohttpd:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
+	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
+
+tslog:
+	$(MAKE) setfetch SETS="${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 imgbuilder:
@@ -101,5 +111,5 @@ imgbuilder:
 	if [ -z "${NOSVCIMGBUILD}" ]; then \
 		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=${SVCSZ}; \
 		./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
-			-f ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
+			-h ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
 	fi
