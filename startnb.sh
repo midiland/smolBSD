@@ -3,20 +3,22 @@
 usage()
 {
 	cat 1>&2 << _USAGE_
-Usage:	${0##*/} -k kernel -i image [-c CPUs] [-m memory]
-	[-a parameters] [-r root disk] [-f drive2] [-p port] [-b]
-	[-w path] [-d] [-v]
+Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
+	[-a kernel parameters] [-r root disk] [-h drive2] [-p port] [-b]
+	[-w path] [-x qemu extra args] [-d] [-v]
 
 	Boot a microvm
+	-f conffile	vm config file
 	-k kernel	kernel to boot on
 	-i image	image to use as root filesystem
 	-c cpus		number of CPUs
 	-m memory	memory in MB
 	-a parameters	append kernel parameters
 	-r root disk	root disk to boot on
-	-f drive2	second drive to pass to image
+	-h drive2	second drive to pass to image
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
 	-w path		host path to share with guest (9p)
+	-x arguments	extra qemu arguments
 	-b		bridge mode
 	-d		daemonize
 	-v		verbose
@@ -38,43 +40,52 @@ if pgrep VirtualBoxVM >/dev/null 2>&1; then
 	exit 1
 fi
 
-[ $# -lt 4 ] && usage
-
-options="k:a:p:i:m:c:r:f:p:w:hbdv"
+options="f:k:a:p:i:m:c:r:h:p:w:x:hbdv"
 
 uuid="$(uuidgen | cut -d- -f1)"
 
+# and possibly override its values
 while getopts "$options" opt
 do
 	case $opt in
+	# first load vm config file
+	f) . $OPTARG;;
+	# and possibly override values
 	k) kernel="$OPTARG";;
 	i) img="$OPTARG";;
 	a) append="$OPTARG";;
 	m) mem="$OPTARG";;
 	c) cpus="$OPTARG";;
 	r) root="$OPTARG";;
-	f) drive2="\
-		-device virtio-blk-device,drive=hd${uuid}1 \
-		-drive if=none,file=${OPTARG},format=raw,id=hd${uuid}1"
-		;;
-	p) network="\
-		-device virtio-net-device,netdev=net${uuid}0 \
-		-netdev user,id=net${uuid}0,hostfwd=${OPTARG}"
-		;;
-	b) network="$network \
-		-device virtio-net-device,netdev=net${uuid}1 \
-		-netdev type=tap,id=net${uuid}1"
-		;;
+	h) drive2=$OPTARG;;
+	p) hostfwd=$OPTARG;;
+	w) share=$OPTARG;;
+	x) extra=$OPTARG;;
+	b) bridgenet=yes;;
 	d) DAEMON=yes;;
 	v) VERBOSE=yes;;
 	h) usage;;
-	w) share="\
-		-fsdev local,path=${OPTARG},security_model=mapped,id=shar${uuid}0 \
-		-device virtio-9p-device,fsdev=shar${uuid}0,mount_tag=shar${uuid}0"
-		;;
 	*) usage;;
 	esac
 done
+
+[ -z "$kernel" -o -z "$img" ] && usage
+
+[ -n "$hostfwd" ] && network="\
+-device virtio-net-device,netdev=net${uuid}0 \
+-netdev user,id=net${uuid}0,hostfwd=${hostfwd}"
+
+[ -n "$bridgenet" ] && network="$network \
+-device virtio-net-device,netdev=net${uuid}1 \
+-netdev type=tap,id=net${uuid}1"
+
+[ -n "$drive2" ] && drive2="\
+-device virtio-blk-device,drive=hd${uuid}1 \
+-drive if=none,file=${drive2},format=raw,id=hd${uuid}1"
+
+[ -n "$share" ] && share="\
+-fsdev local,path=${share},security_model=mapped,id=shar${uuid}0 \
+-device virtio-9p-device,fsdev=shar${uuid}0,mount_tag=shar${uuid}0"
 
 OS=$(uname -s)
 MACHINE=$(uname -p)
@@ -126,7 +137,7 @@ aarch64)
 	mflags="-M virt${ACCEL},highmem=off,gic-version=3"
 	cpuflags="-cpu ${cputype}"
 	root=${root:-"ld4a"}
-	extra="-device virtio-rng-pci"
+	extra="$extra -device virtio-rng-pci"
 	;;
 *)
 	echo "Unknown architecture"
