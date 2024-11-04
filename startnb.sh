@@ -5,7 +5,7 @@ usage()
 	cat 1>&2 << _USAGE_
 Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
 	[-a kernel parameters] [-r root disk] [-h drive2] [-p port] [-b]
-	[-w path] [-x qemu extra args] [-d] [-v]
+	[-w path] [-x qemu extra args] [-s] [-d] [-v]
 
 	Boot a microvm
 	-f conffile	vm config file
@@ -20,6 +20,7 @@ Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
 	-w path		host path to share with guest (9p)
 	-x arguments	extra qemu arguments
 	-b		bridge mode
+	-s		don't lock image file
 	-d		daemonize
 	-v		verbose
 _USAGE_
@@ -40,7 +41,7 @@ if pgrep VirtualBoxVM >/dev/null 2>&1; then
 	exit 1
 fi
 
-options="f:k:a:p:i:m:c:r:h:p:w:x:hbdv"
+options="f:k:a:p:i:m:c:r:h:p:w:x:hbdsv"
 
 uuid="$(uuidgen | cut -d- -f1)"
 
@@ -62,6 +63,7 @@ do
 	w) share=$OPTARG;;
 	x) extra=$OPTARG;;
 	b) bridgenet=yes;;
+	s) sharerw=yes;;
 	d) DAEMON=yes;;
 	v) VERBOSE=yes;;
 	h) usage;;
@@ -86,6 +88,8 @@ done
 [ -n "$share" ] && share="\
 -fsdev local,path=${share},security_model=mapped,id=shar${uuid}0 \
 -device virtio-9p-device,fsdev=shar${uuid}0,mount_tag=shar${uuid}0"
+
+[ -n "$sharerw" ] && sharerw=",share-rw=on"
 
 OS=$(uname -s)
 MACHINE=$(uname -p)
@@ -150,9 +154,9 @@ cmd="qemu-system-${MACHINE} -smp $cpus \
 	$mflags -m $mem $cpuflags \
 	-kernel $kernel -append \"console=com root=${root} ${append}\" \
 	-global virtio-mmio.force-legacy=false ${share} \
-	-device virtio-blk-device,drive=hd${uuid}0 \
-	-drive if=none,file=${img},format=raw,id=hd${uuid}0 $drive2 $network \
-	${d} ${extra}"
+	-device virtio-blk-device,drive=hd${uuid}0${sharerw} \
+	-drive if=none,file=${img},format=raw,id=hd${uuid}0 \
+	${drive2} ${network} ${d} ${extra}"
 
 [ -n "$VERBOSE" ] && echo "$cmd" && exit
 
