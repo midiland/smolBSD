@@ -92,15 +92,13 @@ done
 [ -n "$sharerw" ] && sharerw=",share-rw=on"
 
 OS=$(uname -s)
-MACHINE=$(uname -p)
-
-# Linux on RPi
-[ "$MACHINE" = "unknown" ] && MACHINE=$(uname -m)
+MACHINE=$(uname -m) # Linux and macos x86
 
 cputype="host"
 
 case $OS in
 NetBSD)
+	MACHINE=$(uname -p)
 	ACCEL=",accel=nvmm"
 	;;
 Linux)
@@ -110,12 +108,11 @@ Linux)
 	;;
 Darwin)
 	ACCEL=",accel=hvf"
-	# Mac x86 uname -p returns i386
-	[ "$MACHINE" = "i386" ] && MACHINE="x86_64"
 	# Mac M1
-	[ "$MACHINE" = "arm" ] && MACHINE="aarch64" cputype="cortex-a710"
+	[ "$MACHINE" = "arm64" ] && MACHINE="aarch64" cputype="cortex-a710"
 	;;
 OpenBSD)
+	MACHINE=$(uname -p)
 	ACCEL=",accel=tcg"
 	# uname -m == "amd64" but qemu-system is "qemu-system-x86_64"
 	if [ "$MACHINE" = "amd64" ]; then
