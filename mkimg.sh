@@ -10,7 +10,7 @@ Usage: $progname [-s service] [-m megabytes] [-i image] [-x set]
 	Create a root image
 	-s service	service name, default "rescue"
 	-m megabytes	image size in megabytes, default 10
-	-i image	image name, default root.img
+	-i image	image name, default rescue-[arch].img
 	-x sets		list of NetBSD sets, default rescue.tgz
 	-k kernel	kernel to copy in the image
 	-o		read-only root filesystem
