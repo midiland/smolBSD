@@ -24,7 +24,7 @@ mem=128m
 # optional
 cores=1
 # optional port forward
-hostfwd=::8180-:80
+hostfwd=::4280-:80
 # optional extra parameters
 extra="-pidfile qemu-${vm}.pid"
 # don't lock the disk image
@@ -38,41 +38,43 @@ $ ./startnb.sh -f etc/bozohttpd.conf
 ```
 exit `qemu` with `Ctrl-a x`
 
-## Batch process
+## Example shell script, parallel run
 
-* Declare the number of vms to spawn
+Just play with the `num` variable
 
 ```sh
-num=5
+#!/bin/sh
+
 vmname=bozohttpd
+num=10
+KERNEL=netbsd-SMOL
+
+for i in $(seq 1 $num)
+do
+        sed "
+                s/vm=${vmname}/vm=${vmname}${i}/
+                s/4280/428$i/
+                s,kernel=.*,kernel=$KERNEL,
+        " etc/${vmname}.conf > etc/${vmname}${i}.conf
+done
+
+for f in etc/${vmname}[0-9]*.conf; do
+  . $f
+  echo "starting $vm"
+  ./startnb.sh -f $f -d &
+done
+
+for i in $(seq 1 $num)
+do
+        while ! curl -s -I --max-time 0.01 localhost:428${num}
+        do
+                true
+        done
+done
+
+for i in $(seq 1 $num); do curl -I http://localhost:428${i}; done
+
+for i in $(seq 1 $num); do kill $(cat qemu-${vmname}${i}.pid); done
+
+rm -f etc/${vmname}[0-9]*.conf
 ```
-
-* Create the configuration files for the vms
-
-```sh
-$ for i in $(seq 1 $num); do sed "s/vm=${vmname}/vm=${vmname}${i}/;s/8180/818$i/;s,kernel=.*,kernel=$KERNEL," etc/${vmname}.conf > etc/${vmname}${i}.conf; done
-```
-
-* Start them headless
-```sh
-$ for f in etc/${vmname}?.conf; do . $f; echo "starting $vm"; ./startnb.sh -f $f -d; done
-```
-* Or in `tmux`
-```sh
-$ for f in etc/${vmname}?.conf; do . $f; tmux new -s $vm -d ./startnb.sh -f $f; done
-```
-
-## Test!
-
-You should be able to query the servers
-
-```sh
-$ for i in $(seq 1 $num); do curl -I http://localhost:818${i}; done
-```
-
-Finally get rid of the vms
-
-```sh
-$ for i in $(seq 1 $num); do kill $(cat qemu-${vmname}${i}.pid); done
-```
-
