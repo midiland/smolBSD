@@ -130,9 +130,10 @@ append=${append:-"-z"}
 
 case $MACHINE in
 x86_64|i386)
-	mflags="-M microvm,x-option-roms=off,rtc=on,acpi=off,pic=off${ACCEL}"
+	mflags="-M microvm,rtc=on,acpi=off,pic=off${ACCEL}"
 	cpuflags="-cpu ${cputype},+invtsc"
 	root=${root:-"ld0a"}
+	extra="$extra -L bios -bios bios-microvm.bin"
 	;;
 aarch64)
 	mflags="-M virt${ACCEL},highmem=off,gic-version=3"
