@@ -80,7 +80,7 @@ base:
 
 prof:
 	$(MAKE) setfetch SETS="${PROF}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k ${KERN} -x "${PROF}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k ${KERNEL} -x "${PROF}"
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 bozohttpd:
