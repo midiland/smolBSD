@@ -5,18 +5,20 @@ progname=${0##*/}
 usage()
 {
 	cat 1>&2 << _USAGE_
-Usage: $progname [-s service] [-m megabytes] [-i image] [-x set] [-k kernel]
+Usage: $progname [-s service] [-m megabytes] [-i image] [-x set]
+       [-k kernel] [-o]
 	Create a root image
 	-s service	service name, default "rescue"
 	-m megabytes	image size in megabytes, default 10
-	-i image	image name, default root.img
+	-i image	image name, default rescue-[arch].img
 	-x sets		list of NetBSD sets, default rescue.tgz
 	-k kernel	kernel to copy in the image
+	-o		read-only root filesystem
 _USAGE_
 	exit 1
 }
 
-options="s:m:i:x:k:h"
+options="s:m:i:x:k:oh"
 
 while getopts "$options" opt
 do
@@ -26,6 +28,7 @@ do
 	i) img="$OPTARG";;
 	x) sets="$OPTARG";;
 	k) kernel="$OPTARG";;
+	o) rofs=y;;
 	h) usage;;
 	*) usage;;
 	esac
@@ -69,11 +72,13 @@ mkdir -p mnt
 if [ -n "$is_linux" ]; then
 	mke2fs -O none $img
 	mount -o loop $img mnt
-else
+	mountfs="ext2fs"
+else # NetBSD (and probably OpenBSD)
 	vnd=$(vndconfig -l|grep -m1 'not'|cut -f1 -d:)
 	vndconfig $vnd $img
 	newfs /dev/${vnd}a
 	mount /dev/${vnd}a mnt
+	mountfs="ffs"
 fi
 
 for s in ${sets}
@@ -86,7 +91,9 @@ done
 cd mnt
 mkdir -p sbin bin dev etc/include
 
-cp -f ../etc/fstab.${OS} etc/fstab
+[ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
+
+echo "ROOT.a / $mountfs $mountopt 1 1" > etc/fstab
 cp -f ../service/${svc}/etc/* etc/
 cp -f ../service/common/* etc/include/
 

@@ -11,7 +11,7 @@ build_img:
   script:
     - apt update && apt install -y curl xz-utils make sudo git
     - rm -rf /var/cache
-    - make NOSVCIMGBUILD=yes ARCH=${ARCH} SVCIMG=${SVCIMG} ${IMG}
+    - make NOSVCIMGBUILD=yes ARCH=${ARCH} SVCIMG=${SVCIMG} MOUNTRO=${MOUNTRO} ${IMG}
   artifacts:
     paths:
       - "*.img"
