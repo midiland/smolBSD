@@ -15,7 +15,7 @@ Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
 	-m memory	memory in MB
 	-a parameters	append kernel parameters
 	-r root disk	root disk to boot on
-	-h drive2	second drive to pass to image
+	-l drive2	second drive to pass to image
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
 	-w path		host path to share with guest (9p)
 	-x arguments	extra qemu arguments
@@ -23,6 +23,7 @@ Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
 	-s		don't lock image file
 	-d		daemonize
 	-v		verbose
+	-h		this help
 _USAGE_
 	# as per https://www.qemu.org/docs/master/system/invocation.html
 	# hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
@@ -41,7 +42,7 @@ if pgrep VirtualBoxVM >/dev/null 2>&1; then
 	exit 1
 fi
 
-options="f:k:a:p:i:m:c:r:h:p:w:x:hbdsv"
+options="f:k:a:p:i:m:c:r:l:p:w:x:hbdsv"
 
 uuid="$(uuidgen | cut -d- -f1)"
 
@@ -58,7 +59,7 @@ do
 	m) mem="$OPTARG";;
 	c) cpus="$OPTARG";;
 	r) root="$OPTARG";;
-	h) drive2=$OPTARG;;
+	l) drive2=$OPTARG;;
 	p) hostfwd=$OPTARG;;
 	w) share=$OPTARG;;
 	x) extra=$OPTARG;;

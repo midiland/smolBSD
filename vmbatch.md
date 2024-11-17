@@ -66,7 +66,7 @@ done
 
 for i in $(seq 1 $num)
 do
-        while ! curl -s -I --max-time 0.01 localhost:428${num}
+        while ! curl -s -I --max-time 0.01 localhost:428${i}
         do
                 true
         done

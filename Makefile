@@ -16,12 +16,15 @@ IMGBUILDER=	${BASE}
 
 ifeq (${ARCH}, evbarm-aarch64)
 KERNEL=		netbsd-GENERIC64.img
+LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/gzimg/arm64.img.gz
 else ifeq (${ARCH}, i386)
 KERNEL=		netbsd-GENERIC
 else
 KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
+LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-10.99.12-amd64-live.img.gz
 endif
+LIVEIMG=	NetBSD-live.img
 
 ifeq ($(shell uname -m), x86_64)
 ROOTFS?=	-r ld0a
@@ -49,7 +52,8 @@ PORT?=		::22022-:22
 SVCSZ?=		128
 
 kernfetch:
-	[ -f ${KERNEL} ] || ( \
+	@echo "fetching ${KERNEL}"
+	@[ -f ${KERNEL} ] || ( \
 		[ "${ARCH}" = "amd64" ] && \
 			curl -L -O ${KDIST}/${KERNEL} || \
 			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
@@ -115,3 +119,7 @@ imgbuilder:
 		./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
 			-h ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
 	fi
+
+live:	kernfetch
+	@echo "fetching ${LIVEIMG}"
+	@[ -f ${LIVEIMG} ] || curl -o- -L ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
