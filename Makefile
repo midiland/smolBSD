@@ -24,7 +24,7 @@ KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
 LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-10.99.12-amd64-live.img.gz
 endif
-LIVEIMG=	NetBSD-live.img
+LIVEIMG=	NetBSD-${ARCH}-live.img
 
 ifeq ($(shell uname -m), x86_64)
 ROOTFS?=	-r ld0a
