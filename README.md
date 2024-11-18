@@ -296,6 +296,19 @@ _HTML
 
 ```
 
+## Example of a full fledge NetBSD Operating System
+
+```sh
+$ make live # or make ARCH=evbarm-aarch64 live
+$ ./startnb.sh -f etc/live.conf
+```
+This will fetch a directly bootable kernel and a _NetBSD_ "live", ready-to-use, disk image. Login with `root` and no password. To extend the size of the image to 4 more GB, simply do:
+
+```sh
+$ dd if=/dev/zero bs=1M count=4000 >> NetBSD-amd64-live.img
+```
+And reboot.
+
 [0]: https://gitlab.com/0xDRRB/confkerndev
 [1]: https://man.netbsd.org/x86/multiboot.8
 [2]: https://www.linux-kvm.org/page/Main_Page
