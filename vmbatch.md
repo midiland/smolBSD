@@ -18,7 +18,7 @@ vm=bozohttpd
 # mandatory
 img=bozohttpd-amd64.img
 # mandatory
-kernel=/path/to/netbsd-SMOL # https://smolbsd.org/assets/netbsd-SMOL
+kernel=netbsd-SMOL # https://smolbsd.org/assets/netbsd-SMOL
 # optional
 mem=128m
 # optional
