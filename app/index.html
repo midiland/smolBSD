@@ -61,6 +61,12 @@
           <div class="input-group">
             <input v-model="newVm.cores" type="text" class="form-control" placeholder="Cores" aria-label="Cores">
           </div>
+          <div class="input-group">
+            <input v-model="newVm.hostfwd" type="text" class="form-control" placeholder="Host forward" aria-label="HostFwd">
+          </div>
+          <div class="input-group">
+            <input v-model="newVm.share" type="text" class="form-control" placeholder="Shared directory" aria-label="Share">
+          </div>
           <button class="btn btn-success btn-sm mt-2" @click="createVm">save</button>
         </div>
       </li>
@@ -79,6 +85,8 @@
             kernel: '',
             mem: '',
             cores: '',
+            hostfwd: '',
+            share: '',
           },
           images: [],
           kernels: []
@@ -177,7 +185,9 @@
               kernel: "kernels/" + this.newVm.kernel,
               img: "images/" + this.newVm.img,
               mem: this.newVm.mem,
-              cores: this.newVm.cores
+              cores: this.newVm.cores,
+              hostfwd: this.newVm.hostfwd,
+              share: this.newVm.share
             })
           })
           .then(response => response.json())
@@ -218,6 +228,8 @@
               this.newVm.img = data.img.split("/")[1];
               this.newVm.mem = data.mem;
               this.newVm.cores = data.cores;
+              this.newVm.hostfwd = data.hostfwd;
+              this.newVm.share = data.share;
 
               this.showInputs = true;
             })
