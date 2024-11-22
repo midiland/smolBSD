@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>smolBSD VMs</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.37"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    #app { max-width: 40%; }
+    .blinking {
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container mt-5">
+    <h1>smolBSD VMs</h1> 
+    <ul class="list-group">
+      <li v-for="vm in vmList" :key="vm.name" class="list-group-item d-flex justify-content-between align-items-center">
+        <div>{{ vm.name }}</div>
+        <div class="btn-group" role="group" aria-label="Actions">
+          <button :id="`button-${vm.name}`"
+              :class="['btn', 'btn-sm', vm.status === 'stopped' ? 'btn-success' : 'btn-danger']"
+              @click="toggleVm(vm)">
+            {{ vm.status === 'running' ? 'stop' : 'start' }}
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    const app = Vue.createApp({
+      data() {
+        return {
+          vmList: []
+        };
+      },
+      methods: {
+        fetchVmList() {
+          fetch('/vmlist')
+            .then(response => response.json())
+            .then(data => {
+              this.vmList = data;
+            })
+            .catch(error => console.error('Error fetching VM list:', error));
+        },
+        getVm(vmName) {
+          return fetch(`/getvm/${vmName}`)
+            .then(response => response.json());
+        },
+        getState(vm) {
+          const state = vm.status === 'stopped'
+            ? {
+                 button: 'btn-success', action: 'start', status: 'stopped'
+              }
+            : {
+                 button: 'btn-danger', action: 'stop', status: 'running'
+              };
+          return state;
+        },
+        toggleVm(vm) {
+          var state = this.getState(vm);
+          const btnElement = document.getElementById(`button-${vm.name}`);
+          btnElement.classList.add('blinking');
+          btnElement.classList.remove(state.button)
+          btnElement.classList.add('btn-secondary')
+
+          fetch(`/${state.action}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vm_name: vm.name }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              var retry = 0;
+              const intervalId = setInterval(() => {
+                this.getVm(vm.name).then(data => {
+                  if (vm.status !== data.status) {
+                    state = this.getState(data);
+                    btnElement.classList.remove('blinking');
+                    btnElement.classList.add(state.button);
+                    vm.status = state.status;
+                    clearInterval(intervalId);
+                  }
+                });
+                if (retry++ > 3) {
+                  btnElement.classList.remove('blinking');
+                  btnElement.classList.add(state.button);
+                  clearInterval(intervalId);
+                }
+              }, 1000);
+            }
+          })
+          .catch(error => {
+            alert(`Error: ${error.message}`);
+          });
+        }
+      },
+      mounted() {
+        this.fetchVmList(); // Call to fetch VM list once the component is mounted
+      }
+    });
+
+    app.mount('#app'); // Mount the Vue app to the `#app` div
+  </script>
+</body>
+</html>
