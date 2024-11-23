@@ -87,7 +87,9 @@ def start_vm():
     config_file = f'etc/{vm_name}.conf'
 
     if not os.path.exists(config_file):
-        return jsonify({"success": False, "message": "Config file not found"}), 404
+        return jsonify(
+            {"success": False, "message": "Config file not found"}
+        ), 404
 
     try:
         subprocess.Popen(["./startnb.sh", "-f", config_file, "-d"])
@@ -103,7 +105,9 @@ def stop_vm():
     pid_file = f'qemu-{vm_name}.pid'
 
     if not os.path.exists(pid_file):
-        return jsonify({"success": False, "message": "PID file not found"}), 404
+        return jsonify(
+            {"success": False, "message": "PID file not found"}
+        ), 404
 
     try:
         with open(pid_file, 'r') as f:
@@ -119,11 +123,18 @@ def saveconf():
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"success": False, "message": "No JSON payload provided"}), 400
+            return jsonify(
+                {"success": False, "message": "No JSON payload provided"}
+            ), 400
 
         vm_name = data.get("vm")
         if not vm_name:
-            return jsonify({"success": False, "message": "'vm' key is required in the JSON payload"}), 400
+            return jsonify(
+                {
+                    "success": False,
+                    "message": "'vm' key is required in the JSON payload"
+                }
+            ), 400
 
         directory = './etc'
         os.makedirs(directory, exist_ok=True)
@@ -132,7 +143,7 @@ def saveconf():
         with open(file_path, 'w') as file:
             for key, value in data.items():
                 file.write(f"{key}={value}\n")
-            file.write('extra="-pidfile qemu-${vm}.pid"\n')
+            file.write('extra="-pidfile qemu-${vm}.pid" \n')
 
         return jsonify({"success": True, "message": file_path}), 200
 
@@ -146,7 +157,12 @@ def getconf(vm):
 
     try:
         if not os.path.isfile(conffile):
-            return jsonify({"success": False, "message": "Configuration file not found"}), 404
+            return jsonify(
+                {
+                    "success": False,
+                    "message": "Configuration file not found"
+                }
+            ), 404
 
         config_data = {}
 
@@ -179,10 +195,14 @@ def rm_file(vm):
         filepath = f"etc/{vm}.conf"
 
         if not os.path.isfile(filepath):
-            return jsonify({"success": False, "message": f"'{vm}' not found"}), 404
+            return jsonify(
+                {"success": False, "message": f"'{vm}' not found"}
+            ), 404
 
         os.remove(filepath)
-        return jsonify({"success": True, "message": f"'{vm}' deleted successfully"}), 200
+        return jsonify(
+            {"success": True, "message": f"'{vm}' deleted successfully"}
+        ), 200
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
