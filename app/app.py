@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from flask import Flask, send_file, jsonify, request
 
 app = Flask(__name__)
@@ -12,10 +13,18 @@ def get_vmlist():
     vm_list.clear()
 
     for filename in os.listdir(f'etc'):
+        vm_name = None
+
         if filename.endswith('.conf'):
             with open(f'etc/{filename}', 'r') as f:
                 lines = f.readlines()
-                vm_name = next((line for line in lines if line.startswith('vm=')), None).split('=')[1].strip()
+                for line in lines:
+                    if line.startswith('vm='):
+                        vm_name = line.split('=')[1].strip()
+                        break
+
+            if vm_name is None:
+                sys.exit(f"no vm field in {filename}")
 
             # Check if QEMU process is running 
             pid_file = f'qemu-{filename.replace(".conf", "")}.pid' 
