@@ -5,11 +5,11 @@ from flask import Flask, send_file, jsonify, request
 
 app = Flask(__name__)
 
-vm_list = {}
+vmlist = {}
 
 
 def get_vmlist():
-    vm_list.clear()
+    vmlist.clear()
     for filename in os.listdir('etc'):
         if filename.endswith('.conf'):
             vm_name = None
@@ -36,10 +36,10 @@ def get_vmlist():
             pid_file = f'qemu-{filename.replace(".conf", "")}.pid'
             status = 'running' if os.path.exists(pid_file) else 'stopped'
 
-            vm_list[vm_name] = config_data
-            vm_list[vm_name]['status'] = status
+            vmlist[vm_name] = config_data
+            vmlist[vm_name]['status'] = status
 
-    return vm_list
+    return vmlist
 
 
 def list_files(path):
@@ -51,6 +51,21 @@ def list_files(path):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+def get_qmp_port(vmname):
+    qmp_port = 4444
+    if 'qmp_port' in vmlist[vmname]:
+        return vmlist[vmname]['qmp_port']
+    for vm in vmlist:
+        if not 'qmp_port' in vmlist[vm]:
+            continue
+        vm_qmp_port = int(vmlist[vm]['qmp_port'])
+        if vm_qmp_port >= qmp_port:
+            qmp_port = vm_qmp_port + 1
+
+    return qmp_port
+
+
 ## routes
 
 @app.route("/")
@@ -60,7 +75,7 @@ def index():
 
 
 @app.route("/vmlist")
-def vmlist():
+def vm_list():
     return jsonify(get_vmlist())
 
 
@@ -137,7 +152,12 @@ def saveconf():
         with open(file_path, 'w') as file:
             for key, value in data.items():
                 file.write(f"{key}={value}\n")
-            file.write('extra="-pidfile qemu-${vm}.pid" \n')
+
+            qmp_port = get_qmp_port(vm_name)
+            file.write(f'qmp_port={qmp_port}\n')
+            extra = '-pidfile qemu-${vm}.pid'
+            extra += f' -qmp tcp:localhost:{qmp_port},server,wait=off'
+            file.write(f'extra="{extra}"\n')
 
         return jsonify({"success": True, "message": file_path}), 200
 
@@ -167,6 +187,6 @@ def rm_file(vm):
 if __name__ == "__main__":
 
     os.chdir("..");
-    vm_list = get_vmlist()
+    vmlist = get_vmlist()
  
     app.run(host='0.0.0.0')
