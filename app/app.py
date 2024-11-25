@@ -18,9 +18,12 @@ def get_vmlist():
                 lines = f.readlines()
                 for line in lines:
                     line = line.strip()
-                    if line.startswith('vm='):
+                    if not line:
+                        continue
+                    elif line.startswith('vm='):
                         vm_name = line.split('=')[1].strip()
-                    elif line.startswith('#') or not line or line.startswith('extra'):
+                        continue
+                    elif line.startswith('#') or line.startswith('extra'):
                         continue
                     elif '=' in line:
                         key, value = line.split('=', 1)
@@ -38,8 +41,6 @@ def get_vmlist():
 
     return vm_list
 
-def get_vm(vmname):
-    return vmlist[vmname]
 
 def list_files(path):
     try:
@@ -61,11 +62,6 @@ def index():
 @app.route("/vmlist")
 def vmlist():
     return jsonify(get_vmlist())
-
-
-@app.route("/getvm/<vmname>")
-def getvm(vmname):
-    return jsonify(get_vm(vmname))
 
 
 @app.route("/getkernels")
