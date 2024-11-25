@@ -5,43 +5,41 @@ from flask import Flask, send_file, jsonify, request
 
 app = Flask(__name__)
 
-vm_list = []
+vm_list = {}
 
 
 def get_vmlist():
-
     vm_list.clear()
-
-    for filename in os.listdir(f'etc'):
-        vm_name = None
-
+    for filename in os.listdir('etc'):
         if filename.endswith('.conf'):
+            vm_name = None
+            config_data = {}
             with open(f'etc/{filename}', 'r') as f:
                 lines = f.readlines()
                 for line in lines:
+                    line = line.strip()
                     if line.startswith('vm='):
                         vm_name = line.split('=')[1].strip()
-                        break
-
+                    elif line.startswith('#') or not line or line.startswith('extra'):
+                        continue
+                    elif '=' in line:
+                        key, value = line.split('=', 1)
+                        config_data[key.strip()] = value.strip()
+            
             if vm_name is None:
                 sys.exit(f"no vm field in {filename}")
-
+            
             # Check if QEMU process is running 
-            pid_file = f'qemu-{filename.replace(".conf", "")}.pid' 
-            if os.path.exists(pid_file):
-                status = 'running'
-            else:
-                status = 'stopped'
-            vm_list.append({'name': vm_name, 'status': status})
+            pid_file = f'qemu-{filename.replace(".conf", "")}.pid'
+            status = 'running' if os.path.exists(pid_file) else 'stopped'
+
+            vm_list[vm_name] = config_data
+            vm_list[vm_name]['status'] = status
 
     return vm_list
 
-
 def get_vm(vmname):
-    for vm in get_vmlist():
-        if vm['name'] == vmname:
-            return vm
-
+    return vmlist[vmname]
 
 def list_files(path):
     try:
@@ -146,44 +144,6 @@ def saveconf():
             file.write('extra="-pidfile qemu-${vm}.pid" \n')
 
         return jsonify({"success": True, "message": file_path}), 200
-
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
-
-@app.route("/getconf/<vm>")
-def getconf(vm):
-    conffile = f"etc/{vm}.conf"
-
-    try:
-        if not os.path.isfile(conffile):
-            return jsonify(
-                {
-                    "success": False,
-                    "message": "Configuration file not found"
-                }
-            ), 404
-
-        config_data = {}
-
-        with open(conffile, 'r') as file:
-            for line in file:
-                line = line.strip()
-
-                if line.startswith('#') or not line:
-                    continue
-
-                if '=' in line:
-                    key, value = line.split('=', 1)
-                    key = key.strip()
-                    value = value.strip()
-
-                if key == "extra":
-                    continue
-
-                config_data[key] = value
-
-        return jsonify(config_data), 200
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500

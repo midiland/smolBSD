@@ -20,16 +20,16 @@
   <div id="app" class="container mt-5">
     <h1>smolBSD VMs</h1> 
     <ul class="list-group">
-      <li v-for="vm in vmList" :key="vm.name" class="list-group-item d-flex justify-content-between align-items-center">
-        <div>{{ vm.name }}</div>
+      <li v-for="(vm, vmName) in vmList" class="list-group-item d-flex justify-content-between align-items-center">
+        <div>{{ vmName }}</div>
         <div class="btn-group" role="group" aria-label="Actions">
-          <button :id="`button-${vm.name}`"
+          <button :id="`button-${vmName}`"
               :class="['btn', 'btn-sm', 'me-2', vm.status === 'stopped' ? 'btn-success' : 'btn-danger']"
-              @click="toggleVm(vm)">
+              @click="toggleVM(vmName)">
             {{ vm.status === 'running' ? 'stop' : 'start' }}
           </button>
-          <button class="btn btn-sm btn-light me-2" @click="editVm(vm.name)">✏️</button>
-          <button class="btn btn-sm btn-light me-2" @click="deleteVm(vm)">🗑️</button>
+          <button class="btn btn-sm btn-light me-2" @click="editVM(vmName)">✏️</button>
+          <button class="btn btn-sm btn-light me-2" @click="deleteVM(vmName)">🗑️</button>
         </div>
       </li>
       <li class="list-group-item">
@@ -41,33 +41,33 @@
         </div>
         <div v-if="showInputs" class="mt-2">
           <div class="input-group">
-            <input v-model="newVm.name" type="text" class="form-control" placeholder="VM Name" aria-label="VM Name">
+            <input v-model="VM.name" type="text" class="form-control" placeholder="VM Name" aria-label="VM Name">
           </div>
           <div class="input-group">
-            <select v-model="newVm.img" id="imageSelect" class="form-select">
+            <select v-model="VM.img" id="imageSelect" class="form-select">
               <option v-for="image in images" :key="image" :value="image">{{ image }}</option>
               <option value="" disabled>Image</option>
             </select>
           </div>
           <div class="input-group">
-            <select v-model="newVm.kernel" id="kernelSelect" class="form-select">
+            <select v-model="VM.kernel" id="kernelSelect" class="form-select">
               <option v-for="kernel in kernels" :key="kernel" :value="kernel">{{ kernel }}</option>
               <option value="" disabled>Kernel</option>
             </select>
           </div>
           <div class="input-group">
-            <input v-model="newVm.mem" type="text" class="form-control" placeholder="Memory" aria-label="Memory">
+            <input v-model="VM.mem" type="text" class="form-control" placeholder="Memory" aria-label="Memory">
           </div>
           <div class="input-group">
-            <input v-model="newVm.cores" type="text" class="form-control" placeholder="Cores" aria-label="Cores">
+            <input v-model="VM.cores" type="text" class="form-control" placeholder="Cores" aria-label="Cores">
           </div>
           <div class="input-group">
-            <input v-model="newVm.hostfwd" type="text" class="form-control" placeholder="Host forward" aria-label="HostFwd">
+            <input v-model="VM.hostfwd" type="text" class="form-control" placeholder="Host forward" aria-label="HostFwd">
           </div>
           <div class="input-group">
-            <input v-model="newVm.share" type="text" class="form-control" placeholder="Shared directory" aria-label="Share">
+            <input v-model="VM.share" type="text" class="form-control" placeholder="Shared directory" aria-label="Share">
           </div>
-          <button class="btn btn-success btn-sm mt-2" @click="createVm">save</button>
+          <button class="btn btn-success btn-sm mt-2" @click="createVM">save</button>
         </div>
       </li>
     </ul>
@@ -77,9 +77,9 @@
     const app = Vue.createApp({
       data() {
         return {
-          vmList: [],
+          vmList: {},
           showInputs: false,
-          newVm: {
+          VM: {
             name: '',
             img: '',
             kernel: '',
@@ -96,17 +96,13 @@
         toggleInputs() {
           this.showInputs = !this.showInputs;
         },
-        fetchVmList() {
+        getVMList() {
           fetch('/vmlist')
             .then(response => response.json())
             .then(data => {
               this.vmList = data;
             })
             .catch(error => console.error('Error fetching VM list:', error));
-        },
-        getVm(vmName) {
-          return fetch(`/getvm/${vmName}`)
-            .then(response => response.json());
         },
         getImages() {
           return fetch('/getimages')
@@ -134,9 +130,9 @@
               };
           return state;
         },
-        toggleVm(vm) {
-          var state = this.getState(vm);
-          const btnElement = document.getElementById(`button-${vm.name}`);
+        toggleVM(vmName) {
+          var state = this.getState(this.vmList[vmName]);
+          const btnElement = document.getElementById(`button-${vmName}`);
           btnElement.classList.add('blinking');
           btnElement.classList.remove(state.button)
           btnElement.classList.add('btn-secondary')
@@ -144,22 +140,21 @@
           fetch(`/${state.action}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ vm_name: vm.name }),
+            body: JSON.stringify({ vm_name: vmName }),
           })
           .then(response => response.json())
           .then(data => {
             if (data.success) {
               var retry = 0;
               const intervalId = setInterval(() => {
-                this.getVm(vm.name).then(data => {
-                  if (vm.status !== data.status) {
-                    state = this.getState(data);
-                    btnElement.classList.remove('blinking');
-                    btnElement.classList.add(state.button);
-                    vm.status = state.status;
-                    clearInterval(intervalId);
-                  }
-                });
+                this.getVMList(); // refresh vm statuses
+                if (this.vmList[vmName].status !== data.status) {
+                  state = this.getState(data);
+                  btnElement.classList.remove('blinking');
+                  btnElement.classList.add(state.button);
+                  this.vmList[vmName].status = state.status;
+                  clearInterval(intervalId);
+                }
                 if (retry++ > 3) {
                   btnElement.classList.remove('blinking');
                   btnElement.classList.add(state.button);
@@ -172,8 +167,8 @@
             alert(`Error: ${error.message}`);
           });
         },
-        createVm() {
-          if (!this.newVm.name || this.newVm.image || !this.newVm.kernel) {
+        createVM() {
+          if (!this.VM.name || this.VM.image || !this.VM.kernel) {
               alert(`VM name, kernel and image can't be empty`);
               return;
           }
@@ -181,19 +176,19 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              vm: this.newVm.name,
-              kernel: "kernels/" + this.newVm.kernel,
-              img: "images/" + this.newVm.img,
-              mem: this.newVm.mem,
-              cores: this.newVm.cores,
-              hostfwd: this.newVm.hostfwd,
-              share: this.newVm.share
+              vm: this.VM.name,
+              kernel: "kernels/" + this.VM.kernel,
+              img: "images/" + this.VM.img,
+              mem: this.VM.mem,
+              cores: this.VM.cores,
+              hostfwd: this.VM.hostfwd,
+              share: this.VM.share
             })
           })
           .then(response => response.json())
           .then(data => {
             if (data.success) {
-              this.fetchVmList();
+              this.getVMList();
               this.toggleInputs();
             }
           })
@@ -201,16 +196,16 @@
             alert(`Error: ${error.message}`);
           });
         },
-        deleteVm(vm) {
-          fetch(`/rm/${vm.name}`, {
+        deleteVM(vmName) {
+          fetch(`/rm/${vmName}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
           })
           .then(response => response.json())
           .then(data => {
             if (data.success) {
-              this.fetchVmList();
-              alert(`VM ${vm.name} deleted successfully.`);
+              this.getVMList();
+              alert(`VM ${vmName} deleted successfully.`);
             } else {
               alert(`Failed to delete VM: ${data.message}`);
             }
@@ -219,26 +214,20 @@
             alert(`Error deleting VM: ${error.message}`);
           });
         },
-        editVm(vm) {
-          return fetch(`/getconf/${vm}`)
-            .then(response => response.json())
-            .then(data => {
-              this.newVm.name = data.vm;
-              this.newVm.kernel = data.kernel.split("/")[1];
-              this.newVm.img = data.img.split("/")[1];
-              this.newVm.mem = data.mem;
-              this.newVm.cores = data.cores;
-              this.newVm.hostfwd = data.hostfwd;
-              this.newVm.share = data.share;
-
-              this.showInputs = true;
-            })
-            .catch(error => console.error('error fetching kernels:', error));
+        editVM(vmName) {
+          this.VM.name = vmName;
+          this.VM.kernel = this.vmList[vmName].kernel.split("/")[1];
+          this.VM.img = this.vmList[vmName].img.split("/")[1];
+          this.VM.mem = this.vmList[vmName].mem;
+          this.VM.cores = this.vmList[vmName].cores;
+          this.VM.hostfwd = this.vmList[vmName].hostfwd;
+          this.VM.share = this.vmList[vmName].share;
+          this.toggleInputs();
         },
       },
 
       mounted() {
-        this.fetchVmList();
+        this.getVMList();
         this.getImages();
         this.getKernel();
       }
