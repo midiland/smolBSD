@@ -1,4 +1,6 @@
+import json
 import os
+import socket
 import subprocess
 import sys
 from flask import Flask, send_file, jsonify, request
@@ -64,6 +66,21 @@ def get_qmp_port(vmname):
             qmp_port = vm_qmp_port + 1
 
     return qmp_port
+
+
+def query_qmp(command, qmp_port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        rep_len = 8192
+        s.connect(("localhost", qmp_port))
+        response = s.recv(rep_len)
+        # mandatory before command (duh?)
+        s.sendall('{"execute": "qmp_capabilities"}\n'.encode('utf-8'))
+        response = s.recv(rep_len)
+        # actual command
+        s.sendall(f'{{"execute": "{command}"}}\n'.encode('utf-8'))
+        response = s.recv(rep_len)
+
+        return json.loads(response)
 
 
 ## routes
@@ -180,6 +197,20 @@ def rm_file(vm):
             {"success": True, "message": f"'{vm}' deleted successfully"}
         ), 200
 
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/qmp/<vmname>/<command>', methods=['GET'])
+def qmp(vmname, command):
+    try:
+        if not 'qmp_port' in vmlist[vmname]:
+            return jsonify(
+                {"success": False, "message": f"QMP not enabled in {vmname}"}
+            ), 404
+        qmp_port = vmlist[vmname]['qmp_port']
+        response = query_qmp(command, int(qmp_port))
+        return jsonify(response)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
