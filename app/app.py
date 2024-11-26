@@ -1,5 +1,6 @@
 import json
 import os
+import psutil
 import socket
 import subprocess
 import sys
@@ -14,7 +15,7 @@ def get_vmlist():
     vmlist.clear()
     for filename in os.listdir('etc'):
         if filename.endswith('.conf'):
-            vm_name = None
+            vmname = None
             config_data = {}
             with open(f'etc/{filename}', 'r') as f:
                 lines = f.readlines()
@@ -23,7 +24,7 @@ def get_vmlist():
                     if not line:
                         continue
                     elif line.startswith('vm='):
-                        vm_name = line.split('=')[1].strip()
+                        vmname = line.split('=')[1].strip()
                         continue
                     elif line.startswith('#') or line.startswith('extra'):
                         continue
@@ -31,15 +32,15 @@ def get_vmlist():
                         key, value = line.split('=', 1)
                         config_data[key.strip()] = value.strip()
             
-            if vm_name is None:
+            if vmname is None:
                 sys.exit(f"no vm field in {filename}")
             
             # Check if QEMU process is running 
-            pid_file = f'qemu-{filename.replace(".conf", "")}.pid'
+            pid_file = f'qemu-{vmname}.pid'
             status = 'running' if os.path.exists(pid_file) else 'stopped'
 
-            vmlist[vm_name] = config_data
-            vmlist[vm_name]['status'] = status
+            vmlist[vmname] = config_data
+            vmlist[vmname]['status'] = status
 
     return vmlist
 
@@ -54,21 +55,28 @@ def list_files(path):
         return jsonify({"error": str(e)}), 500
 
 
-def get_qmp_port(vmname):
-    qmp_port = 4444
-    if 'qmp_port' in vmlist[vmname]:
-        return vmlist[vmname]['qmp_port']
+def get_port(vmname, service, default_port):
+    port = default_port
+    if service in vmlist[vmname]:
+        return vmlist[vmname][service]
     for vm in vmlist:
-        if not 'qmp_port' in vmlist[vm]:
+        if not service in vmlist[vm]:
             continue
-        vm_qmp_port = int(vmlist[vm]['qmp_port'])
-        if vm_qmp_port >= qmp_port:
-            qmp_port = vm_qmp_port + 1
+        vm_port = int(vmlist[vm][service])
+        if vm_port >= port:
+            port = vm_port + 1
 
-    return qmp_port
+    return port
 
 
-def query_qmp(command, qmp_port):
+def query_qmp(command, vmname):
+    if not 'qmp_port' in vmlist[vmname]:
+        return jsonify(
+            {"success": False, "message": f"QMP not enabled in {vmname}"}
+        ), 404
+
+    qmp_port = int(vmlist[vmname]['qmp_port'])
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         rep_len = 8192
         s.connect(("localhost", qmp_port))
@@ -82,6 +90,20 @@ def query_qmp(command, qmp_port):
 
         return json.loads(response)
 
+
+def get_cpu_usage(vmname):
+    cpu_percent = 0.0
+    # read TID from QMP
+    r = query_qmp("query-cpus-fast", vmname)
+    for cpu in r['return']:
+        with open(f"qemu-{vmname}.pid", "r") as f:
+            pid = int(f.read().strip())
+            process = psutil.Process(pid)
+            for thread in process.threads():
+                if thread.id == cpu['thread-id']:
+                    cpu_percent += process.cpu_percent()
+
+    return cpu_percent / len(r)
 
 ## routes
 
@@ -153,8 +175,8 @@ def saveconf():
                 {"success": False, "message": "No JSON payload provided"}
             ), 400
 
-        vm_name = data.get("vm")
-        if not vm_name:
+        vmname = data.get("vm")
+        if not vmname:
             return jsonify(
                 {
                     "success": False,
@@ -164,17 +186,23 @@ def saveconf():
 
         directory = './etc'
         os.makedirs(directory, exist_ok=True)
-        file_path = os.path.join(directory, f"{vm_name}.conf")
+        file_path = os.path.join(directory, f"{vmname}.conf")
 
         with open(file_path, 'w') as file:
             for key, value in data.items():
+                if key == "tcpserial":
+                    if value is True:
+                        serial_port = get_port(vmname, 'serial_port', 5555)
+                        key = "serial_port"
+                        value = f"{serial_port}"
+                    else:
+                        continue
                 file.write(f"{key}={value}\n")
 
-            qmp_port = get_qmp_port(vm_name)
+            qmp_port = get_port(vmname, 'qmp_port', 4444)
             file.write(f'qmp_port={qmp_port}\n')
-            extra = '-pidfile qemu-${vm}.pid'
-            extra += f' -qmp tcp:localhost:{qmp_port},server,wait=off'
-            file.write(f'extra="{extra}"\n')
+            extra = 'extra="-pidfile qemu-${vm}.pid"'
+            file.write(f'{extra}\n')
 
         return jsonify({"success": True, "message": file_path}), 200
 
@@ -201,16 +229,19 @@ def rm_file(vm):
         return jsonify({"success": False, "message": str(e)}), 500
 
 
-@app.route('/qmp/<vmname>/<command>', methods=['GET'])
+@app.route('/qmp/<vmname>/<command>')
 def qmp(vmname, command):
     try:
-        if not 'qmp_port' in vmlist[vmname]:
-            return jsonify(
-                {"success": False, "message": f"QMP not enabled in {vmname}"}
-            ), 404
-        qmp_port = vmlist[vmname]['qmp_port']
-        response = query_qmp(command, int(qmp_port))
-        return jsonify(response)
+        response = query_qmp(command, vmname)
+        return response
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/cpu_usage/<vmname>')
+def cpu_usage(vmname):
+    try:
+        return f"{get_cpu_usage(vmname)}\n"
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

@@ -14,6 +14,13 @@
         opacity: 0;
       }
     }
+    .cpu-usage {
+      width: 50px;
+      height: 20px;
+      border-color: black;
+      border-radius: 2px;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -22,6 +29,7 @@
     <ul class="list-group">
       <li v-for="(vm, vmName) in vmList" class="list-group-item d-flex justify-content-between align-items-center">
         <div>{{ vmName }}</div>
+        <div class="cpu-usage"></div>
         <div class="btn-group" role="group" aria-label="Actions">
           <button :id="`button-${vmName}`"
               :class="['btn', 'btn-sm', 'me-2', vm.status === 'stopped' ? 'btn-success' : 'btn-danger']"
@@ -35,7 +43,7 @@
       <li class="list-group-item">
         <div class="d-flex justify-content-between align-items-center">
           <div>new vm</div>
-          <button class="btn btn-sm" :class="showInputs ? 'btn-danger' : 'btn-primary' " @click="toggleInputs">
+          <button class="btn btn-sm" :class="showInputs ? 'btn-danger' : 'btn-primary' " @click="toggleInputs(Action.CREATE)">
             {{ showInputs ? 'cancel' : 'create' }}
           </button>
         </div>
@@ -67,6 +75,10 @@
           <div class="input-group">
             <input v-model="VM.share" type="text" class="form-control" placeholder="Shared directory" aria-label="Share">
           </div>
+          <div class="input-group">
+            <input v-model="VM.tcpserial" type="checkbox" id="tcpserial" class="form-check-input">
+             <label for="tcpserial" class="form-check-label ms-2">TCP Serial Console</label>
+            </div>
           <button class="btn btn-success btn-sm mt-2" @click="createVM">save</button>
         </div>
       </li>
@@ -77,6 +89,10 @@
     const app = Vue.createApp({
       data() {
         return {
+          Action: {
+            CREATE: 0,
+            EDIT: 1,
+          },
           vmList: {},
           showInputs: false,
           VM: {
@@ -87,13 +103,17 @@
             cores: '',
             hostfwd: '',
             share: '',
+            tcpserial: false,
           },
           images: [],
           kernels: []
         };
       },
       methods: {
-        toggleInputs() {
+        toggleInputs(actionType) {
+          if (actionType === this.Action.CREATE) {
+            this.zeroVM();
+          }
           this.showInputs = !this.showInputs;
         },
         getVMList() {
@@ -129,6 +149,17 @@
                  button: 'btn-danger', action: 'stop', status: 'running'
               };
           return state;
+        },
+        zeroVM() {
+          for (const key in this.VM) {
+            if (this.VM.hasOwnProperty(key)) {
+              if (typeof this.VM[key] === 'string') {
+                this.VM[key] = ''; // Reset string properties
+              } else if (typeof this.VM[key] === 'boolean') {
+                this.VM[key] = false; // Reset boolean properties
+              }
+            }
+          }
         },
         toggleVM(vmName) {
           var state = this.getState(this.vmList[vmName]);
@@ -182,14 +213,16 @@
               mem: this.VM.mem,
               cores: this.VM.cores,
               hostfwd: this.VM.hostfwd,
-              share: this.VM.share
+              share: this.VM.share,
+              tcpserial: this.VM.tcpserial
             })
           })
           .then(response => response.json())
           .then(data => {
             if (data.success) {
               this.getVMList();
-              this.toggleInputs();
+              this.toggleInputs(this.Action.CREATE);
+              alert(`VM ${this.VM.name} saved successfully.`);
             }
           })
           .catch(error => {
@@ -215,6 +248,7 @@
           });
         },
         editVM(vmName) {
+          this.zeroVM();
           this.VM.name = vmName;
           this.VM.kernel = this.vmList[vmName].kernel.split("/")[1];
           this.VM.img = this.vmList[vmName].img.split("/")[1];
@@ -222,7 +256,14 @@
           this.VM.cores = this.vmList[vmName].cores;
           this.VM.hostfwd = this.vmList[vmName].hostfwd;
           this.VM.share = this.vmList[vmName].share;
-          this.toggleInputs();
+          if (this.vmList[vmName].serial_port) {
+            this.VM.tcpserial = true
+          } else {
+            this.VM.tcpserial = false
+          }
+          if (!this.showInputs) {
+            this.toggleInputs(this.Action.EDIT);
+          }
         },
       },
 
