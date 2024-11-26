@@ -57,7 +57,7 @@ def list_files(path):
 
 def get_port(vmname, service, default_port):
     port = default_port
-    if service in vmlist[vmname]:
+    if vmname in vmlist and service in vmlist[vmname]:
         return vmlist[vmname][service]
     for vm in vmlist:
         if not service in vmlist[vm]:
