@@ -38,6 +38,9 @@
           </button>
           <button class="btn btn-sm btn-light me-2" @click="editVM(vmName)">✏️</button>
           <button class="btn btn-sm btn-light me-2" @click="deleteVM(vmName)">🗑️</button>
+          <button class="btn btn-sm btn-light me-2"
+            :disabled="!vm.serial_port"
+            @click="copySerialPort(vmName)">💻</button>
         </div>
       </li>
       <li class="list-group-item">
@@ -263,6 +266,23 @@
           }
           if (!this.showInputs) {
             this.toggleInputs(this.Action.EDIT);
+          }
+        },
+        copySerialPort(vmName) {
+          const serialPort = this.vmList[vmName]?.serial_port;
+          if (serialPort) {
+            const cpcommand = `nc localhost ${this.vmList[vmName]?.serial_port}`
+            if (!navigator.clipboard) {
+              alert(`navigator.clipboard not available in HTTP: ${cpcommand}`);
+              return;
+            }
+            navigator.clipboard.writeText(cpcommand)
+              .then(() => {
+                alert(`${cpcommand} copied to clipboard`);
+              })
+              .catch(err => {
+                alert(`Failed to copy: ${err}`);
+              });
           }
         },
       },
