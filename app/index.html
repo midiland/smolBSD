@@ -37,7 +37,9 @@
             {{ vm.status === 'running' ? 'stop' : 'start' }}
           </button>
           <button class="btn btn-sm btn-light me-2" @click="editVM(vmName)">✏️</button>
-          <button class="btn btn-sm btn-light me-2" @click="deleteVM(vmName)">🗑️</button>
+          <button class="btn btn-sm btn-light me-2"
+            :disabled="vm.rmprotect"
+            @click="deleteVM(vmName)">🗑️</button>
           <button class="btn btn-sm btn-light me-2"
             :disabled="!vm.serial_port"
             @click="copySerialPort(vmName)">💻</button>
@@ -80,8 +82,12 @@
           </div>
           <div class="input-group">
             <input v-model="VM.tcpserial" type="checkbox" id="tcpserial" class="form-check-input">
-             <label for="tcpserial" class="form-check-label ms-2">TCP Serial Console</label>
-            </div>
+            <label for="tcpserial" class="form-check-label ms-2">TCP Serial Console</label>
+          </div>
+          <div class="input-group">
+            <input v-model="VM.rmprotect" type="checkbox" id="rmprotect" class="form-check-input">
+            <label for="rmprotect" class="form-check-label ms-2">rm protected</label>
+          </div>
           <button class="btn btn-success btn-sm mt-2" @click="createVM">save</button>
         </div>
       </li>
@@ -107,6 +113,7 @@
             hostfwd: '',
             share: '',
             tcpserial: false,
+            rmprotect: false,
           },
           images: [],
           kernels: []
@@ -217,7 +224,8 @@
               cores: this.VM.cores,
               hostfwd: this.VM.hostfwd,
               share: this.VM.share,
-              tcpserial: this.VM.tcpserial
+              tcpserial: this.VM.tcpserial,
+              rmprotect: this.VM.rmprotect
             })
           })
           .then(response => response.json())
@@ -260,10 +268,12 @@
           this.VM.hostfwd = this.vmList[vmName].hostfwd;
           this.VM.share = this.vmList[vmName].share;
           if (this.vmList[vmName].serial_port) {
-            this.VM.tcpserial = true
-          } else {
-            this.VM.tcpserial = false
+            this.VM.tcpserial = true;
           }
+          if (this.vmList[vmName].rmprotect === "True") {
+            this.VM.rmprotect = true;
+          }
+
           if (!this.showInputs) {
             this.toggleInputs(this.Action.EDIT);
           }

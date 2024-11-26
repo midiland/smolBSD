@@ -197,6 +197,9 @@ def saveconf():
                         value = f"{serial_port}"
                     else:
                         continue
+                if key == "rmprotect" and value == False:
+                    continue
+
                 file.write(f"{key}={value}\n")
 
             qmp_port = get_port(vmname, 'qmp_port', 4444)
