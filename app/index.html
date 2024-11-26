@@ -56,39 +56,39 @@
           <div class="input-group">
             <input v-model="VM.name" type="text" class="form-control" placeholder="VM Name" aria-label="VM Name">
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <select v-model="VM.img" id="imageSelect" class="form-select">
               <option v-for="image in images" :key="image" :value="image">{{ image }}</option>
               <option value="" disabled>Image</option>
             </select>
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <select v-model="VM.kernel" id="kernelSelect" class="form-select">
               <option v-for="kernel in kernels" :key="kernel" :value="kernel">{{ kernel }}</option>
               <option value="" disabled>Kernel</option>
             </select>
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <input v-model="VM.mem" type="text" class="form-control" placeholder="Memory" aria-label="Memory">
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <input v-model="VM.cores" type="text" class="form-control" placeholder="Cores" aria-label="Cores">
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <input v-model="VM.hostfwd" type="text" class="form-control" placeholder="Host forward" aria-label="HostFwd">
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <input v-model="VM.share" type="text" class="form-control" placeholder="Shared directory" aria-label="Share">
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <input v-model="VM.tcpserial" type="checkbox" id="tcpserial" class="form-check-input">
-            <label for="tcpserial" class="form-check-label ms-2">TCP Serial Console</label>
+            <label for="tcpserial" class="form-check-label ms-2">TCP serial console</label>
           </div>
-          <div class="input-group">
+          <div class="input-group mt-2">
             <input v-model="VM.rmprotect" type="checkbox" id="rmprotect" class="form-check-input">
             <label for="rmprotect" class="form-check-label ms-2">rm protected</label>
           </div>
-          <button class="btn btn-success btn-sm mt-2" @click="createVM">save</button>
+          <button class="btn btn-success btn-sm mt-3" @click="createVM">save</button>
         </div>
       </li>
     </ul>
