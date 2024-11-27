@@ -49,10 +49,15 @@
 
     <div class="tab-content mt-3" id="nav-tabContent">
 
-      <div class="tab-pane show active" id="nav-manage" role="tabpanel"
-        aria-labelledby="nav-manage-tab"> <!-- tab -->
+      <!-- Management tab -->
 
-        <ul class="list-group">
+      <div class="tab-pane show active" id="nav-manage" role="tabpanel"
+        aria-labelledby="nav-manage-tab">
+
+        <ul class="list-group"> <!-- main list -->
+
+          <!-- VM list + buttons -->
+
           <li v-for="(vm, vmName) in vmList" class="list-group-item d-flex justify-content-between align-items-center">
             <div>{{ vmName }}</div>
             <div class="cpu-usage"></div>
@@ -71,6 +76,9 @@
                 @click="copySerialPort(vmName)">💻</button>
             </div>
           </li>
+
+          <!-- create button -->
+
           <li class="list-group-item">
             <div class="d-flex justify-content-between align-items-center">
               <div>new vm</div>
@@ -78,6 +86,9 @@
                 {{ showInputs ? 'cancel' : 'create' }}
               </button>
             </div>
+
+            <!-- hidden inputs for vm creation / modification -->
+
             <div v-if="showInputs" class="mt-2">
               <div class="input-group">
                 <input v-model="VM.name" type="text" class="form-control" placeholder="VM Name" aria-label="VM Name">
@@ -117,9 +128,12 @@
               <button class="btn btn-success btn-sm mt-3" @click="createVM">save</button>
             </div>
           </li>
-        </ul>
+
+        </ul> <!-- end main list  -->
 
       </div> <!-- manage tab -->
+
+      <!-- Info tab -->
 
       <div class="tab-pane" id="nav-infos" role="tabpanel"
         aria-labelledby="nav-infos-tab">
