@@ -330,7 +330,7 @@
         copySerialPort(vmName) {
           const serialPort = this.vmList[vmName]?.serial_port;
           if (serialPort) {
-            const cpcommand = `nc localhost ${this.vmList[vmName]?.serial_port}`
+            const cpcommand = `telnet localhost ${this.vmList[vmName]?.serial_port}`
             if (!navigator.clipboard) {
               alert(`navigator.clipboard not available in HTTP: ${cpcommand}`);
               return;
