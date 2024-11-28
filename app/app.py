@@ -92,18 +92,14 @@ def query_qmp(command, vmname):
 
 
 def get_cpu_usage(vmname):
-    cpu_percent = 0.0
-    # read TID from QMP
+    ncpus = 1
     r = query_qmp("query-cpus-fast", vmname)
-    for cpu in r['return']:
-        with open(f"qemu-{vmname}.pid", "r") as f:
-            pid = int(f.read().strip())
-            process = psutil.Process(pid)
-            for thread in process.threads():
-                if thread.id == cpu['thread-id']:
-                    cpu_percent += process.cpu_percent()
-
-    return cpu_percent / len(r)
+    if r and 'return' in r:
+        ncpus = len(r['return'])
+    with open(f"qemu-{vmname}.pid", "r") as f:
+        pid = int(f.read().strip())
+        process = psutil.Process(pid)
+        return process.cpu_percent(interval=0.1) / ncpus
 
 ## routes
 
