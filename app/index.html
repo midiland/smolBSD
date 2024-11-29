@@ -76,7 +76,9 @@
                   @click="toggleVM(vmName)">
                 {{ vm.status === 'running' ? 'stop' : 'start' }}
               </button>
-              <button class="btn btn-sm btn-light me-2" @click="editVM(vmName)">✏️</button>
+              <button class="btn btn-sm btn-light me-2"
+                :disabled="vm.editprotect"
+		@click="editVM(vmName)">✏️</button>
               <button class="btn btn-sm btn-light me-2"
                 :disabled="vm.rmprotect"
                 @click="deleteVM(vmName)">🗑️</button>
@@ -134,6 +136,10 @@
                 <input v-model="VM.rmprotect" type="checkbox" id="rmprotect" class="form-check-input">
                 <label for="rmprotect" class="form-check-label ms-2">rm protected</label>
               </div>
+              <div class="input-group mt-2">
+                <input v-model="VM.editprotect" type="checkbox" id="editprotect" class="form-check-input">
+                <label for="editprotect" class="form-check-label ms-2">Edit protected</label>
+              </div>
               <button class="btn btn-success btn-sm mt-3" @click="createVM">save</button>
             </div>
           </li>
@@ -172,6 +178,7 @@
             share: '',
             tcpserial: false,
             rmprotect: false,
+            editprotect: false,
           },
           images: [],
           kernels: []
@@ -283,7 +290,8 @@
               hostfwd: this.VM.hostfwd,
               share: this.VM.share,
               tcpserial: this.VM.tcpserial,
-              rmprotect: this.VM.rmprotect
+              rmprotect: this.VM.rmprotect,
+              editprotect: this.VM.editprotect
             })
           })
           .then(response => response.json())
@@ -317,6 +325,8 @@
           });
         },
         editVM(vmName) {
+          const setBooleanFromStr = (value) => value === "True";
+
           this.zeroVM();
           this.VM.name = vmName;
           this.VM.kernel = this.vmList[vmName].kernel.split("/")[1];
@@ -328,9 +338,8 @@
           if (this.vmList[vmName].serial_port) {
             this.VM.tcpserial = true;
           }
-          if (this.vmList[vmName].rmprotect === "True") {
-            this.VM.rmprotect = true;
-          }
+          this.VM.rmprotect = setBooleanFromStr(this.vmList[vmName].rmprotect);
+          this.VM.editprotect = setBooleanFromStr(this.vmList[vmName].editprotect);
 
           if (!this.showInputs) {
             this.toggleInputs(this.Action.EDIT);
