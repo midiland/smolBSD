@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import psutil
 import socket
@@ -7,6 +8,9 @@ import sys
 from flask import Flask, send_file, jsonify, request
 
 app = Flask(__name__)
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 vmlist = {}
 
@@ -250,4 +254,4 @@ if __name__ == "__main__":
     os.chdir("..");
     vmlist = get_vmlist()
  
-    app.run(host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')

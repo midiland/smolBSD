@@ -59,8 +59,15 @@
           <!-- VM list + buttons -->
 
           <li v-for="(vm, vmName) in vmList" class="list-group-item d-flex justify-content-between align-items-center">
-            <div>{{ vmName }}</div>
-            <div class="cpu-usage"></div>
+            <div class="flex-grow-1">{{ vmName }}</div>
+            <div class="cpu-usage me-5">
+              <div v-if="vmList[vmName].status === 'running'" class="progress" style="height: 100%;">
+                <div class="progress-bar" role="progressbar"
+                  :style="{ width: `${vmList[vmName].cpuUsage }%` }"
+                  :aria-valuenow="vm.cpuUsage" aria-valuemin="0" aria-valuemax="100">
+                </div>
+              </div>
+            </div>
             <div class="btn-group" role="group" aria-label="Actions">
               <button :id="`button-${vmName}`"
                   :class="['btn', 'btn-sm', 'me-2', vm.status === 'stopped' ? 'btn-success' : 'btn-danger']"
@@ -344,12 +351,27 @@
               });
           }
         },
+        cpuUsage() {
+          Object.keys(this.vmList).forEach(vmName => {
+            if (this.vmList[vmName].status != 'running') {
+              return;
+            }
+            fetch(`/cpu_usage/${vmName}`)
+              .then(response => response.json())
+              .then(data => {
+                this.vmList[vmName].cpuUsage = data;
+                console.log(data);
+              })
+              .catch(error => console.error('Error fetching CPU usage:', error));
+          });
+        },
       },
 
       mounted() {
         this.getVMList();
         this.getImages();
         this.getKernel();
+        setInterval(this.cpuUsage, 1000);
       }
     });
 
