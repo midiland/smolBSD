@@ -60,8 +60,10 @@
 
           <li v-for="(vm, vmName) in vmList" class="list-group-item d-flex justify-content-between align-items-center">
             <div class="flex-grow-1">{{ vmName }}</div>
-            <div class="cpu-usage me-5">
-              <div v-if="vmList[vmName].status === 'running'" class="progress" style="height: 100%;">
+            <div v-if="vmList[vmName].status === 'running'" class="cpu-usage me-4" :id="`cpu-usage-${vmName}`"
+              data-bs-toggle="tooltip" data-bs-placement="top" data-bs-animation="false"
+              :title="`${vmName} CPU usage: ${vmList[vmName].cpuUsage }%`">
+              <div class="progress" style="height: 100%;">
                 <div class="progress-bar" role="progressbar"
                   :style="{ width: `${vmList[vmName].cpuUsage }%` }"
                   :aria-valuenow="vm.cpuUsage" aria-valuemin="0" aria-valuemax="100">
@@ -372,6 +374,10 @@
         this.getImages();
         this.getKernel();
         setInterval(this.cpuUsage, 1000);
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
       }
     });
 
