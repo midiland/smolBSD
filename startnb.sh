@@ -78,7 +78,7 @@ done
 
 [ -n "$hostfwd" ] && network="\
 -device virtio-net-device,netdev=net${uuid}0 \
--netdev user,id=net${uuid}0,hostfwd=${hostfwd}"
+-netdev user,id=net${uuid}0,$(echo "$hostfwd"|sed 's/::/hostfwd=::/g')"
 
 [ -n "$bridgenet" ] && network="$network \
 -device virtio-net-device,netdev=net${uuid}1 \
