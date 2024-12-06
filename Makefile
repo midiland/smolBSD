@@ -104,6 +104,11 @@ tslog:
 	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
 	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
+nbsh:
+	$(MAKE) setfetch SETS="${BASE}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
+	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
+
 imgbuilder:
 	$(MAKE) setfetch SETS="${BASE}"
 	# build the building image if ${NOIMGBUILDERBUILD} is not defined

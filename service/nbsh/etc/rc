@@ -1,0 +1,82 @@
+. /etc/include/basicrc
+
+route flush -inet6 >/dev/null 2>&1
+
+lightgreen="\033[92m"
+bold="\033[1m"
+normal="\033[0m"
+
+printbold()
+{
+	printf "${bold}$1${normal}\n"
+}
+
+NBUSER=nbuser
+NBHOME=/home/${NBUSER}
+export CHOUPI=y
+
+if [ ! -d ${NBHOME} ]; then
+	. /etc/include/pkgin
+
+	PACKAGES="bash git-base vim curl doas ripgrep fd-find"
+
+	if ! id NBUSER >/dev/null 2>&1; then
+	
+		printbold "⭐ creating user"
+		useradd -m $NBUSER
+
+		printbold "⭐ installing user packages"
+		echo "➡️  $PACKAGES"
+		pkgin -y in $PACKAGES
+
+		printbold "⭐ cloning powerline.bash"
+		mkdir ${NBHOME}/.config
+		curl -s -Lo ${NBHOME}/.config/powerline.bash \
+			https://gitlab.com/bersace/powerline-bash/raw/master/powerline.bash
+	
+		printbold "⭐ creating a nice prompt"
+		chsh -s /usr/pkg/bin/bash ${NBUSER}
+		cat >/home/${NBUSER}/.bash_profile<<EOF
+export HOME=${NBHOME}
+export EDITOR=vim
+export VISUAL=\${EDITOR}
+export PAGER=less
+
+LANG=en_US.UTF-8; export LANG
+
+POWERLINE_ICONS=nerd-fonts
+POWERLINE_SEGMENTS="hostname archi pwd python status"
+declare -A POWERLINE_COLORS
+POWERLINE_COLORS=(
+    [commande-utilisateur]=blanc
+)
+declare -A POWERLINE_ICONS_OVERRIDES
+POWERLINE_ICONS_OVERRIDES=(
+    [hostname]=$'\uf98c'
+)
+POWERLINE_HOSTNAME_FG="blanc"
+POWERLINE_HOSTNAME_BG="violet"
+
+. \${HOME}/.config/powerline.bash
+
+PROMPT_COMMAND='__update_ps1 $?'
+EOF
+	
+		printbold "⭐ adding $NBUSER to group wheel"
+		usermod -G wheel $NBUSER
+		printbold "⭐ permit $NBUSER to ${lightgreen}doas${normal}"
+		echo "permit nopass keepenv :wheel" >/usr/pkg/etc/doas.conf
+	fi
+fi
+
+hostname nbakery
+
+printf "\n Welcome to the (n)bakery! 🧁\n\n"
+printf "💪 ${lightgreen}doas <command>${normal} to run command as ${bold}root${normal}\n"
+printf "📦 ${lightgreen}pkgin${normal} to manage packages\n"
+printf "🚪 ${lightgreen}exit${normal} to cleanly shutdown\n"
+echo
+
+su - ${NBUSER}
+
+. /etc/include/shutdown

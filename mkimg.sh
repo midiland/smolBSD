@@ -18,7 +18,7 @@ _USAGE_
 	exit 1
 }
 
-options="s:m:i:x:k:oh"
+options="s:m:i:r:x:k:oh"
 
 while getopts "$options" opt
 do
@@ -26,6 +26,7 @@ do
 	s) svc="$OPTARG";;
 	m) megs="$OPTARG";;
 	i) img="$OPTARG";;
+	r) rootdir="$OPTARG";;
 	x) sets="$OPTARG";;
 	k) kernel="$OPTARG";;
 	o) rofs=y;;
@@ -81,21 +82,31 @@ else # NetBSD (and probably OpenBSD)
 	mountfs="ffs"
 fi
 
-for s in ${sets}
+# $rootdir can be relative, don't cd mnt yet
+for d in sbin bin dev etc/include
 do
-	tar xfp sets/${arch}/${s} -C mnt/ || exit 1
+	mkdir -p mnt/$d
 done
+# root fs built by sailor or hand made
+if [ -n "$rootdir" ]; then
+	tar cfp - -C "$rootdir" . | tar xfp - -C mnt
+# use a set and customization in services/
+else
+	for s in ${sets}
+	do
+		tar xfp sets/${arch}/${s} -C mnt/ || exit 1
+	done
+
+	cp -f service/${svc}/etc/* mnt/etc/
+	cp -f service/common/* mnt/etc/include/
+fi
+
+[ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
+echo "ROOT.a / $mountfs $mountopt 1 1" > mnt/etc/fstab
 
 [ -n "$kernel" ] && cp -f $kernel mnt/
 
 cd mnt
-mkdir -p sbin bin dev etc/include
-
-[ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
-
-echo "ROOT.a / $mountfs $mountopt 1 1" > etc/fstab
-cp -f ../service/${svc}/etc/* etc/
-cp -f ../service/common/* etc/include/
 
 # warning, postinst operations are done on the builder
 

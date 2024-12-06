@@ -1,38 +1,7 @@
 #!/bin/sh
 
 . /etc/include/basicrc
-
-# install necesary packages
-if [ ! -d /var/db/pkgin ]; then
-	echo -e "\nInstalling needed packages\n"
-
-	ver=$(uname -r)
-	case $ver in
-	*99*) # current
-		ver=${ver%.99*}.0
-		;;
-	*_*) # tag
-		ver=${ver%_*}
-		;;
-	esac
-
-	# repository path differs for amd64 or aarch64/evbarm
-	machine=$(uname -m)
-	proc=$(uname -p)
-	[ "$machine" = "amd64" ] && arch=$machine || arch=$proc
-	url="http://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${arch}/${ver}/All"
-	
-	echo "fetching $url"
-	
-	for pkg in pkg_install pkgin mozilla-rootcerts pkg_tarup rsync curl
-	do
-		pkg_info $pkg >/dev/null 2>&1 || pkg_add -v ${url}/${pkg}*
-	done
-
-	mkdir -p /usr/pkg/etc/pkgin
-	echo $url >/usr/pkg/etc/pkgin/repositories.conf
-	pkgin up
-fi
+. /etc/include/pkgin
 
 # newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
 cp /etc/MAKEDEV /dev/

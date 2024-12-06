@@ -1,0 +1,49 @@
+# install necessary packages
+if [ ! -d /var/db/pkgin ]; then
+	case $CHOUPI in
+	[yY]*)
+		star="⭐"
+		arrow="➡️ "
+		out="/dev/null"
+		;;
+	*)
+		star="*"
+		arrow=">"
+		v="-v"
+		out="/dev/stdout"
+		;;
+	esac
+	printf "\n${star} installing needed packages\n"
+
+	ver=$(uname -r)
+	case $ver in
+	*99*) # current
+		ver=${ver%.99*}.0
+		;;
+	*_*) # tag
+		ver=${ver%_*}
+		;;
+	esac
+
+	# repository path differs for amd64 or aarch64/evbarm
+	machine=$(uname -m)
+	proc=$(uname -p)
+	[ "$machine" = "amd64" ] && arch=$machine || arch=$proc
+	url="netbsd.org/pub/pkgsrc/packages/NetBSD/${arch}/${ver}/All"
+
+	printf "${arrow} installing Mozilla root certificates\n"
+	pkg_add ${v} http://ftp.${url}/mozilla-rootcerts*
+	url="https://cdn.${url}"
+	
+	for pkg in pkg_install pkgin pkg_tarup rsync curl
+	do
+		printf "${arrow} installing $pkg\n"
+		pkg_info $pkg >/dev/null 2>&1 || \
+			pkg_add ${v} ${url}/${pkg}*
+	done
+
+	mkdir -p /usr/pkg/etc/pkgin
+	echo $url >/usr/pkg/etc/pkgin/repositories.conf
+	pkgin up
+fi
+
