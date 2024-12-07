@@ -1,5 +1,8 @@
 . /etc/include/basicrc
 
+export TERM=tmux-256color
+resize >/dev/null # get current window size
+
 route flush -inet6 >/dev/null 2>&1
 
 lightgreen="\033[92m"

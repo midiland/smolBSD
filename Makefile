@@ -3,7 +3,7 @@ ARCH?=		amd64
 SMOLI386=	netbsd-SMOLi386
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 KDIST=		${DIST}
-SUDO=		sudo -E ARCH=${ARCH} VERS=${VERS}
+SUDO!=		command -v doas || echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
 WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
@@ -106,7 +106,7 @@ tslog:
 
 nbsh:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -x "${BASE}" ${EXTRAS}
 	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 imgbuilder:
