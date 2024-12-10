@@ -1,8 +1,10 @@
 . /etc/include/basicrc
 
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 export TERM=tmux-256color
 resize >/dev/null # get current window size
 
+mount -t tmpfs tmpfs /tmp
 route flush -inet6 >/dev/null 2>&1
 
 lightgreen="\033[92m"
@@ -14,8 +16,9 @@ printbold()
 	printf "${bold}$1${normal}\n"
 }
 
-NBUSER=nbuser
-NBHOME=/home/${NBUSER}
+export NBUSER=nbuser
+export NBHOME=/home/${NBUSER}
+export TMUX_SOCKET=${NBHOME}/tmp/tmux
 export CHOUPI=y
 
 if [ ! -d ${NBHOME} ]; then
@@ -36,7 +39,14 @@ if [ ! -d ${NBHOME} ]; then
 		mkdir ${NBHOME}/.config
 		curl -s -Lo ${NBHOME}/.config/powerline.bash \
 			https://gitlab.com/bersace/powerline-bash/raw/master/powerline.bash
-	
+
+		printbold "⭐ cloning tmux-power"
+		mkdir -p ${NBHOME}/.tmux
+		curl -s -Lo ${NBHOME}/.tmux/tmux-power.tmux \
+			https://raw.githubusercontent.com/wfxr/tmux-power/master/tmux-power.tmux
+			sed -i.bak 's/status-right "$RS"/status-right ""/' \
+				${NBHOME}/.tmux/tmux-power.tmux
+
 		printbold "⭐ creating a nice prompt"
 		chsh -s /usr/pkg/bin/bash ${NBUSER}
 		cat >/home/${NBUSER}/.bash_profile<<EOF
@@ -44,6 +54,8 @@ export HOME=${NBHOME}
 export EDITOR=vim
 export VISUAL=\${EDITOR}
 export PAGER=less
+export NBUSER=${NBUSER}
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 
 LANG=en_US.UTF-8; export LANG
 
@@ -62,9 +74,38 @@ POWERLINE_HOSTNAME_BG="violet"
 
 . \${HOME}/.config/powerline.bash
 
-PROMPT_COMMAND='__update_ps1 $?'
+PROMPT_COMMAND='__update_ps1 \$?'
+
+# tmux is suid root to allow /dev/console usage from $NBUSER
+[ -S "${TMUX_SOCKET}" ] && \
+	[ "\$(stat -f '%Su' ${TMUX_SOCKET})" != "$NBUSER" ] && \
+	doas chown $NBUSER ${TMUX_SOCKET}
+
+if [ ! -f /tmp/greetings -a -S ${TMUX_SOCKET} ]; then
+	echo -e "
+Welcome to the (n)bakery! 🧁
+
+💪 ${lightgreen}doas <command>${normal} to run command as ${bold}root${normal}
+📦 ${lightgreen}pkgin${normal} to manage packages
+🚪 ${lightgreen}exit${normal} to cleanly shutdown, ${lightgreen}^a-x${normal} to exit ${lightgreen}qemu${normal}
+🪟 you're in a ${lightgreen}tmux${normal} console with standard prefix (${lightgreen}^b${normal})
+"
+	touch /tmp/greetings
+	# tmux run-shell returns error 127
+	bash \${HOME}/.tmux/tmux-power.tmux
+fi
+
 EOF
-	
+echo "rm -f /tmp/greetings" > ${NBHOME}/.bash_logout
+
+		printbold "⭐ customizing tmux"
+		cat >${NBHOME}/.tmux.conf<<EOF
+# spawn a login shell in order to read ~/.bash_profile
+set-option -g default-command "bash -l"
+set -g @tmux_power_theme 'moon'
+EOF
+		chown -R ${NBUSER} ${NBHOME}/.tmux.conf
+
 		printbold "⭐ adding $NBUSER to group wheel"
 		usermod -G wheel $NBUSER
 		printbold "⭐ permit $NBUSER to ${lightgreen}doas${normal}"
@@ -77,18 +118,17 @@ if dmesg |grep -q vio9; then
 	cp -f /etc/MAKEDEV /dev
 	(cd /dev && sh MAKEDEV vio9p0)
 	mount_9p -cu /dev/vio9p0 /mnt
-	echo "➡️host filesystem mounted on /mnt"
+	echo "➡️ host filesystem mounted on /mnt"
 fi
 
 
 hostname nbakery
 
-printf "\n Welcome to the (n)bakery! 🧁\n\n"
-printf "💪 ${lightgreen}doas <command>${normal} to run command as ${bold}root${normal}\n"
-printf "📦 ${lightgreen}pkgin${normal} to manage packages\n"
-printf "🚪 ${lightgreen}exit${normal} to cleanly shutdown\n"
-echo
-
-su - ${NBUSER}
+# horrible hack to get tmux working on the console
+chmod 4755 /usr/bin/tmux
+mkdir -p ${NBHOME}/tmp && chown -R ${NBUSER} ${NBHOME}/tmp
+[ -S "${TMUX_SOCKET}" ] && rm -f ${TMUX_SOCKET}
+# another hack to get proper rights and variables, order matters
+su - ${NBUSER} -c "bash -lc \"tmux -S ${TMUX_SOCKET}\""
 
 . /etc/include/shutdown

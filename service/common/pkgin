@@ -5,6 +5,7 @@ if [ ! -d /var/db/pkgin ]; then
 		star="⭐"
 		arrow="➡️ "
 		out="/dev/null"
+		printf "\n✨ preparing initial environment...\n"
 		;;
 	*)
 		star="*"
