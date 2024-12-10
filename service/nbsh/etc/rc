@@ -88,7 +88,7 @@ Welcome to the (n)bakery! 🧁
 💪 ${lightgreen}doas <command>${normal} to run command as ${bold}root${normal}
 📦 ${lightgreen}pkgin${normal} to manage packages
 🚪 ${lightgreen}exit${normal} to cleanly shutdown, ${lightgreen}^a-x${normal} to exit ${lightgreen}qemu${normal}
-🪟 you're in a ${lightgreen}tmux${normal} console with standard prefix (${lightgreen}^b${normal})
+🪟 you're in a ${lightgreen}tmux${normal} console with (${lightgreen}^q${normal}) as prefix
 "
 	touch /tmp/greetings
 	# tmux run-shell returns error 127
@@ -101,6 +101,9 @@ echo "rm -f /tmp/greetings" > ${NBHOME}/.bash_logout
 		printbold "⭐ customizing tmux"
 		cat >${NBHOME}/.tmux.conf<<EOF
 # spawn a login shell in order to read ~/.bash_profile
+unbind C-b
+set -g prefix ^Q
+bind q send-prefix
 set-option -g default-command "bash -l"
 set -g @tmux_power_theme 'moon'
 EOF
