@@ -46,6 +46,17 @@ if [ ! -d ${NBHOME} ]; then
 			https://raw.githubusercontent.com/wfxr/tmux-power/master/tmux-power.tmux
 			sed -i.bak 's/status-right "$RS"/status-right ""/' \
 				${NBHOME}/.tmux/tmux-power.tmux
+		printbold "⭐ kawaï vimrc"
+		mkdir -p ${NBHOME}/.vim/colors
+		curl -s -Lo ${NBHOME}/.vim/colors/molokai.vim \
+			https://raw.githubusercontent.com/tomasr/molokai/refs/heads/master/colors/molokai.vim
+		cat >${NBHOME}/.vimrc<<EOF
+syntax on
+set t_Co=256
+color molokai
+let g:molokai_original = 1
+let g:rehash256 = 1
+EOF
 
 		printbold "⭐ creating a nice prompt"
 		chsh -s /usr/pkg/bin/bash ${NBUSER}
