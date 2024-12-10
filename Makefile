@@ -107,7 +107,7 @@ tslog:
 
 nbakery:
 	$(MAKE) setfetch SETS="${NBAKERY}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -x "${NBAKERY}" ${EXTRAS}
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 2048 -x "${NBAKERY}" ${EXTRAS}
 	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 imgbuilder:
