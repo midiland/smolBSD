@@ -11,6 +11,7 @@ GROUP!= 	id -gn
 RESCUE=		rescue.tar.xz etc.tar.xz
 BASE=		base.tar.xz etc.tar.xz
 PROF=		${BASE} comp.tar.xz
+NBAKERY=	${BASE} comp.tar.xz
 BOZO=		${BASE}
 IMGBUILDER=	${BASE}
 
@@ -104,9 +105,9 @@ tslog:
 	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
 	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
-nbsh:
-	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -x "${BASE}" ${EXTRAS}
+nbakery:
+	$(MAKE) setfetch SETS="${NBAKERY}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -x "${NBAKERY}" ${EXTRAS}
 	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 imgbuilder:
