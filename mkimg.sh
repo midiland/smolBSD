@@ -9,6 +9,7 @@ Usage: $progname [-s service] [-m megabytes] [-i image] [-x set]
        [-k kernel] [-o]
 	Create a root image
 	-s service	service name, default "rescue"
+	-r rootdir	hand crafted root directory to use
 	-m megabytes	image size in megabytes, default 10
 	-i image	image name, default rescue-[arch].img
 	-x sets		list of NetBSD sets, default rescue.tgz
@@ -69,48 +70,58 @@ esac
 dd if=/dev/zero of=./${img} bs=1${u} count=${megs}
 
 mkdir -p mnt
+mnt=$(pwd)/mnt
 
 if [ -n "$is_linux" ]; then
 	mke2fs -O none $img
-	mount -o loop $img mnt
+	mount -o loop $img $mnt
 	mountfs="ext2fs"
 else # NetBSD (and probably OpenBSD)
 	vnd=$(vndconfig -l|grep -m1 'not'|cut -f1 -d:)
 	vndconfig $vnd $img
 	newfs /dev/${vnd}a
-	mount /dev/${vnd}a mnt
+	mount /dev/${vnd}a $mnt
 	mountfs="ffs"
 fi
 
 # $rootdir can be relative, don't cd mnt yet
 for d in sbin bin dev etc/include
 do
-	mkdir -p mnt/$d
+	mkdir -p ${mnt}/$d
 done
 # root fs built by sailor or hand made
 if [ -n "$rootdir" ]; then
-	tar cfp - -C "$rootdir" . | tar xfp - -C mnt
+	tar cfp - -C "$rootdir" . | tar xfp - -C $mnt
 # use a set and customization in services/
 else
 	for s in ${sets}
 	do
-		tar xfp sets/${arch}/${s} -C mnt/ || exit 1
+		tar xfp sets/${arch}/${s} -C ${mnt}/ || exit 1
 	done
 
-	cp -f service/${svc}/etc/* mnt/etc/
-	cp -f service/common/* mnt/etc/include/
+fi
+
+cp -f service/${svc}/etc/* ${mnt}/etc/
+cp -f service/common/* ${mnt}/etc/include/
+
+if [ "$svc" = "rescue" ]; then
+	for b in init mount_ext2fs
+	do
+		ln -s /rescue/$b sbin/
+	done
+	ln -s /rescue/sh bin/
 fi
 
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
-echo "ROOT.a / $mountfs $mountopt 1 1" > mnt/etc/fstab
+echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
 
-[ -n "$kernel" ] && cp -f $kernel mnt/
+[ -n "$kernel" ] && cp -f $kernel ${mnt}/
 
-cd mnt
+cd $mnt
 
 # warning, postinst operations are done on the builder
 
-[ -d ../service/${svc}/postinst ] &&
+[ -d ../service/${svc}/postinst ] && \
 	for x in ../service/${svc}/postinst/*.sh
 	do
 		# if SVCIMG variable exists, only process its script
@@ -121,23 +132,15 @@ cd mnt
 		sh $x
 	done
 
-if [ "$svc" = "rescue" ]; then
-	for b in init mount_ext2fs
-	do
-		ln -s /rescue/$b sbin/
-	done
-	ln -s /rescue/sh bin/
-fi
-
 # newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
 # backup MAKEDEV so imgbuilder rc can copy it
-cp dev/MAKEDEV etc/
+#cp /dev/MAKEDEV etc/
 # unionfs with ext2 leads to i/o error
 [ -z "$is_netbsd" ] && sed -i 's/-o union//g' dev/MAKEDEV
 
 cd ..
 
-umount mnt
+umount $mnt
 
 [ -z "$is_linux" ] && vndconfig -u $vnd
 
