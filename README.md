@@ -1,4 +1,4 @@
-# mksmolnb
+# smolBSD
 
 This is an ongoing project that aims at creating a minimal _NetBSD_ virtual machine that's
 able to boot and start a service in less than a second.  
@@ -10,7 +10,7 @@ creating the image on a _GNU/Linux_ system, the image will be formatted using _e
 
 Note that this is currently more a proof of concept, don't judge the scripts as they are!
 
-As of March 2024, this method can use to create or fetch a low footprint kernel for use with the images:
+As of December 2024, this method can use to create or fetch a low footprint kernel for use with the images:
 
 * [multiboot][1] to boot directly the kernel from [kvm][2], but warning, only `i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this architecture as of now.
 * [PVH][4] this newer method works with _NetBSD/amd64_ and is available in my [NetBSD development branch][5] but you can still fetch a pre-built kernel at https://smolbsd.org/assets/netbsd-SMOL, warning this is a _NetBSD-current_ kernel
@@ -28,7 +28,7 @@ As of March 2024, this method can use to create or fetch a low footprint kernel 
   - `make` (GNU Make)
   - `uuid-runtime` (for uuidgen)
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
-  - `sudo`
+  - `sudo` or `doas`
 - A x86 VT-capable, or ARM64 CPU is recommended
 
 ## Project structure
