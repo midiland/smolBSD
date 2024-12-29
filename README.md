@@ -248,11 +248,11 @@ Accept-Ranges: bytes
 $ cat service/imgbuilder/postinst/nginx.sh
 #!/bin/sh
 
-git clone https://gitlab.com/iMil/sailor.git
+git clone https://github.com/NetBSDfr/sailor
 
 ship=fakecracker
 
-# create sailor base config - https://gitlab.com/iMil/sailor
+# create sailor base config - https://github.com/NetBSDfr/sailor
 cat >sailor/${ship}.conf<<EOF
 shipname=$ship
 shippath="/sailor/$ship"
@@ -312,6 +312,6 @@ And reboot.
 [0]: https://gitlab.com/0xDRRB/confkerndev
 [1]: https://man.netbsd.org/x86/multiboot.8
 [2]: https://www.linux-kvm.org/page/Main_Page
-[3]: https://gitlab.com/iMil/sailor/-/tree/master/
+[3]: https://github.com/NetBSDfr/sailor
 [4]: https://xenbits.xen.org/docs/4.6-testing/misc/pvh.html
 [5]: https://github.com/NetBSDfr/NetBSD-src/tree/nbfr_master

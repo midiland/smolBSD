@@ -1,6 +1,6 @@
 # VM batch creation and bench
 
-You need the [mksmolnb](https://gitlab.com/iMil/mksmolnb) to test the following
+You need [smolBSD](https://github.com/NetBSDfr/smolBSD) to test the following
 
 ## Read-only `bozohttpd` web server image
 

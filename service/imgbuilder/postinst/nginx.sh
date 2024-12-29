@@ -1,10 +1,10 @@
 #!/bin/sh
 
-git clone https://gitlab.com/iMil/sailor.git
+git clone https://github.com/NetBSDfr/sailor
 
 ship=fakecracker
 
-# create sailor base config - https://gitlab.com/iMil/sailor
+# create sailor base config - https://github.com/NetBSDfr/sailor
 cat >sailor/${ship}.conf<<EOF
 shipname=$ship
 shippath="/sailor/$ship"
