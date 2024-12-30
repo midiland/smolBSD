@@ -36,7 +36,7 @@ jobs:
 
       - name: Build image
         run: |
-          sudo make NOSVCIMGBUILD=yes ARCH=${{ env.ARCH }} SVCIMG=${{ env.SVCIMG }} MOUNTRO=${{ env.MOUNTRO }} ${{ env.IMG }}
+          make NOSVCIMGBUILD=yes ARCH=${{ env.ARCH }} SVCIMG=${{ env.SVCIMG }} MOUNTRO=${{ env.MOUNTRO }} ${{ env.IMG }}
 
       - uses: actions/upload-artifact@v4
         with:
