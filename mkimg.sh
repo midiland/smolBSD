@@ -104,6 +104,13 @@ fi
 cp -f service/${svc}/etc/* ${mnt}/etc/
 cp -f service/common/* ${mnt}/etc/include/
 
+[ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
+echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
+
+[ -n "$kernel" ] && cp -f $kernel ${mnt}/
+
+cd $mnt
+
 if [ "$svc" = "rescue" ]; then
 	for b in init mount_ext2fs
 	do
@@ -112,12 +119,6 @@ if [ "$svc" = "rescue" ]; then
 	ln -s /rescue/sh bin/
 fi
 
-[ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
-echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
-
-[ -n "$kernel" ] && cp -f $kernel ${mnt}/
-
-cd $mnt
 
 # warning, postinst operations are done on the builder
 
