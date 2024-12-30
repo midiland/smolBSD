@@ -3,10 +3,12 @@ ARCH?=		amd64
 SMOLI386=	netbsd-SMOLi386
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 KDIST=		${DIST}
-SUDO!=		[ "$(whoami)" = "root" ] || command -v doas || echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
 WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
+ifneq (${WHOAMI}, root)
+SUDO!=		command -v doas || echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
+endif
 # sets to fetch
 RESCUE=		rescue.tar.xz etc.tar.xz
 BASE=		base.tar.xz etc.tar.xz
