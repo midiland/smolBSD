@@ -30,6 +30,7 @@ jobs:
       - name: Set up environment
         run: |
           apt update && apt install -y curl xz-utils make sudo git
+          echo "User: $(whoami)"
 
       - name: Clean cache
         run: rm -rf /var/cache
