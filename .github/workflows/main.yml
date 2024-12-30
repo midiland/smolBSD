@@ -29,15 +29,14 @@ jobs:
 
       - name: Set up environment
         run: |
-          apt update && apt install -y curl xz-utils make doas git
-          echo "permit nopass keepenv :sudo" >/etc/doas.conf
+          apt update && apt install -y curl xz-utils make sudo git
 
       - name: Clean cache
         run: rm -rf /var/cache
 
       - name: Build image
         run: |
-          make NOSVCIMGBUILD=yes ARCH=${{ env.ARCH }} SVCIMG=${{ env.SVCIMG }} MOUNTRO=${{ env.MOUNTRO }} ${{ env.IMG }}
+          sudo make NOSVCIMGBUILD=yes ARCH=${{ env.ARCH }} SVCIMG=${{ env.SVCIMG }} MOUNTRO=${{ env.MOUNTRO }} ${{ env.IMG }}
 
       - uses: actions/upload-artifact@v4
         with:
