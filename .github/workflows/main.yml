@@ -22,7 +22,9 @@ env:
 jobs:
   build_img:
     runs-on: ubuntu-latest
-    container: debian:latest
+    container:
+      image: debian:latest
+      options: --privileged
     steps:
       - name: Checkout
         uses: actions/checkout@v4
