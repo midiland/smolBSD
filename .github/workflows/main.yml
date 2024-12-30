@@ -14,10 +14,10 @@ on:
         description: "Architecture"
         required: true
         default: "amd64"
-
-env:
-  IMG: "rescue"
-  ARCH: "amd64"
+      mountro:
+        description: "Build as read-only (y or empty)"
+        required: false
+        default:
 
 jobs:
   build_img:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Build image
         run: |
-          make NOSVCIMGBUILD=yes ARCH=${{ env.ARCH }} SVCIMG=${{ env.SVCIMG }} MOUNTRO=${{ env.MOUNTRO }} ${{ env.IMG }}
+          make NOSVCIMGBUILD=yes ARCH=${{ inputs.arch }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img }}
 
       - uses: actions/upload-artifact@v4
         with:
