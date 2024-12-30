@@ -29,7 +29,8 @@ jobs:
 
       - name: Set up environment
         run: |
-          apt update && apt install -y curl xz-utils make sudo git
+          apt update && apt install -y curl xz-utils make sudo git fuseext2
+          touch /in_gh
 
       - name: Clean cache
         run: rm -rf /var/cache

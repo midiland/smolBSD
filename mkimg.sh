@@ -74,7 +74,9 @@ mnt=$(pwd)/mnt
 
 if [ -n "$is_linux" ]; then
 	mke2fs -O none $img
-	mount -o loop $img $mnt
+	[ -f /in_gh ] && \
+		fuse-ext2 $img $mnt -o rw,force || \
+		mount -o loop $img $mnt
 	mountfs="ext2fs"
 else # NetBSD (and probably OpenBSD)
 	vnd=$(vndconfig -l|grep -m1 'not'|cut -f1 -d:)
