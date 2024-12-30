@@ -24,6 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set up environment
         run: |
           apt update && apt install -y curl xz-utils make sudo git
