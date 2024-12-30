@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: debian:latest
-      options: --privileged
+      options: --cap-add=SYS_ADMIN
     steps:
       - name: Checkout
         uses: actions/checkout@v4
