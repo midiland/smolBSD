@@ -3,7 +3,7 @@ ARCH?=		amd64
 SMOLI386=	netbsd-SMOLi386
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 KDIST=		${DIST}
-SUDO!=		command -v doas || echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
+SUDO!=		[ ${UID} = 0 ] || command -v doas || echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
 WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
