@@ -29,7 +29,8 @@ jobs:
 
       - name: Set up environment
         run: |
-          apt update && apt install -y curl xz-utils make sudo git
+          apt update && apt install -y curl xz-utils make doas git
+          echo "permit nopass keepenv :sudo" >/etc/doas.conf
 
       - name: Clean cache
         run: rm -rf /var/cache
