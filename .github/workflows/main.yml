@@ -39,7 +39,7 @@ jobs:
 
       - name: Build image
         run: |
-          make NOSVCIMGBUILD=yes ARCH=${{ inputs.arch }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
+          make NOSVCIMGBUILD=yes ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
 
       - uses: actions/upload-artifact@v4
         with:
