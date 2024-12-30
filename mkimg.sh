@@ -143,7 +143,7 @@ fi
 
 cd ..
 
-[ -f /in_gh ] && fusermount -u $mnt || umount $mnt
+[ -f /in_gh ] && sync || umount $mnt
 
 [ -z "$is_linux" ] && vndconfig -u $vnd
 
