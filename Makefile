@@ -46,6 +46,10 @@ endif
 ifeq (${MOUNTRO}, y)
 EXTRAS+=	-o
 endif
+# extra remote script
+ifneq (${CURLSH},)
+EXTRAS+=	-c ${CURLSH}
+endif
 
 # default memory amount for a guest
 MEM?=		256
@@ -94,7 +98,8 @@ base:
 
 prof:
 	$(MAKE) setfetch SETS="${PROF}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k ${KERNEL} -x "${PROF}"
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k ${KERNEL} -x "${PROF}" \
+		${EXTRAS}
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 bozohttpd:
@@ -117,7 +122,7 @@ imgbuilder:
 	# build the building image if ${NOIMGBUILDERBUILD} is not defined
 	if [ -z "${NOIMGBUILDERBUILD}" ]; then \
 		${SUDO} SVCIMG=${SVCIMG} ./mkimg.sh -i $@-${ARCH}.img -s $@ \
-			-m 512 -x "${BASE}" && \
+			-m 512 -x "${BASE}" ${EXTRAS} && \
 		${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img; \
 	fi
 	# now start an imgbuilder microvm and build the actual service

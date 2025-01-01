@@ -6,7 +6,7 @@ usage()
 {
 	cat 1>&2 << _USAGE_
 Usage: $progname [-s service] [-m megabytes] [-i image] [-x set]
-       [-k kernel] [-o]
+       [-k kernel] [-o] [-c URL]
 	Create a root image
 	-s service	service name, default "rescue"
 	-r rootdir	hand crafted root directory to use
@@ -14,12 +14,13 @@ Usage: $progname [-s service] [-m megabytes] [-i image] [-x set]
 	-i image	image name, default rescue-[arch].img
 	-x sets		list of NetBSD sets, default rescue.tgz
 	-k kernel	kernel to copy in the image
+	-c URL		URL to a script to execute as finalizer
 	-o		read-only root filesystem
 _USAGE_
 	exit 1
 }
 
-options="s:m:i:r:x:k:oh"
+options="s:m:i:r:x:k:c:oh"
 
 while getopts "$options" opt
 do
@@ -30,6 +31,7 @@ do
 	r) rootdir="$OPTARG";;
 	x) sets="$OPTARG";;
 	k) kernel="$OPTARG";;
+	c) curlsh="$OPTARG";;
 	o) rofs=y;;
 	h) usage;;
 	*) usage;;
@@ -133,11 +135,11 @@ fi
 		sh $x
 	done
 
-# newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
-# backup MAKEDEV so imgbuilder rc can copy it
-#cp /dev/MAKEDEV etc/
 # unionfs with ext2 leads to i/o error
 [ -z "$is_netbsd" ] && sed -i 's/-o union//g' dev/MAKEDEV
+
+# proceed with caution
+[ -n "$curlsh" ] && curl -sSL "$CURLSH" | /bin/sh
 
 cd ..
 

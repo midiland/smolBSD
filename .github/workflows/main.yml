@@ -22,6 +22,10 @@ on:
         description: "Build as read-only (y or empty)"
         required: false
         default:
+      curlsh:
+        description: "URL to a script to execute as finalizer"
+        required: false
+        default:
 
 jobs:
   build_img:
@@ -40,7 +44,7 @@ jobs:
 
       - name: Build image
         run: |
-          make NOSVCIMGBUILD=yes SVCIMG=${{ inputs.svcimg }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
+          make NOSVCIMGBUILD=yes SVCIMG=${{ inputs.svcimg }} CURLSH=${{ inputs.curlsh }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
 
       - uses: actions/upload-artifact@v4
         with:
