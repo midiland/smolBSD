@@ -35,35 +35,42 @@ As of December 2024, this method can use to create or fetch a low footprint kern
 
 - `mkimg.sh` creates a root filesystem image
 ```text
-Usage: mkimg.sh [-s service] [-m megabytes] [-n image] [-x set]
-	Create a root image
-	-s service	service name, default "rescue"
-	-m megabytes	image size in megabytes, default 10
-	-i image	image name, default root.img
-	-x sets		list of NetBSD sets, default rescue.tgz
-	-k kernel	kernel to copy in the image
+Usage: mkimg.sh [-s service] [-m megabytes] [-i image] [-x set]
+       [-k kernel] [-o] [-c URL]
+        Create a root image
+        -s service      service name, default "rescue"
+        -r rootdir      hand crafted root directory to use
+        -m megabytes    image size in megabytes, default 10
+        -i image        image name, default rescue-[arch].img
+        -x sets         list of NetBSD sets, default rescue.tgz
+        -k kernel       kernel to copy in the image
+        -c URL          URL to a script to execute as finalizer
+        -o              read-only root filesystem
 ```
 - `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x86_64` or `qemu-system-aarch64`
 ```text
 Usage:  startnb.sh -f conffile | -k kernel -i image [-c CPUs] [-m memory]
         [-a kernel parameters] [-r root disk] [-h drive2] [-p port] [-b]
-        [-w path] [-x qemu extra args] [-d] [-v]
+        [-t tcp serial port] [-w path] [-x qemu extra args] [-s] [-d] [-v]
 
         Boot a microvm
         -f conffile     vm config file
         -k kernel       kernel to boot on
         -i image        image to use as root filesystem
-        -c cpus         number of CPUs
+        -c cores        number of CPUs
         -m memory       memory in MB
         -a parameters   append kernel parameters
         -r root disk    root disk to boot on
-        -h drive2       second drive to pass to image
+        -l drive2       second drive to pass to image
+        -t serial port  TCP serial port
         -p ports        [tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
         -w path         host path to share with guest (9p)
         -x arguments    extra qemu arguments
         -b              bridge mode
+        -s              don't lock image file
         -d              daemonize
         -v              verbose
+        -h              this help
 ```
 - `startnb_nommio.sh` (**deprecated**) starts a _NetBSD_ virtual machine with no support for _MMIO_
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
