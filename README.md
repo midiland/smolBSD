@@ -132,7 +132,7 @@ And then add this to your `rc`:
 
 For the microvm to start instantly, you will need a kernel that is capable of "direct booting" with the `qemu -kernel` flag.
 
-**For `i386`/`multiboot` (deprecated)**
+**For `i386`/`multiboot` (deprecated) 💀 **
 
 > &#x26A0; Unless demand arises, `i386` version of this project is considered archived and will not evolve anymore
 
@@ -154,7 +154,7 @@ $ cp netbsd-GENERIC netbsd-SMOL
 $ confkerndev/confkerndevi386 -v -i netbsd-SMOL -K virtio.list -w
 ```
 
-**For `amd64`/`PVH`**
+**For `amd64`/`PVH` **
 
 Download the `SMOL` kernel
 
@@ -162,7 +162,7 @@ Download the `SMOL` kernel
 $ curl -O https://smolbsd.org/assets/netbsd-SMOL
 ```
 
-**For `aarch64`**
+**For `aarch64` **
 
 Download a regular `netbsd-GENERIC64.img` kernel
 
