@@ -316,6 +316,19 @@ $ dd if=/dev/zero bs=1M count=4000 >> NetBSD-amd64-live.img
 ```
 And reboot.
 
+## Basic frontend
+
+A simple virtual machine manager is available in the `app/` directory, it is a
+`python/Flask` application and needs the following requirements:
+
+* `Flask`
+* `psutil`
+
+Start it in the `app/` directory like this: `python3 app.py` and a _GUI_ like
+the following should be available at `http://localhost:5000`:
+
+![smolGUI](gui.png)
+
 [0]: https://gitlab.com/0xDRRB/confkerndev
 [1]: https://man.netbsd.org/x86/multiboot.8
 [2]: https://www.linux-kvm.org/page/Main_Page
