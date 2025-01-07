@@ -100,6 +100,7 @@ img=${img:-$NBIMG}
 
 OS=$(uname -s)
 MACHINE=$(uname -m) # Linux and macos x86
+QEMU="qemu-system-${MACHINE}"
 
 cputype="host"
 
@@ -140,7 +141,9 @@ x86_64|i386)
 	mflags="-M microvm,rtc=on,acpi=off,pic=off${ACCEL}"
 	cpuflags="-cpu ${cputype},+invtsc"
 	root=${root:-"ld0a"}
-	extra="$extra -L bios -bios bios-microvm.bin"
+	# stack smashing with version 9.0 and 9.1
+	${QEMU} --version|egrep -q '9\.[01]' && \
+		extra="$extra -L bios -bios bios-microvm.bin"
 	;;
 aarch64)
 	mflags="-M virt${ACCEL},highmem=off,gic-version=3"
@@ -165,7 +168,7 @@ fi
 # QMP is available
 [ -n "${qmp_port}" ] && extra="$extra -qmp tcp:localhost:${qmp_port},server,wait=off"
 
-cmd="qemu-system-${MACHINE} -smp $cores \
+cmd="${QEMU} -smp $cores \
 	$mflags -m $mem $cpuflags \
 	-kernel $kernel -append \"console=com root=${root} ${append}\" \
 	-global virtio-mmio.force-legacy=false ${share} \

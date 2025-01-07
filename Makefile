@@ -9,25 +9,29 @@ GROUP!= 	id -gn
 ifneq (${WHOAMI}, root)
 SUDO!=		command -v doas || echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
 endif
-# sets to fetch
-RESCUE=		rescue.tar.xz etc.tar.xz
-BASE=		base.tar.xz etc.tar.xz
-PROF=		${BASE} comp.tar.xz
-NBAKERY=	${BASE} comp.tar.xz
-BOZO=		${BASE}
-IMGBUILDER=	${BASE}
+SETSEXT=tar.xz
+SETSDIR=sets/${ARCH}
 
 ifeq (${ARCH}, evbarm-aarch64)
 KERNEL=		netbsd-GENERIC64.img
 LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/gzimg/arm64.img.gz
 else ifeq (${ARCH}, i386)
 KERNEL=		netbsd-GENERIC
+SETSEXT=	tgz
 else
 KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
 LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-10.99.12-amd64-live.img.gz
 endif
 LIVEIMG=	NetBSD-${ARCH}-live.img
+
+# sets to fetch
+RESCUE=		rescue.${SETSEXT} etc.${SETSEXT}
+BASE=		base.${SETSEXT} etc.${SETSEXT}
+PROF=		${BASE} comp.${SETSEXT}
+NBAKERY=	${BASE} comp.${SETSEXT}
+BOZO=		${BASE}
+IMGBUILDER=	${BASE}
 
 ifeq ($(shell uname -m), x86_64)
 ROOTFS?=	-r ld0a
@@ -68,11 +72,10 @@ kernfetch:
 	)
 
 setfetch:
-	setsdir=sets/${ARCH} && \
-	[ -d $${setsdir} ] || mkdir -p $${setsdir} && \
-	for s in $${SETS}; do \
-		if [ ! -f $${setsdir}/$$s ]; then \
-			curl -L -O --output-dir $${setsdir} ${DIST}/sets/$$s; \
+	[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
+	for s in ${SETS}; do \
+		if [ ! -f ${SETSDIR}/$$s ]; then \
+			curl -L -o ${SETSDIR}/$$s ${DIST}/sets/$$s; \
 		fi; \
 	done
 
