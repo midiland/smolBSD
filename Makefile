@@ -1,6 +1,5 @@
 VERS?=		10
 ARCH?=		amd64
-SMOLI386=	netbsd-SMOLi386
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 KDIST=		${DIST}
 WHOAMI!=	whoami
@@ -16,7 +15,8 @@ ifeq (${ARCH}, evbarm-aarch64)
 KERNEL=		netbsd-GENERIC64.img
 LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/gzimg/arm64.img.gz
 else ifeq (${ARCH}, i386)
-KERNEL=		netbsd-GENERIC
+KERNEL=		netbsd-SMOL386
+KDIST=		https://smolbsd.org/assets
 SETSEXT=	tgz
 else
 KERNEL=		netbsd-SMOL
@@ -65,7 +65,7 @@ SVCSZ?=		128
 kernfetch:
 	@echo "fetching ${KERNEL}"
 	@[ -f ${KERNEL} ] || ( \
-		[ "${ARCH}" = "amd64" ] && \
+		[ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ] && \
 			curl -L -O ${KDIST}/${KERNEL} || \
 			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
 				gzip -dc > ${KERNEL} \
@@ -78,16 +78,6 @@ setfetch:
 			curl -L -o ${SETSDIR}/$$s ${DIST}/sets/$$s; \
 		fi; \
 	done
-
-smoli386:	kernfetch
-	[ -f ${SMOLI386} ] || { \
-		[ -d confkerndev ] || \
-		git clone https://gitlab.com/0xDRRB/confkerndev.git; \
-		cd confkerndev && make NBVERS=${VERS} i386; cd ..; \
-		cp -f ${KERNEL} ${SMOLI386}; \
-		confkerndev/confkerndevi386 -v -i ${SMOLI386} -K virtio.list -w; \
-		cp -f ${SMOLI386} ${KERNEL}
-	}
 
 rescue:
 	$(MAKE) setfetch SETS="${RESCUE}"

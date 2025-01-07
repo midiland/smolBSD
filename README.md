@@ -1,19 +1,15 @@
 # smolBSD
 
-This is an ongoing project that aims at creating a minimal _NetBSD_ virtual machine that's
-able to boot and start a service in less than a second.  
-Previous _NetBSD_ installation is not required, using the provided tools the microvm can be
+This project aims at creating a minimal _NetBSD_ virtual machine that's able to boot and
+start a service in less than a second.  
+Previous _NetBSD_ installation is not required, using the provided tools the _microvm_ can be
 created from any _NetBSD_ or _GNU/Linux_ system.
 
 When creating the image on a _NetBSD_ system, the image will be formatted using FFS, when
 creating the image on a _GNU/Linux_ system, the image will be formatted using _ext2_.
 
-Note that this is currently more a proof of concept, don't judge the scripts as they are!
-
-As of December 2024, this method can use to create or fetch a low footprint kernel for use with the images:
-
-* [multiboot][1] to boot directly the kernel from [kvm][2], but warning, only `i386` virtual machines can be created as _NetBSD_ only supports [multiboot][1] with this architecture as of now.
-* [PVH][4] this newer method works with _NetBSD/amd64_ and is available in my [NetBSD development branch][5] but you can still fetch a pre-built kernel at https://smolbsd.org/assets/netbsd-SMOL, warning this is a _NetBSD-current_ kernel
+[PVH][4] boot and various optimizations enable _NetBSD/amd64_ and _NetBSD/i386_ to directly boot from a [PVH][4] capable VMM (QEMU or Firecracker) in a couple **ms**. The code for these features is available in my [NetBSD development branch][5] and are slowly integrated into _NetBSD_'s source tree. You can fetch a pre-built 64 bits kernel at https://smolbsd.org/assets/netbsd-SMOL and a 32 bits kernel at https://smolbsd.org/assets/netbsd-SMOL386  
+Warning those are _NetBSD-current_ kernels!
 
 `aarch64` `netbsd-GENERIC64` kernels are able to boot directly to the kernel with no modification
 
@@ -72,10 +68,8 @@ Usage:  startnb.sh -f conffile | -k kernel -i image [-c CPUs] [-m memory]
         -v              verbose
         -h              this help
 ```
-- `startnb_nommio.sh` (**deprecated**) starts a _NetBSD_ virtual machine with no support for _MMIO_
 - `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
 - `etc` holds common `/etc` files to be installed in the root filesystem
-- `kstrip.sh` (**deprecated**, now use [confkerndev][0]) strips the kernel from any useless driver to improve boot speed on `i386`
 - `service` structure:
 
 ```sh
@@ -132,34 +126,17 @@ And then add this to your `rc`:
 
 For the microvm to start instantly, you will need a kernel that is capable of "direct booting" with the `qemu -kernel` flag.
 
-**For `i386`/`multiboot` (deprecated) 💀**
-
-> &#x26A0; Unless demand arises, `i386` version of this project is considered archived and will not evolve anymore
-
-Download a `GENERIC` _NetBSD_ kernel
-
-```shell
-$ curl -L -o- https://cdn.netbsd.org/pub/NetBSD/${rel}/${arch}/binary/kernel/netbsd-GENERIC.gz | gzip -dc > netbsd-GENERIC
-
-```
-
-Now the main trick, in order to decrease kernel boot time, we will disable all drivers except
-the ones absolutely needed to boot a virtual machine with `VirtIO` disk and network, using
-https://gitlab.com/0xDRRB/confkerndev
-
-```shell
-$ git clone https://gitlab.com/0xDRRB/confkerndev.git
-$ cd confkerndev && make i386
-$ cp netbsd-GENERIC netbsd-SMOL
-$ confkerndev/confkerndevi386 -v -i netbsd-SMOL -K virtio.list -w
-```
-
-**For `amd64`/`PVH`**
+**For `amd64`/`PVH` and `i386`/`PVH`**
 
 Download the `SMOL` kernel
 
+* 64 bits
 ```shell
 $ curl -O https://smolbsd.org/assets/netbsd-SMOL
+```
+* 32 bits
+```shell
+$ curl -O https://smolbsd.org/assets/netbsd-SMOL386
 ```
 
 **For `aarch64`**
@@ -179,10 +156,15 @@ $ make rescue
 ```
 Will create a `rescue-amd64.img` file for use with an _amd64_ kernel.
 ```shell
+$ make ARCH=i386 rescue
+```
+Will create a `rescue-i386.img` file for use with an _i386_ kernel.
+```shell
 $ make ARCH=evbarm-aarch64 rescue
 ```
 Will create a `rescue-evbarm-aarch64.img` file for use with an _aarch64_ kernel.
 
+Start the microvm
 ```shell
 $ ./startnb.sh -k netbsd-SMOL -i rescue-amd64.img
 ```
