@@ -72,7 +72,9 @@ if [ -n "$is_linux" ]; then
 		echo "This image must be built on NetBSD!"
 		exit 1
 	fi
-	u=M || u=m
+	u=M
+else
+	u=m
 fi
 
 dd if=/dev/zero of=./${img} bs=1${u} count=${megs}
