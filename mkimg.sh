@@ -67,7 +67,13 @@ esac
 [ -n "$is_darwin" -o -n "$is_unknown" ] && \
 	echo "${progname}: OS is not supported" && exit 1
 
-[ -n "$is_linux" ] && u=M || u=m
+if [ -n "$is_linux" ]; then
+	if [ -f "service/${svc}/NETBSD_ONLY" ]; then
+		echo "This image must be built on NetBSD!"
+		exit 1
+	fi
+	u=M || u=m
+fi
 
 dd if=/dev/zero of=./${img} bs=1${u} count=${megs}
 
@@ -132,7 +138,7 @@ fi
 			[ "${x##*/}" != "${SVCIMG}.sh" ] && continue
 			echo "SVCIMG=$SVCIMG" > etc/svc
 		fi
-		sh $x
+		[ -f $x ] && sh $x
 	done
 
 # newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
