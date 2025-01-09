@@ -179,7 +179,7 @@ $ ./startnb.sh -k netbsd-GENERIC64.img -i base-evbarm-aarch64.img
 ## Example of an image running the `bozohttpd` web server on an `aarch64` CPU
 
 ```shell
-$ make ARCH=evbarm-aarch64 bozohttpd
+$ make ARCH=evbarm-aarch64 SERVICE=bozohttpd base
 $ ./startnb.sh -k netbsd-GENERIC64.img -i bozohttpd-evbarm-aarch64.img -p ::8080-:80
 [   1.0000000] NetBSD/evbarm (fdt) booting ...
 [   1.0000000] NetBSD 10.99.11 (GENERIC64)     Notice: this software is protected by copyright
