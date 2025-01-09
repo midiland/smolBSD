@@ -62,6 +62,9 @@ PORT?=		::22022-:22
 # default size for disk built by imgbuilder
 SVCSZ?=		128
 
+SERVICE?=	$@
+IMGSIZE?=	512
+
 kernfetch:
 	@echo "fetching ${KERNEL}"
 	@[ -f ${KERNEL} ] || ( \
@@ -86,24 +89,15 @@ rescue:
 
 base:
 	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
+	${SUDO} ./mkimg.sh -i ${SERVICE}-${ARCH}.img -s ${SERVICE} \
+		-m ${IMGSIZE} -x "${BASE}" ${EXTRAS}
+	${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
 
 prof:
 	$(MAKE) setfetch SETS="${PROF}"
 	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k ${KERNEL} -x "${PROF}" \
 		${EXTRAS}
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
-
-bozohttpd:
-	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
-
-tslog:
-	$(MAKE) setfetch SETS="${BASE}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 512 -x "${BASE}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
 
 nbakery:
 	$(MAKE) setfetch SETS="${NBAKERY}"
