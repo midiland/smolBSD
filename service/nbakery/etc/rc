@@ -134,6 +134,7 @@ if dmesg |grep -q vio9; then
 	echo "➡️ host filesystem mounted on /mnt"
 fi
 
+ttyflags -a
 
 hostname nbakery
 

@@ -8,8 +8,3 @@ done
 
 ln -s /etc/sv/sshd service/
 
-# runit needs the service to not bg
-cat >>etc/rc.conf<<EOF
-sshd_flags="-D"
-sshd=YES
-EOF

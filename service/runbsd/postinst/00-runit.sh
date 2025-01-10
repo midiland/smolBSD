@@ -37,8 +37,5 @@ ln -s /etc/sv/getty-0 service/
 cp -p sbin/init sbin/init.bsd
 cp -p sbin/runit-init sbin/init
 
-sed -i.bak 's/rc_configured=NO/rc_configured=YES/' etc/rc.conf
-
-cd dev
-sh MAKEDEV all
+cd dev && sh MAKEDEV all
 cd -
