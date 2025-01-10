@@ -1,1 +1,19 @@
-. /etc/include/basicrc
+#!/bin/sh
+
+# usually done by /sbin/init
+cd /dev && sh MAKEDEV -M all
+cd -
+
+[ -f /etc/rc.conf ] && . /etc/rc.conf
+
+/etc/rc.d/bootconf.sh start
+/etc/rc.d/root start
+/etc/rc.d/ttys start
+/etc/rc.d/sysctl start
+/etc/rc.d/entropy start
+/etc/rc.d/network start
+/etc/rc.d/mountall start
+/etc/rc.d/motd start
+/etc/rc.d/local start
+
+chmod 666 /dev/null
