@@ -45,9 +45,6 @@ megs=${megs:-"20"}
 img=${img:-"rescue-${arch}.img"}
 sets=${sets:-"rescue.tar.xz"}
 
-[ ! -f service/${svc}/etc/rc ] && \
-	echo "no service/${svc}/etc/rc available" && exit 1
-
 OS=$(uname -s)
 
 case $OS in
@@ -111,8 +108,8 @@ else
 
 fi
 
-cp -f service/${svc}/etc/* ${mnt}/etc/
-cp -f service/common/* ${mnt}/etc/include/
+cp -Rf service/${svc}/etc/* ${mnt}/etc/
+cp -Rf service/common/* ${mnt}/etc/include/
 
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
 echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
@@ -140,6 +137,7 @@ fi
 			[ "${x##*/}" != "${SVCIMG}.sh" ] && continue
 			echo "SVCIMG=$SVCIMG" > etc/svc
 		fi
+		echo "executing $x"
 		[ -f $x ] && sh $x
 	done
 
