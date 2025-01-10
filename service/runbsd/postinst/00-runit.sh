@@ -1,3 +1,6 @@
+#!/bin/sh
+
+# switch from /sbin/init to runit!
 PATH=$PATH:/usr/pkg/bin:/usr/pkg/sbin
 for d in "" s
 do
@@ -34,5 +37,8 @@ ln -s /etc/sv/getty-0 service/
 cp -p sbin/init sbin/init.bsd
 cp -p sbin/runit-init sbin/init
 
+sed -i.bak 's/rc_configured=NO/rc_configured=YES/' etc/rc.conf
+
 cd dev
 sh MAKEDEV all
+cd -
