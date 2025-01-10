@@ -108,11 +108,11 @@ else
 
 fi
 
-cp -Rf service/${svc}/etc/* ${mnt}/etc/
-cp -Rf service/common/* ${mnt}/etc/include/
-
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
 echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
+
+cp -Rf service/${svc}/etc/* ${mnt}/etc/
+cp -Rf service/common/* ${mnt}/etc/include/
 
 [ -n "$kernel" ] && cp -f $kernel ${mnt}/
 
