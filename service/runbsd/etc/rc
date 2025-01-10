@@ -1,19 +1,35 @@
 #!/bin/sh
 
-# usually done by /sbin/init
-cd /dev && sh MAKEDEV -M all
-cd -
+export HOME=/
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
+umask 022
+
+mount -a
 
 [ -f /etc/rc.conf ] && . /etc/rc.conf
 
 /etc/rc.d/bootconf.sh start
-/etc/rc.d/root start
-/etc/rc.d/ttys start
-/etc/rc.d/sysctl start
-/etc/rc.d/entropy start
-/etc/rc.d/network start
-/etc/rc.d/mountall start
-/etc/rc.d/motd start
-/etc/rc.d/local start
+
+# usually done by /sbin/init
+cd /dev && sh MAKEDEV -M all
+cd -
+
+# basic services to start at boot
+STARTSVC="
+ttys
+sysctl
+entropy
+network
+local
+"
+
+for svc in $STARTSVC
+do
+	/etc/rc.d/${svc} start
+done
 
 chmod 666 /dev/null
+
+cp /etc/banner.ans /etc/motd
+printf "\e[0m  :: powered by 🚩 \e[38;5;208mNetBSD\e[0m $(uname -r)\n\n" \
+	>>/etc/motd

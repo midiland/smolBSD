@@ -12,10 +12,10 @@ SERVICE_NAME=\$(basename "\$DIR_PATH")
 
 case "\$PROG_NAME" in
 run)
-        ACTION="onestart"
+        ACTION="start"
         ;;
 finish)
-        ACTION="onestop"
+        ACTION="stop"
         ;;
 *)
         echo "unsupported"

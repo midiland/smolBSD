@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# https://smarden.org/runit/replaceinit
 # switch from /sbin/init to runit!
 PATH=$PATH:/usr/pkg/bin:/usr/pkg/sbin
 for d in "" s
