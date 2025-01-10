@@ -10,8 +10,13 @@ mount -a
 
 /etc/rc.d/bootconf.sh start
 
-# usually done by /sbin/init
-cd /dev && sh MAKEDEV -M all
+# usually done by the kernel
+cd /dev
+# /dev is a union fs, permissions are recorded and bad
+# after reboot for those. MAKEDEV doesn't re-create them
+# and -f fails with "-f option works only with mknod"
+rm -f tty null std*
+sh MAKEDEV -M -M all
 cd -
 
 # basic services to start at boot
