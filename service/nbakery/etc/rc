@@ -4,7 +4,6 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 export TERM=tmux-256color
 resize >/dev/null # get current window size
 
-mount -t tmpfs tmpfs /tmp
 route flush -inet6 >/dev/null 2>&1
 
 lightgreen="\033[92m"
@@ -44,8 +43,10 @@ if [ ! -d ${NBHOME} ]; then
 		mkdir -p ${NBHOME}/.tmux
 		curl -s -Lo ${NBHOME}/.tmux/tmux-power.tmux \
 			https://raw.githubusercontent.com/wfxr/tmux-power/master/tmux-power.tmux
-			sed -i.bak 's/status-right "$RS"/status-right ""/' \
+		sed -i.bak 's/status-right "$RS"/status-right ""/' \
 				${NBHOME}/.tmux/tmux-power.tmux
+		chmod +x ${NBHOME}/.tmux/tmux-power.tmux
+
 		printbold "⭐ kawaï vimrc"
 		mkdir -p ${NBHOME}/.vim/colors
 		curl -s -Lo ${NBHOME}/.vim/colors/molokai.vim \
@@ -69,6 +70,10 @@ export PAGER=less
 export NBUSER=${NBUSER}
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 
+lightgreen="${lightgreen}"
+bold="${bold}"
+normal="${normal}"
+
 LANG=en_US.UTF-8; export LANG
 
 POWERLINE_ICONS=nerd-fonts
@@ -88,18 +93,14 @@ POWERLINE_HOSTNAME_BG="violet"
 
 PROMPT_COMMAND='__update_ps1 \$?'
 
-# tmux must be suid root to allow /dev/console usage from $NBUSER
-[ -S "${TMUX_SOCKET}" ] && \
-	[ "\$(stat -f '%Su' ${TMUX_SOCKET})" != "$NBUSER" ] && \
-	doas chown $NBUSER ${TMUX_SOCKET}
-
-if [ ! -f /tmp/greetings ]; then
+if [ -d /tmp/tmux* -a ! -f /tmp/greetings ]; then
 	echo -e "
 Welcome to the (n)bakery! 🧁
 
-💪 ${lightgreen}doas <command>${normal} to run command as ${bold}root${normal}
-📦 ${lightgreen}pkgin${normal} to manage packages
-🚪 ${lightgreen}exit${normal} to cleanly shutdown, ${lightgreen}^a-x${normal} to exit ${lightgreen}qemu${normal}
+💪 \${lightgreen}doas <command>\${normal} to run command as \${bold}root\${normal}
+📦 \${lightgreen}pkgin\${normal} to manage packages
+🚪 \${lightgreen}exit\${normal} to cleanly shutdown, \${lightgreen}^a-x\${normal} to exit \${lightgreen}qemu\${normal}
+🪟 you are inside a \${lightgreen}tmux\${normal} with prefix \${lightgreen}^q\${normal}
 "
 	touch /tmp/greetings
 fi
@@ -116,8 +117,9 @@ bind q send-prefix
 set-option -g default-command "bash -l"
 set -g default-terminal "tmux-256color"
 set -g @tmux_power_theme 'moon'
+run '~/.tmux/tmux-power.tmux'
 EOF
-		chown -R ${NBUSER} ${NBHOME}
+		chown -R ${NBUSER} ${NBHOME} ${NBHOME}/.*
 
 		printbold "⭐ adding $NBUSER to group wheel"
 		usermod -G wheel $NBUSER
@@ -134,20 +136,8 @@ if dmesg |grep -q vio9; then
 	echo "➡️ host filesystem mounted on /mnt"
 fi
 
-ttyflags -a
-
 hostname nbakery
 
-# horrible hack to get tmux working on the console
-chmod 4755 /usr/bin/tmux
-mkdir -p ${NBHOME}/tmp && chown -R ${NBUSER} ${NBHOME}/tmp
-[ -S "${TMUX_SOCKET}" ] && rm -f ${TMUX_SOCKET}
-startmux()
-{
-	# another hack to get proper rights and variables, order matters
-	su - ${NBUSER} -c "bash -lc \"tmux -S ${TMUX_SOCKET}\""
-}
-
-su - ${NBUSER}
+su - ${NBUSER} -c "bash -lc \"tmux new\""
 
 . /etc/include/shutdown
