@@ -10,7 +10,7 @@ mount -a
 
 /etc/rc.d/bootconf.sh start
 
-# usually done by the kernel
+# tmpfs dev is usually done by init(8)
 cd /dev
 # /dev is a union fs, permissions are recorded and bad
 # after reboot for those. MAKEDEV doesn't re-create them
@@ -32,8 +32,6 @@ for svc in $STARTSVC
 do
 	/etc/rc.d/${svc} start
 done
-
-chmod 666 /dev/null
 
 cp /etc/banner.ans /etc/motd
 printf "\e[0m  :: powered by 🚩 \e[38;5;208mNetBSD\e[0m $(uname -r)\n\n" \
