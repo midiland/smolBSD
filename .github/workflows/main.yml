@@ -16,8 +16,8 @@ on:
         description: "Architecture"
         required: true
         default: "amd64"
-      svcimg:
-        description: "Image builder service"
+      service:
+        description: "Service to build on top of image"
         required: false
         default:
       mountro:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Build image
         run: |
-          make NOSVCIMGBUILD=yes SVCIMG=${{ inputs.svcimg }} CURLSH=${{ inputs.curlsh }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
+          make SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
 
       - uses: actions/upload-artifact@v4
         with:
