@@ -2,7 +2,7 @@
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 export TERM=tmux-256color
-resize >/dev/null # get current window size
+eval $(resize) # get current window size
 
 route flush -inet6 >/dev/null 2>&1
 
@@ -23,7 +23,7 @@ export CHOUPI=y
 if [ ! -d ${NBHOME} ]; then
 	. /etc/include/pkgin
 
-	PACKAGES="bash git-base vim curl doas ripgrep fd-find"
+	PACKAGES="bash git-base vim curl doas ripgrep fd-find bat"
 
 	if ! id NBUSER >/dev/null 2>&1; then
 	
@@ -43,7 +43,7 @@ if [ ! -d ${NBHOME} ]; then
 		mkdir -p ${NBHOME}/.tmux
 		curl -s -Lo ${NBHOME}/.tmux/tmux-power.tmux \
 			https://raw.githubusercontent.com/wfxr/tmux-power/master/tmux-power.tmux
-		sed -i.bak 's/status-right "$RS"/status-right ""/' \
+		sed -i.bak 's/status-right "$RS"/status-right ":: powered by 🚩 + smolBSD "/' \
 				${NBHOME}/.tmux/tmux-power.tmux
 		chmod +x ${NBHOME}/.tmux/tmux-power.tmux
 
@@ -75,6 +75,9 @@ bold="${bold}"
 normal="${normal}"
 
 LANG=en_US.UTF-8; export LANG
+
+alias cat="bat -pp"
+alias less="bat -p"
 
 POWERLINE_ICONS=nerd-fonts
 POWERLINE_SEGMENTS="hostname archi pwd python status"
@@ -138,6 +141,6 @@ fi
 
 hostname nbakery
 
-su - ${NBUSER} -c "bash -lc \"tmux new\""
+su - ${NBUSER} -c "tmux -u new"
 
 . /etc/include/shutdown
