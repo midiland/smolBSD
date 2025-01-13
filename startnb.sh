@@ -100,7 +100,6 @@ img=${img:-$NBIMG}
 
 OS=$(uname -s)
 MACHINE=$(uname -m) # Linux and macos x86
-QEMU="qemu-system-${MACHINE}"
 
 cputype="host"
 
@@ -131,6 +130,8 @@ OpenBSD)
 *)
 	echo "Unknown hypervisor, no acceleration"
 esac
+
+QEMU="qemu-system-${MACHINE}"
 
 mem=${mem:-"256"}
 cores=${cores:-"1"}
