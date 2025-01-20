@@ -23,7 +23,7 @@ export CHOUPI=y
 if [ ! -d ${NBHOME} ]; then
 	. /etc/include/pkgin
 
-	PACKAGES="bash git-base vim curl doas ripgrep fd-find bat"
+	PACKAGES="bash git-base neovim curl doas ripgrep fd-find bat fzf"
 
 	if ! id NBUSER >/dev/null 2>&1; then
 	
@@ -34,10 +34,13 @@ if [ ! -d ${NBHOME} ]; then
 		echo "➡️  $PACKAGES"
 		pkgin -y in $PACKAGES
 
-		printbold "⭐ cloning powerline.bash"
-		mkdir ${NBHOME}/.config
-		curl -s -Lo ${NBHOME}/.config/powerline.bash \
-			https://gitlab.com/bersace/powerline-bash/raw/master/powerline.bash
+		export HOSTNAME_FG="blanc"
+		export HOSTNAME_BG="violet"
+
+		printbold "⭐ setup powerline.bash"
+		curl -o- -s \
+			https://gitlab.com/-/snippets/4796585/raw/main/mkchoupi.sh | \
+			bash > ${NBHOME}/.bashoupi
 
 		printbold "⭐ cloning tmux-power"
 		mkdir -p ${NBHOME}/.tmux
@@ -58,13 +61,22 @@ set t_Co=256
 color molokai
 let g:molokai_original = 1
 let g:rehash256 = 1
+set list listchars=tab:»\ 
+EOF
+		# nvim is the only editor I found that does not mess
+		# with tab display in qemu stdio mode
+		mkdir -p ${NBHOME}/.config/nvim
+		cat >${NBHOME}/.config/nvim/init.vim<<EOF
+set runtimepath^=~/.vim runtimepath+=~/.vim/after
+let &packpath = &runtimepath
+source ~/.vimrc
 EOF
 
 		printbold "⭐ creating a nice prompt"
 		chsh -s /usr/pkg/bin/bash ${NBUSER}
 		cat >/home/${NBUSER}/.bash_profile<<EOF
 export HOME=${NBHOME}
-export EDITOR=vim
+export EDITOR=nvim
 export VISUAL=\${EDITOR}
 export PAGER=less
 export NBUSER=${NBUSER}
@@ -78,23 +90,12 @@ LANG=en_US.UTF-8; export LANG
 
 alias cat="bat -pp"
 alias less="bat -p"
+alias vim=nvim
+alias vi=nvim
 
-POWERLINE_ICONS=nerd-fonts
-POWERLINE_SEGMENTS="hostname archi pwd python status"
-declare -A POWERLINE_COLORS
-POWERLINE_COLORS=(
-    [commande-utilisateur]=blanc
-)
-declare -A POWERLINE_ICONS_OVERRIDES
-POWERLINE_ICONS_OVERRIDES=(
-    [hostname]=$'\uf98c'
-)
-POWERLINE_HOSTNAME_FG="blanc"
-POWERLINE_HOSTNAME_BG="violet"
+stty speed 115200 >/dev/null
 
-. \${HOME}/.config/powerline.bash
-
-PROMPT_COMMAND='__update_ps1 \$?'
+. \${HOME}/.bashoupi
 
 if [ -d /tmp/tmux* -a ! -f /tmp/greetings ]; then
 	echo -e "
