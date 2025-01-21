@@ -1,3 +1,5 @@
+#!/bin/sh
+
 . /etc/include/basicrc
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
@@ -50,29 +52,17 @@ if [ ! -d ${NBHOME} ]; then
 				${NBHOME}/.tmux/tmux-power.tmux
 		chmod +x ${NBHOME}/.tmux/tmux-power.tmux
 
-		printbold "⭐ kawaï vimrc"
-		mkdir -p ${NBHOME}/.vim/colors
-		curl -s -Lo ${NBHOME}/.vim/colors/molokai.vim \
-			https://raw.githubusercontent.com/tomasr/molokai/refs/heads/master/colors/molokai.vim
-		cat >${NBHOME}/.vimrc<<EOF
-set nocompatible
-syntax on
-set t_Co=256
-color molokai
-let g:molokai_original = 1
-let g:rehash256 = 1
-set list listchars=tab:»\ 
-EOF
 		# nvim is the only editor I found that does not mess
 		# with tab display in qemu stdio mode
+		printbold "⭐ kawaï nvim"
+		mkdir -p ${NBHOME}/.local/share/nvim/site/autoload
+		curl -s -Lo ${NBHOME}/.local/share/nvim/site/autoload/plug.vim \
+			https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 		mkdir -p ${NBHOME}/.config/nvim
-		cat >${NBHOME}/.config/nvim/init.vim<<EOF
-set runtimepath^=~/.vim runtimepath+=~/.vim/after
-let &packpath = &runtimepath
-source ~/.vimrc
-EOF
+		curl -s -Lo ${NBHOME}/.config/nvim/init.lua \
+			https://gitlab.com/-/snippets/4797133/raw/main/init.lua
 
-		printbold "⭐ creating a nice prompt"
+		printbold "⭐ creating a sane bach_profile"
 		chsh -s /usr/pkg/bin/bash ${NBUSER}
 		cat >/home/${NBUSER}/.bash_profile<<EOF
 export HOME=${NBHOME}
@@ -96,6 +86,10 @@ alias vi=nvim
 stty speed 115200 >/dev/null
 
 . \${HOME}/.bashoupi
+
+# download modules, ignore complains about modules not being installed
+[ ! -d \${HOME}/.local/share/nvim/plugged ] && \
+		nvim --headless +PlugInstall +qall 2>/dev/null
 
 if [ -d /tmp/tmux* -a ! -f /tmp/greetings ]; then
 	echo -e "
