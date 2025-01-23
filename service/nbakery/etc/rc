@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# custom local preload
+[ -f /etc/rc.pre ] && . /etc/rc.pre
+
 . /etc/include/basicrc
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
@@ -122,7 +125,8 @@ EOF
 		printbold "⭐ adding $NBUSER to group wheel"
 		usermod -G wheel $NBUSER
 		printbold "⭐ permit $NBUSER to ${lightgreen}doas${normal}"
-		echo "permit nopass keepenv :wheel" >/usr/pkg/etc/doas.conf
+		echo "permit nopass keepenv setenv { PATH } :wheel" \
+			>/usr/pkg/etc/doas.conf
 	fi
 fi
 
