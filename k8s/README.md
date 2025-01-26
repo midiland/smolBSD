@@ -38,7 +38,7 @@ $ curl http://localhost:8080
 
 The [generic device plugin][1] is needed in order to expose `/dev/kvm` to the container without running the _smolBSD_ pod it in privileged mode.
 
-Apply this modified version of `k8s/generic-device-plugin.yaml` to your _k8s_ cluster:
+Apply this [modified version][2] of `k8s/generic-device-plugin.yaml` to your _k8s_ cluster:
 
 ```sh
 $ kubectl apply -f k8s/generic-device-plugin.yaml
@@ -70,6 +70,22 @@ spec:
       limits:
         squat.ai/kvm: 1
 ```
+Apply it
+```sh
+$ kubectl apply -f k8s/smolbozo.yaml
+```
+Check it is running
+```sh
+$ kubectl get pods -n smolbsd -o wide
+NAME       READY   STATUS    RESTARTS   AGE   IP           NODE   NOMINATED NODE   READINESS GATES
+smolbozo   1/1     Running   0          41h   10.42.0.21   k3s    <none>           <none>
+```
+And curl it!
+```sh
+$ curl http://10.42.0.21:8080
+<html><body>up!</body></html>
+ ```
 
 [0]: https://github.com/NetBSDfr/smolBSD/tree/main/service/bozohttpd
 [1]: https://github.com/squat/generic-device-plugin
+[2]: https://github.com/NetBSDfr/smolBSD/blob/main/k8s/generic-device-plugin.yaml
