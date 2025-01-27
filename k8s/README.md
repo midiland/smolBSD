@@ -70,8 +70,15 @@ spec:
       limits:
         squat.ai/kvm: 1
 ```
-Apply it
+> [!note]
+> you will either need to change the repository address for the `image` or setup a local repository:
+> * [with Kind][3]
+> * [with K3s][4]
+> With _Kind_, you can also [import the image][5] into the cluster, but beware to use fixed versions for the image, if `:latest` is used, the pull policy defaults to `Always`.
+
+Create the `smolbsd` _namespace_ and apply the manifest:
 ```sh
+$ kubectl create namespace smolbsd
 $ kubectl apply -f k8s/smolbozo.yaml
 ```
 Check it is running
@@ -89,3 +96,6 @@ $ curl http://10.42.0.21:8080
 [0]: https://github.com/NetBSDfr/smolBSD/tree/main/service/bozohttpd
 [1]: https://github.com/squat/generic-device-plugin
 [2]: https://github.com/NetBSDfr/smolBSD/blob/main/k8s/generic-device-plugin.yaml
+[3]: https://kind.sigs.k8s.io/docs/user/local-registry/
+[4]: https://docs.k3s.io/installation/private-registry
+[5]: https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster
