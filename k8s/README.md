@@ -74,6 +74,7 @@ spec:
 > you will either need to change the repository address for the `image` or setup a local repository:
 > * [with Kind][3]
 > * [with K3s][4]
+>
 > With _Kind_, you can also [import the image][5] into the cluster, but beware to use fixed versions for the image, if `:latest` is used, the pull policy defaults to `Always`.
 
 Create the `smolbsd` _namespace_ and apply the manifest:
