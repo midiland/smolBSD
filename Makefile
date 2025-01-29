@@ -68,8 +68,9 @@ SERVICE?=	$@
 IMGSIZE?=	512
 
 kernfetch:
-	@echo "fetching ${KERNEL}"
+	@mkdir -p kernels
 	@[ -f kernels/${KERNEL} ] || ( \
+		echo "fetching ${KERNEL}" && \
 		[ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ] && \
 			curl -L -o kernels/${KERNEL} ${KDIST}/${KERNEL} || \
 			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
