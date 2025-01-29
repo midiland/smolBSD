@@ -1,0 +1,6 @@
+type = internal
+restart = false
+options = runs-on-console
+
+depends-on: rc.boot
+waits-for: rc.fs

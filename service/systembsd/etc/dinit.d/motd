@@ -1,0 +1,5 @@
+type = scripted
+command = /etc/rc.d/motd start
+restart = false
+
+depends-on: rc.fs

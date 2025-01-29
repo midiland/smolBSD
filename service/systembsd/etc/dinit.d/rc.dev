@@ -1,0 +1,4 @@
+# tmpfs dev needs to execute before mounting
+type = scripted
+command = /etc/dinit.d/rc.dev.sh
+restart = false

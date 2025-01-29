@@ -1,0 +1,37 @@
+#!/bin/sh
+
+export HOME=/
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
+umask 022
+
+/sbin/mount -a
+
+# tmpfs dev is usually done by init(8)
+cd /dev
+# /dev is a union fs, permissions are recorded and bad
+# after reboot for those. MAKEDEV doesn't re-create them
+# and -f fails with "-f option works only with mknod"
+rm -f tty null std*
+sh MAKEDEV -M -M all
+cd -
+
+[ -f /etc/rc.conf ] && . /etc/rc.conf
+
+/etc/rc.d/bootconf.sh start
+
+# basic services to start at boot
+STARTSVC="
+ttys
+sysctl
+entropy
+network
+local
+"
+
+for svc in $STARTSVC
+do
+	/etc/rc.d/${svc} start
+done
+# dinit needs /var/run to be mounted in order to create
+# its socket
+#/sbin/dinit -m

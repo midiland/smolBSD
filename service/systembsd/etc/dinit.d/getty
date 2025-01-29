@@ -1,0 +1,7 @@
+type = process
+command = /usr/libexec/getty Pc constty
+termsignal = HUP
+smooth-recovery = true
+
+depends-on: motd
+depends-on: loginready
