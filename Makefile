@@ -69,11 +69,11 @@ IMGSIZE?=	512
 
 kernfetch:
 	@echo "fetching ${KERNEL}"
-	@[ -f ${KERNEL} ] || ( \
+	@[ -f kernels/${KERNEL} ] || ( \
 		[ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ] && \
-			curl -L -O ${KDIST}/${KERNEL} || \
+			curl -L -o kernels/${KERNEL} ${KDIST}/${KERNEL} || \
 			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
-				gzip -dc > ${KERNEL} \
+				gzip -dc > kernels/${KERNEL} \
 	)
 
 setfetch:
@@ -97,8 +97,8 @@ base:
 
 prof:
 	$(MAKE) setfetch SETS="${PROF}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k ${KERNEL} -x "${PROF}" \
-		${EXTRAS}
+	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k kernels/${KERNEL} \
+		-x "${PROF}" ${EXTRAS}
 	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
 
 nbakery:
@@ -118,7 +118,7 @@ imgbuilder:
 	# image unless $NOSVCIMGBUILD is set (probably a GL pipeline)
 	if [ -z "${NOSVCIMGBUILD}" ]; then \
 		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=${SVCSZ}; \
-		./startnb.sh -k ${KERNEL} -i $@-${ARCH}.img -a '-v' \
+		./startnb.sh -k kernels/${KERNEL} -i $@-${ARCH}.img -a '-v' \
 			-h ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
 	fi
 
