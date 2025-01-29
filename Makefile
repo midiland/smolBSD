@@ -6,7 +6,9 @@ WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
 ifneq (${WHOAMI}, root)
-SUDO!=		command -v doas || echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
+SUDO!=		command -v doas >/dev/null && \
+		echo "ARCH=${ARCH} VERS=${VERS} doas" || \
+		echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
 endif
 SETSEXT=tar.xz
 SETSDIR=sets/${ARCH}
