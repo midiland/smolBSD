@@ -2,17 +2,13 @@
 
 # https://smarden.org/runit/replaceinit
 # switch from /sbin/init to runit!
-PATH=$PATH:/usr/pkg/bin:/usr/pkg/sbin
-for d in "" s
-do
-	mkdir -p usr/pkg/${d}bin
-	cp -f /usr/pkg/${d}bin/pkg_* usr/pkg/${d}bin/
-done
-cp -f /etc/resolv.conf etc/
-cp -R /etc/openssl/* etc/openssl/
-mkdir -p usr/pkg/etc/pkgin
-cp -f /usr/pkg/etc/pkgin/repositories.conf usr/pkg/etc/pkgin/
-pkgin -y -c $(pwd) in runit
+
+PKGURL="https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${ARCH}/${VERS}.0/All"
+RUNPKG=$(curl -L -s ${PKGURL}|sed -nE "s/.*(runit-[a-z0-9\.]+).*/\1/p")
+
+mkdir -p usr/pkg
+curl -L -o- -s ${PKGURL}/${RUNPKG} | $TAR zxvfp - --exclude='+*' -C usr/pkg
+
 mkdir -p etc/runit
 cp -p usr/pkg/share/examples/runit/openbsd/1 etc/runit/
 sed 's/local/pkg/g' usr/pkg/share/examples/runit/openbsd/2 > etc/runit/2
@@ -37,6 +33,3 @@ mkdir -p service
 ln -s /etc/sv/getty-0 service/
 cp -p sbin/init sbin/init.bsd
 cp -p sbin/runit-init sbin/init
-
-cd dev && sh MAKEDEV all
-cd -
