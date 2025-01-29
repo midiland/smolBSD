@@ -4,3 +4,4 @@ options = runs-on-console
 
 depends-on: rc.boot
 waits-for: rc.fs
+waits-for: syslogd

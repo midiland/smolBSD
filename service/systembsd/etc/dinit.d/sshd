@@ -2,3 +2,5 @@ type = scripted
 command = /etc/rc.d/sshd onestart
 
 depends-on: loginready
+
+waits-for: syslogd
