@@ -4,20 +4,19 @@ export HOME=/
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 umask 022
 
-mount -a
-
-[ -f /etc/rc.conf ] && . /etc/rc.conf
-
-/etc/rc.d/bootconf.sh start
-
 # tmpfs dev is usually done by init(8)
 cd /dev
 # /dev is a union fs, permissions are recorded and bad
 # after reboot for those. MAKEDEV doesn't re-create them
 # and -f fails with "-f option works only with mknod"
-rm -f tty null std*
 sh MAKEDEV -M -M all
 cd -
+
+mount -a
+
+[ -f /etc/rc.conf ] && . /etc/rc.conf
+
+/etc/rc.d/bootconf.sh start
 
 # basic services to start at boot
 STARTSVC="
@@ -32,7 +31,3 @@ for svc in $STARTSVC
 do
 	/etc/rc.d/${svc} start
 done
-
-cp /etc/banner.ans /etc/motd
-printf "\e[0m  :: powered by 🚩 \e[38;5;208mNetBSD\e[0m $(uname -r)\n\n" \
-	>>/etc/motd
