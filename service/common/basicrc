@@ -1,3 +1,7 @@
+
+# custom local preload
+[ -f /etc/rc.pre ] && . /etc/rc.pre
+
 export HOME=/
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 umask 022
@@ -5,6 +9,7 @@ umask 022
 mount -a
 
 if ifconfig vioif0 >/dev/null 2>&1; then
+	route flush -inet6 >/dev/null 2>&1
 	# default qemu addresses and routing
 	ifconfig vioif0 10.0.2.15/24
 	route add default 10.0.2.2
