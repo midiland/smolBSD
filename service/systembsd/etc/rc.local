@@ -1,0 +1,3 @@
+# for design porposes, make root shell ksh
+grep -q '^root.*bin/sh' /etc/passwd && \
+	usermod -s /bin/ksh root || true
