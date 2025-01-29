@@ -25,6 +25,8 @@ Warning those are _NetBSD-current_ kernels!
   - `uuid-runtime` (for uuidgen)
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
+  - `rsync`
+  - `bsdtar`
 - A x86 VT-capable, or ARM64 CPU is recommended
 
 ## Project structure
