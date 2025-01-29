@@ -20,6 +20,14 @@ _USAGE_
 	exit 1
 }
 
+for tool in bsdtar rsync
+do
+	if ! command -v $tool >/dev/null; then
+		echo "$tool missing"
+		exit 1
+	fi
+done
+
 options="s:m:i:r:x:k:c:oh"
 
 while getopts "$options" opt
@@ -38,6 +46,8 @@ do
 	esac
 done
 
+export ARCH VERS
+
 arch=${ARCH:-"amd64"}
 
 svc=${svc:-"rescue"}
@@ -51,7 +61,9 @@ case $OS in
 NetBSD)
 	is_netbsd=1;;
 Linux)
-	is_linux=1;;
+	is_linux=1
+	TAR=bsdtar; export TAR
+	;;
 Darwin)
 	# might be supported in the future
 	is_darwin=1;;
@@ -61,14 +73,15 @@ OpenBSD)
 	is_unknown=1;
 esac
 
+if [ -z "$is_netbsd" -a -f "service/${svc}/NETBSD_ONLY" ]; then
+	printf "\nThis image must be built on NetBSD!\n"
+	exit 1
+fi
+
 [ -n "$is_darwin" -o -n "$is_unknown" ] && \
 	echo "${progname}: OS is not supported" && exit 1
 
 if [ -n "$is_linux" ]; then
-	if [ -f "service/${svc}/NETBSD_ONLY" ]; then
-		echo "This image must be built on NetBSD!"
-		exit 1
-	fi
 	u=M
 else
 	u=m
@@ -111,8 +124,10 @@ fi
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
 echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
 
-cp -Rf service/${svc}/etc/* ${mnt}/etc/
-cp -Rf service/common/* ${mnt}/etc/include/
+rsync -av service/${svc}/etc/ ${mnt}/etc/
+rsync -av service/common/ ${mnt}/etc/include/
+[ -d service/${svc}/packages ]  && \
+	rsync -av service/${svc}/packages ${mnt}/
 
 [ -n "$kernel" ] && cp -f $kernel ${mnt}/
 
@@ -145,7 +160,18 @@ fi
 # backup MAKEDEV so imgbuilder rc can copy it
 cp dev/MAKEDEV etc/
 # unionfs with ext2 leads to i/o error
-[ -z "$is_netbsd" ] && sed -i 's/-o union//g' dev/MAKEDEV
+# [ -z "$is_netbsd" ] &&
+sed -i 's/-o union//g' dev/MAKEDEV
+
+# bare minimum
+mknod -m 600 dev/console c 0 0
+mknod -m 600 dev/constty c 0 1
+mknod -m 666 dev/tty c 1 0
+mknod -m 666 dev/null c 2 2
+mknod -m 666 dev/stdin c 22 0
+mknod -m 666 dev/stdout c 22 1
+mknod -m 666 dev/stderr c 22 2
+
 
 # proceed with caution
 [ -n "$curlsh" ] && curl -sSL "$CURLSH" | /bin/sh
