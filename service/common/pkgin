@@ -15,7 +15,6 @@ if [ ! -d /var/db/pkgin ]; then
 		;;
 	esac
 	printf "\n${star} installing needed packages\n"
-	printf "${arrow} using proxy: $http_proxy\n"
 
 	ver=$(uname -r)
 	case $ver in
@@ -35,9 +34,11 @@ if [ ! -d /var/db/pkgin ]; then
 
 	certctl rehash
 
-	[ -n "$https_proxy" -o -n "$https_proxy" ] && \
+	if [ -n "$https_proxy" -o -n "$https_proxy" ]; then
+		printf "${arrow} using proxy: $http_proxy\n"
 		# libfetch doesn't support HTTPS proxying
 		scheme="http" || scheme="https"
+	fi
 
 	url="${scheme}://cdn.${url}"
 
@@ -47,6 +48,12 @@ if [ ! -d /var/db/pkgin ]; then
 		pkg_info $pkg >/dev/null 2>&1 || \
 			pkg_add ${v} ${url}/${pkg}*
 	done
+
+	[ -d /packages ] && \
+		for pkg in /packages/*
+		do
+			pkg_add ${v} $pkg
+		done
 
 	mkdir -p /usr/pkg/etc/pkgin
 	echo $url >/usr/pkg/etc/pkgin/repositories.conf
