@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# custom local preload
-[ -f /etc/rc.pre ] && . /etc/rc.pre
-
 . /etc/include/basicrc
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
@@ -28,7 +25,7 @@ export CHOUPI=y
 if [ ! -d ${NBHOME} ]; then
 	. /etc/include/pkgin
 
-	PACKAGES="bash git-base neovim curl doas ripgrep fd-find bat fzf"
+	PACKAGES="bash git-base neovim curl doas ripgrep fd-find bat fzf gmake"
 
 	if ! id NBUSER >/dev/null 2>&1; then
 	
