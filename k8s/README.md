@@ -50,7 +50,7 @@ NAME                          READY   STATUS    RESTARTS   AGE
 generic-device-plugin-c74cc   1/1     Running   0          40h
 ```
 
-Finally, here is a simple pod example for the `bozohttpd` _smolBSD_ image:
+Finally, here is a simple pod example for the `bozohttpd` _smolBSD_ image, this example implies the image is already loaded in the cluster and the pod port `8080` will be mapped to the node IP.
 
 ```yaml
 apiVersion: v1
@@ -63,9 +63,10 @@ metadata:
 spec:
   containers:
   - name: bozohttpd
-    image: localhost:5000/smolbozo
+    image: smolbozo:0.1
     ports:
     - containerPort: 8080
+      hostPort: 8080
     resources:
       limits:
         squat.ai/kvm: 1
