@@ -34,10 +34,11 @@ if [ ! -d /var/db/pkgin ]; then
 
 	certctl rehash
 
+	scheme="https"
 	if [ -n "$https_proxy" -o -n "$https_proxy" ]; then
 		printf "${arrow} using proxy: $http_proxy\n"
 		# libfetch doesn't support HTTPS proxying
-		scheme="http" || scheme="https"
+		scheme="http"
 	fi
 
 	url="${scheme}://cdn.${url}"
