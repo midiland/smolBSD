@@ -77,10 +77,10 @@
                 {{ vm.status === 'running' ? 'stop' : 'start' }}
               </button>
               <button class="btn btn-sm btn-light me-2"
-                :disabled="vm.editprotect"
+                :disabled="vm.editprotect==='True'"
 		@click="editVM(vmName)">✏️</button>
               <button class="btn btn-sm btn-light me-2"
-                :disabled="vm.rmprotect"
+                :disabled="vm.rmprotect==='True'"
                 @click="deleteVM(vmName)">🗑️</button>
               <button class="btn btn-sm btn-light me-2"
                 :disabled="!vm.serial_port"
