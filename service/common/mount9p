@@ -1,0 +1,6 @@
+if dmesg |grep -q vio9; then
+        cp -f /etc/MAKEDEV /dev
+        (cd /dev && sh MAKEDEV vio9p0)
+        mount_9p -cu /dev/vio9p0 /mnt
+        echo "➡️  host filesystem mounted on /mnt"
+fi
