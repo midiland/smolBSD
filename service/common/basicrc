@@ -19,4 +19,5 @@ fi
 
 ifconfig lo0 127.0.0.1 up
 
-export TERM=dumb
+eval $(resize)
+export TERM=vt220

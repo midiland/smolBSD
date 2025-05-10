@@ -9,8 +9,6 @@ command -v perl >/dev/null || pkgin -y in perl git-base
 # newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
 cp /etc/MAKEDEV /dev/
 
-resize
-export TERM=vt220
 ksh
 
 . /etc/include/shutdown
