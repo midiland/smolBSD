@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. /etc/include/basicrc
+
+cd /dev && /bin/sh /etc/MAKEDEV ttyVI01
+
+ksh
+
+. /etc/include/shutdown
