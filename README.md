@@ -48,8 +48,9 @@ Usage: mkimg.sh [-s service] [-m megabytes] [-i image] [-x set]
 - `startnb.sh` starts a _NetBSD_ virtual machine using `qemu-system-x86_64` or `qemu-system-aarch64`
 ```text
 Usage:  startnb.sh -f conffile | -k kernel -i image [-c CPUs] [-m memory]
-        [-a kernel parameters] [-r root disk] [-h drive2] [-p port] [-b]
-        [-t tcp serial port] [-w path] [-x qemu extra args] [-s] [-d] [-v]
+        [-a kernel parameters] [-r root disk] [-h drive2] [-p port]
+        [-t tcp serial port] [-w path] [-x qemu extra args]
+        [-b] [-n] [-s] [-d] [-v]
 
         Boot a microvm
         -f conffile     vm config file
@@ -61,6 +62,7 @@ Usage:  startnb.sh -f conffile | -k kernel -i image [-c CPUs] [-m memory]
         -r root disk    root disk to boot on
         -l drive2       second drive to pass to image
         -t serial port  TCP serial port
+        -n num sockets  number of VirtIO console socket
         -p ports        [tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
         -w path         host path to share with guest (9p)
         -x arguments    extra qemu arguments
