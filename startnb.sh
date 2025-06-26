@@ -4,8 +4,9 @@ usage()
 {
 	cat 1>&2 << _USAGE_
 Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
-	[-a kernel parameters] [-r root disk] [-h drive2] [-p port] [-b]
-	[-t tcp serial port] [-w path] [-x qemu extra args] [-s] [-d] [-v]
+	[-a kernel parameters] [-r root disk] [-h drive2] [-p port]
+	[-t tcp serial port] [-w path] [-x qemu extra args]
+	[-b] [-n] [-s] [-d] [-v]
 
 	Boot a microvm
 	-f conffile	vm config file
@@ -17,6 +18,7 @@ Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
 	-r root disk	root disk to boot on
 	-l drive2	second drive to pass to image
 	-t serial port	TCP serial port
+	-n num sockets	number of VirtIO console socket
 	-p ports	[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport
 	-w path		host path to share with guest (9p)
 	-x arguments	extra qemu arguments
@@ -43,7 +45,7 @@ if pgrep VirtualBoxVM >/dev/null 2>&1; then
 	exit 1
 fi
 
-options="f:k:a:p:i:m:c:r:l:p:w:x:t:hbdsv"
+options="f:k:a:p:i:m:n:c:r:l:p:w:x:t:hbdsv"
 
 uuid="$(uuidgen | cut -d- -f1)"
 
@@ -51,25 +53,26 @@ uuid="$(uuidgen | cut -d- -f1)"
 while getopts "$options" opt
 do
 	case $opt in
+	a) append="$OPTARG";;
+	b) bridgenet=yes;;
+	c) cores="$OPTARG";;
+	d) DAEMON=yes;;
 	# first load vm config file
 	f) . $OPTARG;;
+	h) usage;;
+	i) img="$OPTARG";;
 	# and possibly override values
 	k) kernel="$OPTARG";;
-	i) img="$OPTARG";;
-	a) append="$OPTARG";;
-	m) mem="$OPTARG";;
-	c) cores="$OPTARG";;
-	r) root="$OPTARG";;
 	l) drive2=$OPTARG;;
+	m) mem="$OPTARG";;
+	n) max_ports=$(($OPTARG + 1));;
 	p) hostfwd=$OPTARG;;
-	w) share=$OPTARG;;
-	t) serial_port=$OPTARG;;
-	x) extra=$OPTARG;;
-	b) bridgenet=yes;;
+	r) root="$OPTARG";;
 	s) sharerw=yes;;
-	d) DAEMON=yes;;
+	t) serial_port=$OPTARG;;
 	v) VERBOSE=yes;;
-	h) usage;;
+	w) share=$OPTARG;;
+	x) extra=$OPTARG;;
 	*) usage;;
 	esac
 done
@@ -103,6 +106,19 @@ fi
 -device virtio-9p-device,fsdev=shar${uuid}0,mount_tag=shar${uuid}0"
 
 [ -n "$sharerw" ] && sharerw=",share-rw=on"
+
+# use VirtIO console when available, if not, emulated ISA serial console
+if nm $kernel | grep -q viocon_earlyinit; then
+	console=viocon
+	[ -z "$max_ports" ] && max_ports=1
+	consdev="\
+-chardev stdio,signal=off,mux=on,id=char0 \
+-device virtio-serial-device,max_ports=${max_ports} \
+-device virtconsole,chardev=char0,name=char0"
+else
+	consdev="-serial mon:stdio"
+	console=com
+fi
 
 OS=$(uname -s)
 MACHINE=$(uname -m) # Linux and macos x86
@@ -170,18 +186,28 @@ if [ -n "$DAEMON" ]; then
 	d="$d -daemonize $serial"
 else
 	# console output
-	d="$d -serial mon:stdio"
+	d="$d $consdev"
+fi
+if [ -n "$max_ports" ]; then
+	for v in $(seq $((max_ports - 1)))
+	do
+		sockid="${uuid}-${v}"
+		sockname="sock${sockid}"
+		viosock="$viosock \
+-chardev socket,path=${sockid}.sock,server=on,wait=off,id=${sockname} \
+-device virtconsole,chardev=${sockname},name=${sockname}"
+	done
 fi
 # QMP is available
 [ -n "${qmp_port}" ] && extra="$extra -qmp tcp:localhost:${qmp_port},server,wait=off"
 
 cmd="${QEMU} -smp $cores \
 	$mflags -m $mem $cpuflags \
-	-kernel $kernel -append \"console=com root=${root} ${append}\" \
+	-kernel $kernel -append \"console=${console} root=${root} ${append}\" \
 	-global virtio-mmio.force-legacy=false ${share} \
 	-device virtio-blk-device,drive=hd${uuid}0${sharerw} \
 	-drive if=none,file=${img},format=raw,id=hd${uuid}0 \
-	${drive2} ${network} ${d} ${extra}"
+	${drive2} ${network} ${d} ${viosock} ${extra}"
 
 [ -n "$VERBOSE" ] && echo "$cmd" && exit
 
