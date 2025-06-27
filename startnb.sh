@@ -196,6 +196,7 @@ if [ -n "$max_ports" ]; then
 		viosock="$viosock \
 -chardev socket,path=${sockid}.sock,server=on,wait=off,id=${sockname} \
 -device virtconsole,chardev=${sockname},name=${sockname}"
+		echo "host socket ${v}: ${sockid}.sock"
 	done
 fi
 # QMP is available

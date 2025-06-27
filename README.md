@@ -8,7 +8,11 @@ created from any _NetBSD_ or _GNU/Linux_ system.
 When creating the image on a _NetBSD_ system, the image will be formatted using FFS, when
 creating the image on a _GNU/Linux_ system, the image will be formatted using _ext2_.
 
-[PVH][4] boot and various optimizations enable _NetBSD/amd64_ and _NetBSD/i386_ to directly boot from a [PVH][4] capable VMM (QEMU or Firecracker) in a couple **ms**. The code for these features is available in my [NetBSD development branch][5] and are slowly integrated into _NetBSD_'s source tree. You can fetch a pre-built 64 bits kernel at https://smolbsd.org/assets/netbsd-SMOL and a 32 bits kernel at https://smolbsd.org/assets/netbsd-SMOL386  
+[PVH][4] boot and various optimizations enable _NetBSD/amd64_ and _NetBSD/i386_ to directly boot from a [PVH][4] capable VMM (QEMU or Firecracker) in a couple **milliseconds**.  
+
+As of June 2025, most of these features are integrated in [NetBSD's current kernel][6], those still pending are available in my [NetBSD development branch][5].  
+
+You can fetch a pre-built 64 bits kernel at https://smolbsd.org/assets/netbsd-SMOL and a 32 bits kernel at https://smolbsd.org/assets/netbsd-SMOL386  
 Warning those are _NetBSD-current_ kernels!
 
 `aarch64` `netbsd-GENERIC64` kernels are able to boot directly to the kernel with no modification
@@ -26,6 +30,7 @@ Warning those are _NetBSD-current_ kernels!
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
   - `rsync`
+  - `nm`
   - `bsdtar`
 - A x86 VT-capable, or ARM64 CPU is recommended
 
@@ -160,6 +165,10 @@ $ make rescue
 ```
 Will create a `rescue-amd64.img` file for use with an _amd64_ kernel.
 ```shell
+$ make MOUNTRO=y rescue
+```
+Will also create a `rescue-amd64.img` file but with read-only root filesystem so the _VM_ can be stopped without graceful shutdow
+```shell
 $ make ARCH=i386 rescue
 ```
 Will create a `rescue-i386.img` file for use with an _i386_ kernel.
@@ -289,6 +298,15 @@ _HTML
 
 ```
 
+## Example of starting a _VM_ with bi-directionnal socket to _host_
+
+```sh
+$ make SERVICE=mport MOUNTRO=y base
+$ ./startnb.sh -n 1 -i mport-amd64.img # starts 1 socket port
+host socket 1: ed4f6568-1.sock
+```
+On the guest, the corresponding socket is `/dev/ttyVI01`
+
 ## Example of a full fledge NetBSD Operating System
 
 ```sh
@@ -321,3 +339,4 @@ the following should be available at `http://localhost:5000`:
 [3]: https://github.com/NetBSDfr/sailor
 [4]: https://xenbits.xen.org/docs/4.6-testing/misc/pvh.html
 [5]: https://github.com/NetBSDfr/NetBSD-src/tree/nbfr_master
+[6]: https://github.com/NetBSD/src
