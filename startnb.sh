@@ -191,12 +191,13 @@ fi
 if [ -n "$max_ports" ]; then
 	for v in $(seq $((max_ports - 1)))
 	do
-		sockid="${uuid}-${v}"
+		sockid="${uuid}p${v}"
 		sockname="sock${sockid}"
+		sockpath="s${sockid}.sock"
 		viosock="$viosock \
--chardev socket,path=${sockid}.sock,server=on,wait=off,id=${sockname} \
+-chardev socket,path=${sockpath},server=on,wait=off,id=${sockname} \
 -device virtconsole,chardev=${sockname},name=${sockname}"
-		echo "host socket ${v}: ${sockid}.sock"
+		echo "host socket ${v}: ${sockpath}"
 	done
 fi
 # QMP is available

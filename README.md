@@ -302,11 +302,17 @@ _HTML
 
 ```sh
 $ make SERVICE=mport MOUNTRO=y base
-$ ./startnb.sh -n 1 -i mport-amd64.img # starts 1 socket port
-host socket 1: ed4f6568-1.sock
+$ ./startnb.sh -n 1 -i mport-amd64.img 
+host socket 1: s885f756bp1.sock
 ```
-On the guest, the corresponding socket is `/dev/ttyVI01`
-
+On the guest, the corresponding socket is `/dev/ttyVI0<port number>`, here `/dev/ttyVI01`
+```sh
+guest$ echo "hello there!" >/dev/ttyVI01
+```
+```sh
+host$ socat ./s885f756bp1.sock -
+hello there!
+```
 ## Example of a full fledge NetBSD Operating System
 
 ```sh
