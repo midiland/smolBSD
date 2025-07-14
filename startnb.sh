@@ -91,7 +91,7 @@ fi
 
 [ -n "$hostfwd" ] && network="\
 -device virtio-net-device,netdev=net${uuid}0 \
--netdev user,id=net${uuid}0,ipv6=off,$(echo "$hostfwd"|sed 's/::/hostfwd=::/g')"
+-netdev user,id=net${uuid}0,ipv6=off,$(echo "$hostfwd"|sed -E 's/(udp|tcp)?::/hostfwd=\1::/g')"
 
 [ -n "$bridgenet" ] && network="$network \
 -device virtio-net-device,netdev=net${uuid}1 \
