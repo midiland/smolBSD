@@ -186,7 +186,7 @@ $ ./startnb.sh -k netbsd-SMOL -i rescue-amd64.img
 
 ```shell
 $ make base
-$ ./startnb.sh -k netbsd-GENERIC64.img -i base-evbarm-aarch64.img
+$ ./startnb.sh -k netbsd-SMOL -i base-amd64.img
 ```
 
 ## Example of an image running the `bozohttpd` web server on an `aarch64` CPU
