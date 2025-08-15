@@ -56,13 +56,14 @@ img=${img:-"rescue-${arch}.img"}
 sets=${sets:-"rescue.tar.xz"}
 
 OS=$(uname -s)
+TAR=tar
 
 case $OS in
 NetBSD)
 	is_netbsd=1;;
 Linux)
 	is_linux=1
-	TAR=bsdtar; export TAR
+	TAR=bsdtar
 	;;
 Darwin)
 	# might be supported in the future
@@ -72,6 +73,8 @@ OpenBSD)
 *)
 	is_unknown=1;
 esac
+
+export TAR
 
 if [ -z "$is_netbsd" -a -f "service/${svc}/NETBSD_ONLY" ]; then
 	printf "\nThis image must be built on NetBSD!\n"
@@ -111,12 +114,12 @@ do
 done
 # root fs built by sailor or hand made
 if [ -n "$rootdir" ]; then
-	tar cfp - -C "$rootdir" . | tar xfp - -C $mnt
+	$TAR cfp - -C "$rootdir" . | $TAR xfp - -C $mnt
 # use a set and customization in services/
 else
-	for s in ${sets}
+	for s in ${sets} ${ADDONS}
 	do
-		tar xfp sets/${arch}/${s} -C ${mnt}/ || exit 1
+		$TAR xfp sets/${arch}/${s} -C ${mnt}/ || exit 1
 	done
 
 fi
@@ -140,7 +143,6 @@ if [ "$svc" = "rescue" ]; then
 	done
 	ln -s /rescue/sh bin/
 fi
-
 
 # warning, postinst operations are done on the builder
 
