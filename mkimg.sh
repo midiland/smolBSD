@@ -117,7 +117,7 @@ if [ -n "$rootdir" ]; then
 	$TAR cfp - -C "$rootdir" . | $TAR xfp - -C $mnt
 # use a set and customization in services/
 else
-	for s in ${sets} ${ADDONS}
+	for s in ${sets} ${ADDSETS}
 	do
 		# don't prepend sets path if this is a full path
 		case $s in */*) ;; *) s="sets/${arch}/${s}" ;; esac
@@ -127,6 +127,14 @@ else
 	done
 
 fi
+# additional packages
+[ -n "$ADDPKGS" ] && for pkg in ${ADDPKGS}; do
+		eval $($TAR xfp $pkg -O +BUILD_INFO|grep ^LOCALBASE)
+		echo -n "extracting $pkg to ${LOCALBASE}.. "
+		mkdir -p ${mnt}/${LOCALBASE}
+		$TAR xfp ${pkg} -C ${mnt}/${LOCALBASE} || exit 1
+		echo done
+	done
 
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
 echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
