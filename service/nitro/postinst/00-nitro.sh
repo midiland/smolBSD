@@ -37,12 +37,3 @@ for s in run finish
 do
 	chmod +x ${PREFIX}/etc/nitro/getty-0/$s
 done
-
-cat >${PREFIX}/etc/nitro/SYS/finish<<EOF
-#!/bin/sh
-sleep 10
-echo FINISH
-poweroff
-EOF
-
-chmod +x ${PREFIX}/etc/nitro/SYS/finish
