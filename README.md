@@ -97,7 +97,7 @@ service
 A microvm is seen as a "service", for each one:
 
 - there **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
-- there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
+- if standard _NetBSD_ `init` is used, there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
 
 In the `service` directory, `common/` contains scripts that will be bundled in the
 `/etc/include` directory of the microvm, this would be a perfect place to have something like:
