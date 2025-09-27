@@ -10,7 +10,7 @@ mknod -m 666 dev/stdout c 22 1
 mknod -m 666 dev/stderr c 22 2
 
 mkdir -p packages
-VERSION=0.3.0.0.20250907
+VERSION=0.4.1
 curl -L -s -o packages/nitro.tgz https://imil.net/NetBSD/nitro-${VERSION}.tgz?$RANDOM
 
 PREFIX=usr/pkg
@@ -37,3 +37,9 @@ for s in run finish
 do
 	chmod +x ${PREFIX}/etc/nitro/getty-0/$s
 done
+
+cat >etc/motd<<EOF
+
+Welcome to nitroBSD! 🔥
+
+EOF
