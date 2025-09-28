@@ -326,6 +326,17 @@ $ dd if=/dev/zero bs=1M count=4000 >> NetBSD-amd64-live.img
 ```
 And reboot.
 
+## Environment variables
+
+The following environment variables change `mkimg.sh` behavior:
+
+* `ADDPKGS` will **untar** the packages paths listed in the variable, this is done in `postinst` stage, on the build host, where `pkgin` might not be available
+* `ADDSETS` will add the sets paths listed in the variable
+
+The following environment variables change `startnb.sh` behavior:
+
+* `QEMU` will use custom `qemu` instead of the one in user's `$PATH`
+
 ## Basic frontend
 
 A simple virtual machine manager is available in the `app/` directory, it is a
