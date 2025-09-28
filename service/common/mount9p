@@ -1,7 +1,7 @@
 if dmesg |grep -q vio9; then
-	[ -z "MOUNT9P" ] && MOUNT9P=/mnt
+	[ -z "$MOUNT9P" ] && MOUNT9P=/mnt
         cp -f /etc/MAKEDEV /dev
         (cd /dev && sh MAKEDEV vio9p0)
         mount_9p -cu /dev/vio9p0 $MOUNT9P
-        echo "➡️  host filesystem mounted on MOUNT9P"
+        echo "➡️  host filesystem mounted on $MOUNT9P"
 fi
