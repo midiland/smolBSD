@@ -42,6 +42,7 @@ if [ ! -d /var/db/pkgin ]; then
 	fi
 
 	url="${scheme}://cdn.${url}"
+	echo "${arrow} fetch URL: ${url}"
 
 	for pkg in pkg_install pkgin pkg_tarup rsync curl # ca-certificates
 	do
