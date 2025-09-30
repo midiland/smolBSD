@@ -153,7 +153,9 @@ OpenBSD)
 	echo "Unknown hypervisor, no acceleration"
 esac
 
-QEMU="qemu-system-${MACHINE}"
+QEMU=${QEMU:-qemu-system-${MACHINE}}
+echo -n "using QEMU "
+$QEMU --version|grep -oE 'version .*'
 
 mem=${mem:-"256"}
 cores=${cores:-"1"}

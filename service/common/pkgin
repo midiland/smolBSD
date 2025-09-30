@@ -60,5 +60,11 @@ if [ ! -d /var/db/pkgin ]; then
 	mkdir -p /usr/pkg/etc/pkgin
 	echo $url >/usr/pkg/etc/pkgin/repositories.conf
 	pkgin up
+
+	# additional packages to install
+	for p in $INSTALL_PACKAGES
+	do
+		pkgin -y install $p
+	done
 fi
 

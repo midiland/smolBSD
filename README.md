@@ -97,7 +97,7 @@ service
 A microvm is seen as a "service", for each one:
 
 - there **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
-- there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
+- if standard _NetBSD_ `init` is used, there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
 
 In the `service` directory, `common/` contains scripts that will be bundled in the
 `/etc/include` directory of the microvm, this would be a perfect place to have something like:
@@ -325,6 +325,17 @@ This will fetch a directly bootable kernel and a _NetBSD_ "live", ready-to-use, 
 $ dd if=/dev/zero bs=1M count=4000 >> NetBSD-amd64-live.img
 ```
 And reboot.
+
+## Environment variables
+
+The following environment variables change `mkimg.sh` behavior:
+
+* `ADDPKGS` will **untar** the packages paths listed in the variable, this is done in `postinst` stage, on the build host, where `pkgin` might not be available
+* `ADDSETS` will add the sets paths listed in the variable
+
+The following environment variables change `startnb.sh` behavior:
+
+* `QEMU` will use custom `qemu` instead of the one in user's `$PATH`
 
 ## Basic frontend
 
