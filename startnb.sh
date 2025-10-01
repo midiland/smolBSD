@@ -102,7 +102,7 @@ fi
 -drive if=none,file=${drive2},format=raw,id=hd${uuid}1"
 
 [ -n "$share" ] && share="\
--fsdev local,path=${share},security_model=mapped,id=shar${uuid}0 \
+-fsdev local,path=${share},security_model=none,id=shar${uuid}0 \
 -device virtio-9p-device,fsdev=shar${uuid}0,mount_tag=shar${uuid}0"
 
 [ -n "$sharerw" ] && sharerw=",share-rw=on"
@@ -119,6 +119,7 @@ else
 	consdev="-serial mon:stdio"
 	console=com
 fi
+echo "* using console: $console"
 
 OS=$(uname -s)
 MACHINE=$(uname -m) # Linux and macos x86
