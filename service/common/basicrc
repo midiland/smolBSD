@@ -19,5 +19,4 @@ fi
 
 ifconfig lo0 127.0.0.1 up
 
-eval $(resize)
-export TERM=vt220
+[ -n "$MOUNTRO" ] && mount -u -o ro /
