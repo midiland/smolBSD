@@ -1,3 +1,4 @@
+# taken from NetBSD's /etc/rc.d/sshd
 keygen="/usr/bin/ssh-keygen"
 umask 022
 new_key_created=false
@@ -16,5 +17,5 @@ ecdsa   -1      ssh_host_ecdsa_key
 ed25519 -1      ssh_host_ed25519_key
 rsa     0       ssh_host_rsa_key
 _EOF
-
+# we want sshd to be the main process
 echo 'sshd_flags="-D"' >> etc/rc.conf
