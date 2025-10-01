@@ -2,6 +2,24 @@
 
 . /etc/include/basicrc
 
+mount -t tmpfs -o -s1M tmpfs /home
+mount -t tmpfs -o -s1M tmpfs /tmp
+mount -t tmpfs -o -s10M tmpfs /var/log
+mount -t tmpfs -o -s1M tmpfs /var/run
+mkdir /tmp/etc
+for f in rc rc.conf include ssh
+do
+	cp -Rp /etc/${f} /tmp/etc
+done
+mount -t tmpfs -o -s10M tmpfs /etc
+tar xfp /var/cache/etc.* -C / etc
+cp -Rp /tmp/etc/* /etc/
+
+useradd -m ssh
+mkdir -p /home/ssh/.ssh
+cp -f /etc/ssh/authorized_keys /home/ssh/.ssh
+chown -R ssh /home/ssh
+
 /etc/rc.d/sshd onestart
 
 . /etc/include/shutdown
