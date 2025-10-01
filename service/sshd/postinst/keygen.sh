@@ -22,6 +22,9 @@ echo 'sshd_flags="-D -e"' >> etc/rc.conf
 echo 'UseDNS no' >> etc/ssh/sshd_config
 
 ssh-add -L >etc/ssh/authorized_keys
+pubkeys="../service/sshd/etc/*.pub"
+ls $pubkeys >/dev/null 2>&1 && \
+	cat $pubkeys >>etc/ssh/authorized_keys
 
 mkdir -p home var/cache
 # to populate empty tmpfs /etc
