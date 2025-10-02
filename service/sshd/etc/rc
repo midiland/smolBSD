@@ -3,17 +3,14 @@
 . /etc/include/basicrc
 
 mount -t tmpfs -o -s1M tmpfs /home
-mount -t tmpfs -o -s1M tmpfs /tmp
+mount -t tmpfs -o -s10M tmpfs /tmp
 mount -t tmpfs -o -s10M tmpfs /var/log
 mount -t tmpfs -o -s1M tmpfs /var/run
 mkdir /tmp/etc
-for f in rc rc.conf include ssh
-do
-	cp -Rp /etc/${f} /tmp/etc
-done
+(cd /etc && tar cfp - .)|(cd /tmp/etc && tar xfp -)
 mount -t tmpfs -o -s10M tmpfs /etc
-tar xfp /var/cache/etc.* -C / etc
-cp -Rp /tmp/etc/* /etc/
+(cd /tmp/etc && tar cfp - .)|(cd /etc && tar xfp -)
+rm -rf /tmp/*
 
 useradd -m ssh
 mkdir -p /home/ssh/.ssh

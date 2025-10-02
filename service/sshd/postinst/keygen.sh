@@ -27,5 +27,3 @@ ls $pubkeys >/dev/null 2>&1 && \
 	cat $pubkeys >>etc/ssh/authorized_keys
 
 mkdir -p home var/cache
-# to populate empty tmpfs /etc
-cp ../sets/${ARCH}/etc.* var/cache/
