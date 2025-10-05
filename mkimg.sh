@@ -20,13 +20,10 @@ _USAGE_
 	exit 1
 }
 
-for tool in bsdtar rsync
-do
-	if ! command -v $tool >/dev/null; then
-		echo "$tool missing"
-		exit 1
-	fi
-done
+rsynclite()
+{
+	(cd $1 && tar cfp - .)|(cd $2 && tar xfp -)
+}
 
 options="s:m:i:r:x:k:c:oh"
 
@@ -63,6 +60,7 @@ NetBSD)
 	is_netbsd=1;;
 Linux)
 	is_linux=1
+	# avoid sets and pkgs untar warnings
 	TAR=bsdtar
 	;;
 Darwin)
@@ -73,6 +71,14 @@ OpenBSD)
 *)
 	is_unknown=1;
 esac
+
+for tool in $TAR # add more if needed
+do
+	if ! command -v $tool >/dev/null; then
+		echo "$tool missing"
+		exit 1
+	fi
+done
 
 export TAR
 
@@ -139,10 +145,10 @@ fi
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
 echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
 
-rsync -av service/${svc}/etc/ ${mnt}/etc/
-rsync -av service/common/ ${mnt}/etc/include/
+rsynclite service/${svc}/etc/ ${mnt}/etc/
+rsynclite service/common/ ${mnt}/etc/include/
 [ -d service/${svc}/packages ]  && \
-	rsync -av service/${svc}/packages ${mnt}/
+	rsynclite service/${svc}/packages ${mnt}/
 
 [ -n "$kernel" ] && cp -f $kernel ${mnt}/
 
