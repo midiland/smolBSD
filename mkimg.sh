@@ -55,10 +55,13 @@ sets=${sets:-"rescue.tar.xz"}
 
 OS=$(uname -s)
 TAR=tar
+export FETCH=curl
 
 case $OS in
 NetBSD)
-	is_netbsd=1;;
+	is_netbsd=1
+	export FETCH=ftp
+	;;
 Linux)
 	is_linux=1
 	# avoid sets and pkgs untar warnings
