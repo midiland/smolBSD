@@ -25,6 +25,16 @@ done
 
 ln -sf /var/run/nitro/nitro.sock ${PREFIX}/etc/nitro.sock
 
+cat >${PREFIX}/etc/nitro/SYS/setup<<EOF
+#!/bin/sh
+
+cp /etc/MAKEDEV /dev
+cd /dev
+sh MAKEDEV -M -M all
+cd -
+EOF
+chmod +x ${PREFIX}/etc/nitro/SYS/setup
+
 cat >${PREFIX}/etc/nitro/getty-0/run<<EOF
 #!/bin/sh
 exec /usr/libexec/getty Pc constty
