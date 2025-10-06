@@ -51,7 +51,13 @@ jobs:
             bmake SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH="$arch" MOUNTRO=${{ inputs.mountro || 'y' }} ${{ inputs.img || 'buildimg' }}
           done
 
-      - uses: actions/upload-artifact@v4
+      - name: Publish images to "latest" release
+        uses: softprops/action-gh-release@v2
         with:
-          name: image
-          path: "images/*.img"
+          tag_name: latest
+          name: "Latest smolBSD images"
+          files: images/*.img
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
