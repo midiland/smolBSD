@@ -8,6 +8,8 @@ KDIST=		${DIST}
 WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
+BUILDIMG=	build-${ARCH}.img
+BUILDIMGURL=	https://github.com/NetBSDfr/smolBSD/releases/download/latest/${BUILDIMG}
 
 .if ${WHOAMI} != "root"
 SUDO!=		command -v doas >/dev/null && \
@@ -145,6 +147,12 @@ buildimg:
 	@mkdir -p images
 	${MAKE} MOUNTRO=y SERVICE=build IMGSIZE=320 base
 	mv -f build-${ARCH}.img images/
+
+fetchimg:
+	@mkdir -p images
+	if [ ! -f images/${BUILDIMG} ]; then \
+		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
+	fi
 
 build:
 	@if [ ! -f images/${.TARGET}-${ARCH}.img ]; then \

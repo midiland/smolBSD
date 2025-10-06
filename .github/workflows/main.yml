@@ -69,7 +69,6 @@ jobs:
           files: |
             images/*.img.xz
             images/*.xz.sha256
-          overwrite: true
           prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
