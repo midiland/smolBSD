@@ -41,12 +41,12 @@ jobs:
 
       - name: Set up environment
         run: |
-          apt update && apt install -y curl xz-utils make sudo git libarchive-tools rsync
+          apt update && apt install -y curl xz-utils make sudo git libarchive-tools rsync bmake
           rm -rf /var/cache
 
       - name: Build image
         run: |
-          make SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
+          bmake SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
 
       - uses: actions/upload-artifact@v4
         with:
