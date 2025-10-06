@@ -88,6 +88,7 @@ export TAR
 
 if [ -z "$is_netbsd" -a -f "service/${svc}/NETBSD_ONLY" ]; then
 	printf "\nThis image must be built on NetBSD!\n"
+	printf "Use: make SERVICE=<service> build\n"
 	exit 1
 fi
 
