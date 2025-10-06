@@ -1,30 +1,36 @@
-VERS?=		10
+VERS?=		10.1
 ARCH?=		amd64
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
+UNAME_M!=	uname -m
+PKGSITE?=	https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${UNAME_M}/${VERS}/All
+PKGS?=		packages
 KDIST=		${DIST}
 WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
-ifneq (${WHOAMI}, root)
+
+.if ${WHOAMI} != "root"
 SUDO!=		command -v doas >/dev/null && \
 		echo "ARCH=${ARCH} VERS=${VERS} doas" || \
 		echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
-endif
-SETSEXT=tar.xz
-SETSDIR=sets/${ARCH}
+.endif
 
-ifeq (${ARCH}, evbarm-aarch64)
+SETSEXT=	tar.xz
+SETSDIR=	sets/${ARCH}
+
+.if ${ARCH} == "evbarm-aarch64"
 KERNEL=		netbsd-GENERIC64.img
 LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/gzimg/arm64.img.gz
-else ifeq (${ARCH}, i386)
+.elif ${ARCH} == "i386"
 KERNEL=		netbsd-SMOL386
 KDIST=		https://smolbsd.org/assets
 SETSEXT=	tgz
-else
+.else
 KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
 LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-10.99.12-amd64-live.img.gz
-endif
+.endif
+
 LIVEIMG=	NetBSD-${ARCH}-live.img
 
 # sets to fetch
@@ -35,27 +41,29 @@ NBAKERY=	${BASE} comp.${SETSEXT}
 BOZO=		${BASE}
 IMGBUILDER=	${BASE}
 
-ifeq ($(shell uname -m), x86_64)
+.if ${UNAME_M} == "x86_64"
 ROOTFS?=	-r ld0a
-else
+.else
 # unknown / aarch64
 ROOTFS?=	-r ld5a
-endif
+.endif
 
 # any BSD variant including MacOS
 DDUNIT=		m
-ifeq ($(shell uname), Linux)
+UNAME_S!=	uname
+.if ${UNAME_S} == "Linux"
 DDUNIT=		M
-endif
+.endif
 
 # guest root filesystem will be read-only
-ifeq (${MOUNTRO}, y)
+.if defined(MOUNTRO) && ${MOUNTRO} == "y"
 EXTRAS+=	-o
-endif
+.endif
+
 # extra remote script
-ifneq (${CURLSH},)
+.if defined(CURLSH) && !empty(CURLSH)
 EXTRAS+=	-c ${CURLSH}
-endif
+.endif
 
 # default memory amount for a guest
 MEM?=		256
@@ -64,65 +72,90 @@ PORT?=		::22022-:22
 # default size for disk built by imgbuilder
 SVCSZ?=		128
 
-SERVICE?=	$@
+SERVICE?=	${.TARGET}
 IMGSIZE?=	512
 
 kernfetch:
-	@mkdir -p kernels
-	@[ -f kernels/${KERNEL} ] || ( \
-		echo "fetching ${KERNEL}" && \
-		[ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ] && \
-			curl -L -o kernels/${KERNEL} ${KDIST}/${KERNEL} || \
+	mkdir -p kernels
+	if [ ! -f kernels/${KERNEL} ]; then \
+		echo "fetching ${KERNEL}"; \
+		if [ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ]; then \
+			curl -L -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
+		else \
 			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
-				gzip -dc > kernels/${KERNEL} \
-	)
+				gzip -dc > kernels/${KERNEL}; \
+		fi; \
+	fi
 
 setfetch:
 	[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
 	for s in ${SETS}; do \
-		if [ ! -f ${SETSDIR}/$$s ]; then \
-			curl -L -o ${SETSDIR}/$$s ${DIST}/sets/$$s; \
-		fi; \
+		[ -f ${SETSDIR}/$${s} ] || curl -L -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
+	done
+
+pkgfetch:
+	[ -d ${PKGS} ] || mkdir ${PKGS}
+	for p in ${ADDPKGS};do \
+		[ -f ${PKGS}/$${p}* ] || ftp -o ${PKGS}/$${p}.tgz ${PKGSITE}/$${p}*; \
 	done
 
 rescue:
-	$(MAKE) setfetch SETS="${RESCUE}"
+	${MAKE} setfetch SETS="${RESCUE}"
 	${SUDO} ./mkimg.sh -m 20 -x "${RESCUE}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
+	${SUDO} chown ${USER}:${GROUP} ${.TARGET}-${ARCH}.img
 
 base:
-	$(MAKE) setfetch SETS="${BASE}"
+	${MAKE} setfetch SETS="${BASE}"
 	${SUDO} ./mkimg.sh -i ${SERVICE}-${ARCH}.img -s ${SERVICE} \
 		-m ${IMGSIZE} -x "${BASE}" ${EXTRAS}
 	${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
 
 prof:
-	$(MAKE) setfetch SETS="${PROF}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 1024 -k kernels/${KERNEL} \
+	${MAKE} setfetch SETS="${PROF}"
+	${SUDO} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} -m 1024 -k kernels/${KERNEL} \
 		-x "${PROF}" ${EXTRAS}
-	${SUDO} chown ${WHOAMI} $@-${ARCH}.img
+	${SUDO} chown ${WHOAMI} ${.TARGET}-${ARCH}.img
 
 nbakery:
-	$(MAKE) setfetch SETS="${NBAKERY}"
-	${SUDO} ./mkimg.sh -i $@-${ARCH}.img -s $@ -m 2048 -x "${NBAKERY}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img
+	${MAKE} setfetch SETS="${NBAKERY}"
+	${SUDO} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} -m 2048 -x "${NBAKERY}" ${EXTRAS}
+	${SUDO} chown ${USER}:${GROUP} ${.TARGET}-${ARCH}.img
 
 imgbuilder:
-	$(MAKE) setfetch SETS="${BASE}"
-	# build the building image if ${NOIMGBUILDERBUILD} is not defined
+	${MAKE} setfetch SETS="${BASE}"
+	# build the building image if NOIMGBUILDERBUILD is not defined
 	if [ -z "${NOIMGBUILDERBUILD}" ]; then \
-		${SUDO} SVCIMG=${SVCIMG} ./mkimg.sh -i $@-${ARCH}.img -s $@ \
+		${SUDO} SVCIMG=${SVCIMG} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} \
 			-m 512 -x "${BASE}" ${EXTRAS} && \
-		${SUDO} chown ${USER}:${GROUP} $@-${ARCH}.img; \
+		${SUDO} chown ${USER}:${GROUP} ${.TARGET}-${ARCH}.img; \
 	fi
 	# now start an imgbuilder microvm and build the actual service
-	# image unless $NOSVCIMGBUILD is set (probably a GL pipeline)
+	# image unless NOSVCIMGBUILD is set (probably a GL pipeline)
 	if [ -z "${NOSVCIMGBUILD}" ]; then \
 		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=${SVCSZ}; \
-		./startnb.sh -k kernels/${KERNEL} -i $@-${ARCH}.img -a '-v' \
+		./startnb.sh -k kernels/${KERNEL} -i ${.TARGET}-${ARCH}.img -a '-v' \
 			-h ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
 	fi
 
 live:	kernfetch
-	@echo "fetching ${LIVEIMG}"
-	@[ -f ${LIVEIMG} ] || curl -o- -L ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
+	echo "fetching ${LIVEIMG}"
+	[ -f ${LIVEIMG} ] || curl -o- -L ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
+
+buildimg:
+	${MAKE} MOUNTRO=y SERVICE=build base
+	mv -f build-${ARCH}.img images/
+
+build:
+	@mkdir -p images tmp
+	@if [ ! -f images/${.TARGET}-${ARCH}.img ]; then \
+		echo "* building builder"; \
+		${MAKE} buildimg; \
+	fi
+	@rm -f tmp/build-*
+	@echo "${SERVICE}" > tmp/build-${SERVICE}
+	./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 512 \
+		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
+	# wait till the build is finished, guest removes the lock
+	@while [ -f tmp/build-${SERVICE} ]; do sleep 0.2; done
+	kill $$(cat qemu-${.TARGET}.pid)
+	${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
