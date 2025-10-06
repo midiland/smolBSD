@@ -143,7 +143,7 @@ live:	kernfetch
 
 buildimg:
 	@mkdir -p images
-	${MAKE} MOUNTRO=y SERVICE=build base
+	${MAKE} MOUNTRO=y SERVICE=build IMGSIZE=320 base
 	mv -f build-${ARCH}.img images/
 
 build:
