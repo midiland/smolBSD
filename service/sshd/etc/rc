@@ -6,11 +6,7 @@ mount -t tmpfs -o -s1M tmpfs /home
 mount -t tmpfs -o -s10M tmpfs /tmp
 mount -t tmpfs -o -s10M tmpfs /var/log
 mount -t tmpfs -o -s1M tmpfs /var/run
-mkdir /tmp/etc
-(cd /etc && tar cfp - .)|(cd /tmp/etc && tar xfp -)
-mount -t tmpfs -o -s10M tmpfs /etc
-(cd /tmp/etc && tar cfp - .)|(cd /etc && tar xfp -)
-rm -rf /tmp/*
+mount -t tmpfs -o -s10M -o union tmpfs /etc
 
 useradd -m ssh
 mkdir -p /home/ssh/.ssh
