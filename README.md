@@ -25,13 +25,12 @@ Warning those are _NetBSD-current_ kernels!
 - The following tools installed
   - `curl`
   - `git`
-  - `make` (GNU Make)
+  - `make` (`bmake` if running on Linux)
   - `uuid-runtime` (for uuidgen)
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
-  - `rsync`
   - `nm`
-  - `bsdtar` (install with libarchive-tools on linux)
+  - `bsdtar` on Linux (install with libarchive-tools)
 - A x86 VT-capable, or ARM64 CPU is recommended
 
 ## Project structure
