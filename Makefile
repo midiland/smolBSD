@@ -142,15 +142,16 @@ live:	kernfetch
 	[ -f ${LIVEIMG} ] || curl -o- -L ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
 
 buildimg:
+	@mkdir -p images
 	${MAKE} MOUNTRO=y SERVICE=build base
 	mv -f build-${ARCH}.img images/
 
 build:
-	@mkdir -p images tmp
 	@if [ ! -f images/${.TARGET}-${ARCH}.img ]; then \
 		echo "* building builder"; \
 		${MAKE} buildimg; \
 	fi
+	@mkdir -p tmp
 	@rm -f tmp/build-*
 	@echo "${SERVICE}" > tmp/build-${SERVICE}
 	./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 512 \
