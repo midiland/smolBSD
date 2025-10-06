@@ -8,10 +8,9 @@ cp /usr/share/examples/certctl/certs.conf /etc/openssl/
 certctl rehash
 
 cd /mnt
-SERVICE=$(cat tmp/build*)
+. tmp/build*
 echo "* building $SERVICE image"
-make SERVICE=$SERVICE base
-
+make SERVICE=$SERVICE MOUNTRO=$MOUNTRO base
 echo "* build finished, Ctrl-A X to exit"
 rm -f tmp/build*
 cat
