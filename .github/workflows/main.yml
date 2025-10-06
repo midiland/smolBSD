@@ -11,7 +11,7 @@ on:
       img:
         description: "Image target"
         required: true
-        default: "rescue"
+        default: "base"
       arch:
         description: "Architecture"
         required: true
@@ -19,11 +19,11 @@ on:
       service:
         description: "Service to build on top of image"
         required: false
-        default:
+        default: "build"
       mountro:
         description: "Build as read-only (y or empty)"
         required: false
-        default:
+        default: "y"
       curlsh:
         description: "URL to a script to execute as finalizer"
         required: false
