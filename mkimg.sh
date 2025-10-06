@@ -22,6 +22,7 @@ _USAGE_
 
 rsynclite()
 {
+	[ ! -d $1 -o ! -d $2 ] && return
 	(cd $1 && tar cfp - .)|(cd $2 && tar xfp -)
 }
 
