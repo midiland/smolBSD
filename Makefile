@@ -1,4 +1,4 @@
-VERS?=		10.1
+VERS?=		10
 ARCH?=		amd64
 DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 UNAME_M!=	uname -m
