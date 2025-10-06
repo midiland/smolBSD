@@ -30,7 +30,7 @@ Warning those are _NetBSD-current_ kernels!
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
   - `nm`
-  - `bsdtar` on Linux (install with libarchive-tools)
+  - `bsdtar` on Linux (install with `libarchive-tools` on Debian and derivatives, `libarchive` on Arch)
 - A x86 VT-capable, or ARM64 CPU is recommended
 
 ## Project structure
@@ -128,7 +128,7 @@ And then add this to your `rc`:
 
 ## ⚠️  Warning ⚠️
 
-`postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
+If you use directly your host to build images, `postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
 
 ## Prerequisite
 
@@ -155,24 +155,43 @@ Download a regular `netbsd-GENERIC64.img` kernel
 $ curl -L -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/kernel/netbsd-GENERIC64.img.gz|gunzip -c >netbsd-GENERIC64.img
 ```
 
+## Notes on image building
+
+* If you are running NetBSD or GNU/Linux, you can build most images using respectively `make` or `bmake`
+* If you are not running NetBSD, a safer, cleaner way of building images is to use the `build` image:
+  * either by building it if you are running GNU/Linux
+```sh
+$ bmake buildimg
+```
+  * or by simply fetching it if you are running other systems such as MacOS
+```sh
+$ bmake fetchimg
+```
+Both methods will create an `images/build-<arch>.img` disk image that you'll be able to use to build services.  
+To do so, in the following examples commands, replace `base` with `build`, i.e.:
+```sh
+$ bmake SERVICE=nitro build
+```
+This will spawn a microvm running the build image, and will in turn build the requested service.
+
 ## Example of a very minimal (10MB) virtual machine
 
 > Note: you can use the ARCH variable to specify an architecture to build your image for, default is amd64.
 
 ```shell
-$ make rescue
+$ bmake rescue
 ```
 Will create a `rescue-amd64.img` file for use with an _amd64_ kernel.
 ```shell
-$ make MOUNTRO=y rescue
+$ bmake MOUNTRO=y rescue
 ```
 Will also create a `rescue-amd64.img` file but with read-only root filesystem so the _VM_ can be stopped without graceful shutdow
 ```shell
-$ make ARCH=i386 rescue
+$ bmake ARCH=i386 rescue
 ```
 Will create a `rescue-i386.img` file for use with an _i386_ kernel.
 ```shell
-$ make ARCH=evbarm-aarch64 rescue
+$ bmake ARCH=evbarm-aarch64 rescue
 ```
 Will create a `rescue-evbarm-aarch64.img` file for use with an _aarch64_ kernel.
 
@@ -184,7 +203,7 @@ $ ./startnb.sh -k netbsd-SMOL -i rescue-amd64.img
 ## Example of an image filled with the `base` set on an `x86_64` CPU
 
 ```shell
-$ make base
+$ bmake base
 $ ./startnb.sh -k netbsd-SMOL -i base-amd64.img
 ```
 
@@ -218,7 +237,7 @@ Connection: close
 ## Example of an image used to create an nginx microvm with [sailor][3]
 
 ```shell
-$ make SVCIMG=nginx imgbuilder
+$ bmake SVCIMG=nginx imgbuilder
 ```
 This will spawn an image builder host which will populate an `nginx` minimal image.
 
@@ -300,7 +319,7 @@ _HTML
 ## Example of starting a _VM_ with bi-directionnal socket to _host_
 
 ```sh
-$ make SERVICE=mport MOUNTRO=y base
+$ bmake SERVICE=mport MOUNTRO=y base
 $ ./startnb.sh -n 1 -i mport-amd64.img 
 host socket 1: s885f756bp1.sock
 ```
@@ -315,7 +334,7 @@ hello there!
 ## Example of a full fledge NetBSD Operating System
 
 ```sh
-$ make live # or make ARCH=evbarm-aarch64 live
+$ bmake live # or make ARCH=evbarm-aarch64 live
 $ ./startnb.sh -f etc/live.conf
 ```
 This will fetch a directly bootable kernel and a _NetBSD_ "live", ready-to-use, disk image. Login with `root` and no password. To extend the size of the image to 4 more GB, simply do:
