@@ -46,7 +46,7 @@ jobs:
 
       - name: Build image
         run: |
-          bmake SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro }} ${{ inputs.img || 'rescue' }}
+          bmake SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH=${{ inputs.arch || 'amd64' }} MOUNTRO=${{ inputs.mountro || 'y' }} ${{ inputs.img || 'buildimg' }}
 
       - uses: actions/upload-artifact@v4
         with:
