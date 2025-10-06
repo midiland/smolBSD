@@ -11,7 +11,7 @@ mknod -m 666 dev/stderr c 22 2
 
 mkdir -p packages
 VERSION=0.4.1
-curl -L -s -o packages/nitro.tgz https://imil.net/NetBSD/nitro-${VERSION}.tgz?$RANDOM
+${FETCH} -o packages/nitro.tgz https://imil.net/NetBSD/nitro-${VERSION}.tgz?$RANDOM
 
 PREFIX=usr/pkg
 mkdir -p ${PREFIX}
