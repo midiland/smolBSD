@@ -1,0 +1,17 @@
+. /etc/include/basicrc
+. /etc/include/mount9p
+
+# needed to fetch HTTPS
+mount -t tmpfs -o -s1M tmpfs /etc/openssl
+mount -t tmpfs -o -s32M tmpfs /tmp
+cp /usr/share/examples/certctl/certs.conf /etc/openssl/
+certctl rehash
+
+cd /mnt
+SERVICE=$(cat tmp/build*)
+echo "* building $SERVICE image"
+make SERVICE=$SERVICE base
+
+echo "* build finished, Ctrl-A X to exit"
+rm -f tmp/build*
+cat
