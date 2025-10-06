@@ -19,4 +19,6 @@ fi
 
 ifconfig lo0 127.0.0.1 up
 
+mount -a
+
 [ -n "$MOUNTRO" ] && mount -u -o ro /
