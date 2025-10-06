@@ -51,12 +51,25 @@ jobs:
             bmake SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH="$arch" MOUNTRO=${{ inputs.mountro || 'y' }} ${{ inputs.img || 'buildimg' }}
           done
 
+      - name: Compress images
+        run: |
+          cd images
+          for f in *.img; do
+            echo "Compressing $f..."
+            xz -T0 -9e "$f"
+            sha256sum ${f}.xz > ${f}.xz.sha256
+          done
+          rm -f *.img
+
       - name: Publish images to "latest" release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Latest smolBSD images"
-          files: images/*.img
+          name: "Latest smolBSD images (compressed)"
+          files: |
+            images/*.img.xz
+            images/*.xz.sha256
+          overwrite: true
           prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
