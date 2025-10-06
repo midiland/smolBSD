@@ -148,6 +148,7 @@ fi
 	done
 
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
+[ "$mountfs" = "ffs" ] && mountopt="${mountopt},log,noatime"
 echo "ROOT.a / $mountfs $mountopt 1 1" > ${mnt}/etc/fstab
 
 rsynclite service/${svc}/etc/ ${mnt}/etc/
