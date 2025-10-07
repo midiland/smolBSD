@@ -161,7 +161,8 @@ build:
 	fi
 	@mkdir -p tmp
 	@rm -f tmp/build-*
-	@printf "SERVICE=${SERVICE}\nMOUNTRO=${MOUNTRO}" > tmp/build-${SERVICE}
+	@printf "SERVICE=${SERVICE}\nMOUNTRO=${MOUNTRO}\nARCH=${ARCH}\n" > \
+		tmp/build-${SERVICE}
 	./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 512 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
 	# wait till the build is finished, guest removes the lock

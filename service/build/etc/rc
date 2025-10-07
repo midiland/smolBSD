@@ -9,8 +9,8 @@ certctl rehash
 
 cd /mnt
 . tmp/build*
-echo "* building $SERVICE image"
-make SERVICE=$SERVICE MOUNTRO=$MOUNTRO base
+echo "* building $SERVICE image (ARCH=$ARCH)"
+make ARCH=$ARCH SERVICE=$SERVICE MOUNTRO=$MOUNTRO base
 echo "* build finished, Ctrl-A X to exit"
 rm -f tmp/build*
 cat
