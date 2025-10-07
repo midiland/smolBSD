@@ -1,6 +1,7 @@
-VERS?=		10
+VERS?=		11
+PKGVERS?=	10.1
 ARCH?=		amd64
-DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
+DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${PKGVERS}/latest/${ARCH}/binary
 UNAME_M!=	uname -m
 PKGSITE?=	https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${UNAME_M}/${VERS}/All
 PKGS?=		packages
@@ -13,8 +14,8 @@ BUILDIMGURL=	https://github.com/NetBSDfr/smolBSD/releases/download/latest/${BUIL
 
 .if ${WHOAMI} != "root"
 SUDO!=		command -v doas >/dev/null && \
-		echo "ARCH=${ARCH} VERS=${VERS} doas" || \
-		echo "sudo -E ARCH=${ARCH} VERS=${VERS}"
+		echo "ARCH=${ARCH} PKGVERS=${PKGVERS} doas" || \
+		echo "sudo -E ARCH=${ARCH} PKGVERS=${PKGVERS}"
 .endif
 
 SETSEXT=	tar.xz
@@ -161,7 +162,7 @@ build:
 	fi
 	@mkdir -p tmp
 	@rm -f tmp/build-*
-	@printf "SERVICE=${SERVICE}\nMOUNTRO=${MOUNTRO}\nARCH=${ARCH}\n" > \
+	@printf "SERVICE=${SERVICE}\nMOUNTRO=${MOUNTRO}\nARCH=${ARCH}\nPKGVERS=${PKGVERS}\n" > \
 		tmp/build-${SERVICE}
 	./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 512 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
