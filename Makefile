@@ -58,6 +58,10 @@ UNAME_S!=	uname
 .if ${UNAME_S} == "Linux"
 DDUNIT=		M
 .endif
+FETCH=		curl -L
+.if ${UNAME_S} == "NetBSD"
+FETCH=		ftp
+.endif
 
 # guest root filesystem will be read-only
 .if defined(MOUNTRO) && ${MOUNTRO} == "y"
@@ -84,9 +88,9 @@ kernfetch:
 	if [ ! -f kernels/${KERNEL} ]; then \
 		echo "fetching ${KERNEL}"; \
 		if [ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ]; then \
-			curl -L -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
+			${FETCH} -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
 		else \
-			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
+			${FETCH} -o- ${KDIST}/kernel/${KERNEL}.gz | \
 				gzip -dc > kernels/${KERNEL}; \
 		fi; \
 	fi
@@ -94,7 +98,7 @@ kernfetch:
 setfetch:
 	[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
 	for s in ${SETS}; do \
-		[ -f ${SETSDIR}/$${s} ] || curl -L -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
+		[ -f ${SETSDIR}/$${s} ] || ${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
 	done
 
 pkgfetch:
