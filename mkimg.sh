@@ -101,7 +101,7 @@ else
 	u=m
 fi
 
-dd if=/dev/zero of=./${img} bs=1${u} count=${megs}
+dd if=/dev/zero of=./${img} bs=1 count=0 seek=512${u}
 
 mkdir -p mnt
 mnt=$(pwd)/mnt
@@ -113,8 +113,8 @@ if [ -n "$is_linux" ]; then
 else # NetBSD (and probably OpenBSD)
 	vnd=$(vndconfig -l|grep -m1 'not'|cut -f1 -d:)
 	vndconfig $vnd $img
-	newfs /dev/${vnd}a
-	mount /dev/${vnd}a $mnt
+	newfs -o time -O2 /dev/${vnd}a
+	mount -o log,noatime /dev/${vnd}a $mnt
 	mountfs="ffs"
 fi
 
