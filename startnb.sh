@@ -108,7 +108,7 @@ fi
 [ -n "$sharerw" ] && sharerw=",share-rw=on"
 
 # use VirtIO console when available, if not, emulated ISA serial console
-if nm $kernel | grep -q viocon_earlyinit; then
+if nm $kernel 2>&1 | grep -q viocon_earlyinit; then
 	console=viocon
 	[ -z "$max_ports" ] && max_ports=1
 	consdev="\
@@ -155,7 +155,7 @@ OpenBSD)
 esac
 
 QEMU=${QEMU:-qemu-system-${MACHINE}}
-echo -n "using QEMU "
+printf "using QEMU "
 $QEMU --version|grep -oE 'version .*'
 
 mem=${mem:-"256"}
