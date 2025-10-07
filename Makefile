@@ -1,7 +1,7 @@
 VERS?=		11
 PKGVERS?=	10.1
 ARCH?=		amd64
-DIST=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
+DIST?=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 # for an obscure reason, packages path use uname -m...
 UNAME_M!=	uname -m
 PKGSITE?=	https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${UNAME_M}/${PKGVERS}/All
