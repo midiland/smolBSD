@@ -16,15 +16,20 @@ if [ ! -d /var/db/pkgin ]; then
 	esac
 	printf "\n${star} installing needed packages\n"
 
-	ver=$(uname -r)
-	case $ver in
-	*99*) # current
-		ver=${ver%.99*}.0
-		;;
-	*_*) # tag
-		ver=${ver%_*}
-		;;
-	esac
+	[ -f /etc/pkgvers ] && . /etc/pkgvers
+	if [ -n "$PKGVERS" ]; then
+		ver=$PKGVERS
+	else
+		ver=$(uname -r)
+		case $ver in
+		*99*) # current
+			ver=${ver%.99*}.0
+			;;
+		*_*) # tag
+			ver=${ver%_*}
+			;;
+		esac
+	fi
 
 	# repository path differs for amd64 or aarch64/evbarm
 	machine=$(uname -m)

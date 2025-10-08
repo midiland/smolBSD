@@ -1,5 +1,7 @@
+.-include "service/${SERVICE}/options.mk"
+
 VERS?=		11
-PKGVERS?=	10.1
+PKGVERS?=	11.0_2025Q3
 ARCH?=		amd64
 DIST?=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
 # for an obscure reason, packages path use uname -m...
@@ -13,10 +15,19 @@ GROUP!= 	id -gn
 BUILDIMG=	build-${ARCH}.img
 BUILDIMGURL=	https://github.com/NetBSDfr/smolBSD/releases/download/latest/${BUILDIMG}
 
+SERVICE?=	${.TARGET}
+# guest root filesystem will be read-only
+.if defined(MOUNTRO) && ${MOUNTRO} == "y"
+EXTRAS+=	-o
+.endif
+
+ENVVARS=	SERVICE=${SERVICE} ARCH=${ARCH} PKGVERS=${PKGVERS} MOUNTRO=${MOUNTRO}
 .if ${WHOAMI} != "root"
 SUDO!=		command -v doas >/dev/null && \
-		echo "ARCH=${ARCH} PKGVERS=${PKGVERS} doas" || \
-		echo "sudo -E ARCH=${ARCH} PKGVERS=${PKGVERS}"
+		echo "${ENVVARS} doas" || \
+		echo "sudo -E ${ENVVARS}"
+.else
+SUDO=		${ENVVARS}
 .endif
 
 SETSEXT=	tar.xz
@@ -39,9 +50,9 @@ LIVEIMG=	NetBSD-${ARCH}-live.img
 
 # sets to fetch
 RESCUE=		rescue.${SETSEXT} etc.${SETSEXT}
-BASE=		base.${SETSEXT} etc.${SETSEXT}
+BASE?=		base.${SETSEXT} etc.${SETSEXT}
 PROF=		${BASE} comp.${SETSEXT}
-NBAKERY=	${BASE} comp.${SETSEXT}
+COMP=		${BASE} comp.${SETSEXT}
 BOZO=		${BASE}
 IMGBUILDER=	${BASE}
 
@@ -63,11 +74,6 @@ FETCH=		curl -L
 FETCH=		ftp
 .endif
 
-# guest root filesystem will be read-only
-.if defined(MOUNTRO) && ${MOUNTRO} == "y"
-EXTRAS+=	-o
-.endif
-
 # extra remote script
 .if defined(CURLSH) && !empty(CURLSH)
 EXTRAS+=	-c ${CURLSH}
@@ -80,7 +86,6 @@ PORT?=		::22022-:22
 # default size for disk built by imgbuilder
 SVCSZ?=		128
 
-SERVICE?=	${.TARGET}
 IMGSIZE?=	512
 
 kernfetch:
@@ -124,11 +129,6 @@ prof:
 		-x "${PROF}" ${EXTRAS}
 	${SUDO} chown ${WHOAMI} ${.TARGET}-${ARCH}.img
 
-nbakery:
-	${MAKE} setfetch SETS="${NBAKERY}"
-	${SUDO} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} -m 2048 -x "${NBAKERY}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} ${.TARGET}-${ARCH}.img
-
 imgbuilder:
 	${MAKE} setfetch SETS="${BASE}"
 	# build the building image if NOIMGBUILDERBUILD is not defined
@@ -167,8 +167,8 @@ build:
 	fi
 	@mkdir -p tmp
 	@rm -f tmp/build-*
-	@printf "SERVICE=${SERVICE}\nMOUNTRO=${MOUNTRO}\nARCH=${ARCH}\nPKGVERS=${PKGVERS}\n" > \
-		tmp/build-${SERVICE}
+	# save variables for sourcing in the build vm
+	@echo "${ENVVARS}"|sed 's/\ /\n/g' > tmp/build-${SERVICE}
 	./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 512 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
 	# wait till the build is finished, guest removes the lock

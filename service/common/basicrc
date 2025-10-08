@@ -1,10 +1,10 @@
 
-# custom local preload
-[ -f /etc/rc.pre ] && . /etc/rc.pre
-
 export HOME=/
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 umask 022
+
+# custom local preload
+[ -f /etc/rc.pre ] && . /etc/rc.pre
 
 mount -a
 

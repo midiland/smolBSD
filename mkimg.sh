@@ -55,12 +55,12 @@ sets=${sets:-"rescue.tar.xz"}
 
 OS=$(uname -s)
 TAR=tar
-export FETCH=curl
+FETCH=curl
 
 case $OS in
 NetBSD)
 	is_netbsd=1
-	export FETCH=ftp
+	FETCH=ftp
 	;;
 Linux)
 	is_linux=1
@@ -84,7 +84,7 @@ do
 	fi
 done
 
-export TAR
+export TAR FETCH
 
 if [ -z "$is_netbsd" -a -f "service/${svc}/NETBSD_ONLY" ]; then
 	printf "\nThis image must be built on NetBSD!\n"
@@ -101,7 +101,7 @@ else
 	u=m
 fi
 
-dd if=/dev/zero of=./${img} bs=1 count=0 seek=512${u}
+dd if=/dev/zero of=./${img} bs=1 count=0 seek=${megs}${u}
 
 mkdir -p mnt
 mnt=$(pwd)/mnt
@@ -186,8 +186,9 @@ fi
 # backup MAKEDEV so imgbuilder rc can copy it
 cp dev/MAKEDEV etc/
 # unionfs with ext2 leads to i/o error
-# [ -z "$is_netbsd" ] &&
 sed -i 's/-o union//g' dev/MAKEDEV
+# record wanted pkgsrc version
+echo "PKGVERS=$PKGVERS" > etc/pkgvers
 
 # proceed with caution
 [ -n "$curlsh" ] && curl -sSL "$CURLSH" | /bin/sh
