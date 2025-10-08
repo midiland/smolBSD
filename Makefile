@@ -24,8 +24,8 @@ EXTRAS+=	-o
 ENVVARS=	SERVICE=${SERVICE} ARCH=${ARCH} PKGVERS=${PKGVERS} MOUNTRO=${MOUNTRO}
 .if ${WHOAMI} != "root"
 SUDO!=		command -v doas >/dev/null && \
-		echo "${ENVVARS} doas" || \
-		echo "sudo -E ${ENVVARS}"
+		echo '${ENVVARS} doas' || \
+		echo 'sudo -E ${ENVVARS}'
 .else
 SUDO=		${ENVVARS}
 .endif
