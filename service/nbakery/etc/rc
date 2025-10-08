@@ -6,8 +6,6 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 export TERM=tmux-256color
 eval $(resize) # get current window size
 
-route flush -inet6 >/dev/null 2>&1
-
 lightgreen="\033[92m"
 bold="\033[1m"
 normal="\033[0m"
@@ -38,6 +36,7 @@ if [ ! -d ${NBHOME} ]; then
 
 		export HOSTNAME_FG="blanc"
 		export HOSTNAME_BG="violet"
+		export HOME=${NBHOME}
 
 		printbold "⭐ setup powerline.bash"
 		curl -o- -s \
@@ -128,12 +127,8 @@ EOF
 fi
 
 printbold "⭐ checking for exported filesystem"
-if dmesg |grep -q vio9; then
-	cp -f /etc/MAKEDEV /dev
-	(cd /dev && sh MAKEDEV vio9p0)
-	mount_9p -cu /dev/vio9p0 /mnt
-	echo "➡️ host filesystem mounted on /mnt"
-fi
+
+. /etc/include/mount9p
 
 hostname nbakery
 
