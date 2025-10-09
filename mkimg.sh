@@ -101,7 +101,7 @@ else
 	u=m
 fi
 
-dd if=/dev/zero of=./${img} bs=1 count=0 seek=${megs}${u}
+dd if=/dev/zero of=./${img} bs=1${u} count=${megs} count=1
 
 mkdir -p mnt
 mnt=$(pwd)/mnt
