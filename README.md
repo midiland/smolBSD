@@ -3,14 +3,14 @@
 This project aims at creating a minimal _NetBSD_ virtual machine that's able to boot and
 start a service in less than a second.  
 Previous _NetBSD_ installation is not required, using the provided tools the _microvm_ can be
-created from any _NetBSD_ or _GNU/Linux_ system.
+created from any _NetBSD_, _GNU/Linux_, MacOS system and probably more.
 
 When creating the image on a _NetBSD_ system, the image will be formatted using FFS, when
 creating the image on a _GNU/Linux_ system, the image will be formatted using _ext2_.
 
 [PVH][4] boot and various optimizations enable _NetBSD/amd64_ and _NetBSD/i386_ to directly boot from a [PVH][4] capable VMM (QEMU or Firecracker) in a couple **milliseconds**.  
 
-As of June 2025, most of these features are integrated in [NetBSD's current kernel][6], those still pending are available in my [NetBSD development branch][5].  
+As of June 2025, most of these features are integrated in [NetBSD's current kernel][6], and [NetBSD 11 releases][7] those still pending are available in my [NetBSD development branch][5].
 
 You can fetch a pre-built 64 bits kernel at https://smolbsd.org/assets/netbsd-SMOL and a 32 bits kernel at https://smolbsd.org/assets/netbsd-SMOL386  
 Warning those are _NetBSD-current_ kernels!
@@ -21,11 +21,11 @@ Warning those are _NetBSD-current_ kernels!
 
 ## Requirements
 
-- A GNU/Linux or NetBSD operating system
+- A GNU/Linux, NetBSD or MacOS operating system
 - The following tools installed
   - `curl`
   - `git`
-  - `make` (`bmake` if running on Linux)
+  - `make` (`bmake` if running on Linux or MacOS)
   - `uuid-runtime` (for uuidgen)
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
@@ -76,7 +76,7 @@ Usage:  startnb.sh -f conffile | -k kernel -i image [-c CPUs] [-m memory]
         -v              verbose
         -h              this help
 ```
-- `sets` contains _NetBSD_ "sets", i.e. `base.tgz`, `rescue.tgz`...
+- `sets` contains _NetBSD_ "sets" by architecture, i.e. `amd64/base.tgz`, `evbarm-aarch64/rescue.tgz`...
 - `etc` holds common `/etc` files to be installed in the root filesystem
 - `service` structure:
 
@@ -97,11 +97,21 @@ A microvm is seen as a "service", for each one:
 
 - there **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
 - if standard _NetBSD_ `init` is used, there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
+- image specifics **COULD**  be added in `make(1)` format in `options.mk`, i.e.
+```sh
+$ cat service/nbakery/options.mk
+# size of resulting inage in megabytes
+IMGSIZE=1024
+# as of 202510, there's no NetBSD 11 packages for !amd64
+.if defined(ARCH) && ${ARCH} != "amd64"
+PKGVERS=10.1
+.endif
+```
 
 In the `service` directory, `common/` contains scripts that will be bundled in the
 `/etc/include` directory of the microvm, this would be a perfect place to have something like:
 
-```shell
+```sh
 $ cat common/basicrc
 export HOME=/
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
@@ -122,7 +132,7 @@ export TERM=dumb
 ```
 
 And then add this to your `rc`:
-```shell
+```sh
 . /etc/include/basicrc
 ```
 
@@ -138,39 +148,34 @@ For the microvm to start instantly, you will need a kernel that is capable of "d
 
 Download the `SMOL` kernel
 
-* 64 bits
-```shell
-$ curl -O https://smolbsd.org/assets/netbsd-SMOL
-```
-* 32 bits
-```shell
-$ curl -O https://smolbsd.org/assets/netbsd-SMOL386
+```sh
+$ bmake kernfetch
 ```
 
 **For `aarch64`**
 
 Download a regular `netbsd-GENERIC64.img` kernel
 
-```shell
-$ curl -L -o- -s https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/evbarm-aarch64/binary/kernel/netbsd-GENERIC64.img.gz|gunzip -c >netbsd-GENERIC64.img
+```sh
+$ bmake ARCH=evbarm-aarch64 kernfetch
 ```
 
 ## Notes on image building
 
 * If you are running NetBSD or GNU/Linux, you can build most images using respectively `make` or `bmake`
-* If you are not running NetBSD, a safer, cleaner way of building images is to use the `build` image:
+* If you are not running NetBSD, a safer, cleaner way of building images is to use the `build` image builder:
   * either by building it if you are running GNU/Linux
 ```sh
 $ bmake buildimg
 ```
   * or by simply fetching it if you are running other systems such as MacOS
 ```sh
-$ bmake fetchimg
+$ bmake ARCH=evbarm-aarch64 fetchimg
 ```
 Both methods will create an `images/build-<arch>.img` disk image that you'll be able to use to build services.  
 To do so, in the following examples commands, replace `base` with `build`, i.e.:
 ```sh
-$ bmake SERVICE=nitro build
+$ bmake SERVICE=nitro build # instead of bmake SERVICE=nitro base
 ```
 This will spawn a microvm running the build image, and will in turn build the requested service.
 
@@ -178,38 +183,41 @@ This will spawn a microvm running the build image, and will in turn build the re
 
 > Note: you can use the ARCH variable to specify an architecture to build your image for, default is amd64.
 
-```shell
+```sh
 $ bmake rescue
 ```
 Will create a `rescue-amd64.img` file for use with an _amd64_ kernel.
-```shell
+```sh
 $ bmake MOUNTRO=y rescue
 ```
 Will also create a `rescue-amd64.img` file but with read-only root filesystem so the _VM_ can be stopped without graceful shutdow
-```shell
+```sh
 $ bmake ARCH=i386 rescue
 ```
 Will create a `rescue-i386.img` file for use with an _i386_ kernel.
-```shell
+```sh
 $ bmake ARCH=evbarm-aarch64 rescue
 ```
 Will create a `rescue-evbarm-aarch64.img` file for use with an _aarch64_ kernel.
 
 Start the microvm
-```shell
+```sh
 $ ./startnb.sh -k netbsd-SMOL -i rescue-amd64.img
 ```
 
 ## Example of an image filled with the `base` set on an `x86_64` CPU
 
-```shell
+```sh
 $ bmake base
 $ ./startnb.sh -k netbsd-SMOL -i base-amd64.img
 ```
 
 ## Example of an image running the `bozohttpd` web server on an `aarch64` CPU
 
-```shell
+Services are build on top of the `base` image, this can be overriden with the `BASE` `make(1)` variable.  
+Service name is specified with the `SERVICE` `make(1)` variable.
+
+```sh
 $ make ARCH=evbarm-aarch64 SERVICE=bozohttpd base
 $ ./startnb.sh -k netbsd-GENERIC64.img -i bozohttpd-evbarm-aarch64.img -p ::8080-:80
 [   1.0000000] NetBSD/evbarm (fdt) booting ...
@@ -222,7 +230,7 @@ started in daemon mode as `' port `http' root `/var/www'
 got request ``HEAD / HTTP/1.1'' from host 10.0.2.2 to port 80
 ```
 Try it from the host
-```shell
+```sh
 $ curl -I localhost:8080
 HTTP/1.1 200 OK
 Date: Wed, 10 Jul 2024 05:25:04 GMT
@@ -232,88 +240,6 @@ Last-Modified: Wed, 10 Jul 2024 05:24:51 GMT
 Content-Type: text/html
 Content-Length: 30
 Connection: close
-```
-
-## Example of an image used to create an nginx microvm with [sailor][3]
-
-```shell
-$ bmake SVCIMG=nginx imgbuilder
-```
-This will spawn an image builder host which will populate an `nginx` minimal image.
-
-Once the `nginx` image is baked, simply run it:
-
-```shell
-$ ./startnb.sh -k netbsd-SMOL -i nginx-amd64.img -p tcp::8080-:80
-```
-
-And try it:
-
-```shell
-$ curl -I http://localhost:8008
-HTTP/1.1 200 OK
-Server: nginx/1.24.0
-Date: Sun, 30 Jun 2024 07:58:14 GMT
-Content-Type: text/html
-Content-Length: 615
-Last-Modified: Mon, 08 Apr 2024 14:01:28 GMT
-Connection: keep-alive
-ETag: "6613f8b8-267"
-Accept-Ranges: bytes
-```
-
-### Example configuration for the `nginx` service
-
-```shell
-$ cat service/imgbuilder/postinst/nginx.sh
-#!/bin/sh
-
-git clone https://github.com/NetBSDfr/sailor
-
-ship=fakecracker
-
-# create sailor base config - https://github.com/NetBSDfr/sailor
-cat >sailor/${ship}.conf<<EOF
-shipname=$ship
-shippath="/sailor/$ship"
-shipbins="/bin/sh /sbin/init /usr/bin/printf /sbin/mount /sbin/mount_ffs /bin/ls /sbin/mknod /sbin/ifconfig /usr/bin/nc /usr/bin/tail /sbin/poweroff /sbin/umount /sbin/fsck /usr/bin/netstat /sbin/dhcpcd /sbin/route"
-packages="nginx"
-EOF
-
-# system and service startup
-mkdir -p sailor/ships/${ship}/etc
-cat >>sailor/ships/${ship}/etc/rc<<EOF
-. /etc/include/basicrc
-
-# service startup
-
-printf "\nstarting nginx.. "
-/usr/pkg/sbin/nginx
-echo "done"
-printf "\nTesting web server:\n"
-printf "HEAD / HTTP/1.0\r\n\r\n"|nc -n 127.0.0.1 80
-printf "^D to cleanly shutdown\n\n"
-sh
-
-. /etc/include/shutdown
-EOF
-```
-You might also want to add an `service/imgbuilder/etc/rc.nginx`
-```
-$ cat service/imgbuilder/etc/rc.nginx
-
-# do stuff
-
-cat >${ship}/usr/pkg/share/examples/nginx/html/index.html<<_HTML
-<html>
-<body>
-<pre>
-Welcome to $(uname -s) $(uname -r) on $(uname -m) / $(uname -p)!
-</pre>
-</body>
-</html>
-_HTML
-
 ```
 
 ## Example of starting a _VM_ with bi-directionnal socket to _host_
@@ -375,3 +301,4 @@ the following should be available at `http://localhost:5000`:
 [4]: https://xenbits.xen.org/docs/4.6-testing/misc/pvh.html
 [5]: https://github.com/NetBSDfr/NetBSD-src/tree/nbfr_master
 [6]: https://github.com/NetBSD/src
+[7]: https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-11/latest
