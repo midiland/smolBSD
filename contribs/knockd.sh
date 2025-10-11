@@ -8,7 +8,6 @@
 # unlike the real `knockd`, start ports and stop ports are
 # identical
 
-SERVICE=$1
 pid=qemu-${SERVICE}.pid
 
 while :
