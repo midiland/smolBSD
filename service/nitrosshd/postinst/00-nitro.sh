@@ -2,12 +2,7 @@
 
 # bare minimum
 mknod -m 600 dev/console c 0 0
-#mknod -m 600 dev/constty c 0 1
-#mknod -m 666 dev/tty c 1 0
 mknod -m 666 dev/null c 2 2
-#mknod -m 666 dev/stdin c 22 0
-#mknod -m 666 dev/stdout c 22 1
-#mknod -m 666 dev/stderr c 22 2
 
 mkdir -p packages
 VERSION=0.4.1
@@ -18,19 +13,31 @@ mkdir -p ${PREFIX}
 $TAR zxvfp packages/nitro.tgz --exclude='+*' -C ${PREFIX}
 
 mv ${PREFIX}/sbin/nitro sbin/init
-for d in var/run/nitro ${PREFIX}/etc/nitro/SYS ${PREFIX}/etc/nitro/LOG ${PREFIX}/etc/nitro/sshd home
+for d in var/run/nitro \
+	${PREFIX}/etc/nitro/SYS \
+	${PREFIX}/etc/nitro/LOG \
+	${PREFIX}/etc/nitro/sshd home
 do
 	mkdir -p ${d}
 done
 
 ln -sf /var/run/nitro/nitro.sock ${PREFIX}/etc/nitro.sock
 
+# ptyfs is needed to provide ttys to clients
 echo "ptyfs /dev/pts ptyfs rw 0 0" >> etc/fstab
+
+# we want sshd to be the main process
+echo 'sshd_flags="-D -e"' >> etc/rc.conf
+echo 'UseDNS no' >> etc/ssh/sshd_config
+
+# if running an agent
+ssh-add -L >etc/ssh/authorized_keys 2>/dev/null
+pubkeys="../service/nitrosshd/etc/*.pub"
+ls $pubkeys >/dev/null 2>&1 && \
+	cat $pubkeys >>etc/ssh/authorized_keys
 
 cat >${PREFIX}/etc/nitro/SYS/setup<<EOF
 #!/bin/sh
-
-exec 2>&1
 
 cd /dev
 sh MAKEDEV -M -M all

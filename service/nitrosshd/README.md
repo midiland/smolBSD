@@ -2,8 +2,8 @@
 
 This microservice starts an _OpenSSH_ daemon with the [nitro][1] `init` system.
 
-As it uses `union` `tmpfs` which is unsupported with `ext2`, it must be built with either a _NetBSD_ host or the [builder image][2].
-You need to create the `service/nitrosshd/etc/ssh/authorized_keys` file containing your SSH public key(s).
+As it uses `union` `tmpfs` which is unsupported with `ext2`, it must be built with either a _NetBSD_ host or the [builder image][2].  
+Add the desired SSH public keys in the `service/nitrosshd/etc` directory in file(s) ending with `.pub`.
 
 Building on GNU/Linux or MacOS
 ```sh
