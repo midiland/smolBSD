@@ -19,5 +19,5 @@ $ ./startnb.sh -f etc/nitrosshd.conf
 ```
 By default it listens at port 2022, you can change it in `etc/nitrosshd.conf`.
 
-[2]: https://github.com/leahneukirchen/nitro
+[1]: https://github.com/leahneukirchen/nitro
 [2]: https://github.com/NetBSDfr/smolBSD/tree/main/service/build
