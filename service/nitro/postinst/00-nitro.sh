@@ -28,7 +28,6 @@ ln -sf /var/run/nitro/nitro.sock ${PREFIX}/etc/nitro.sock
 cat >${PREFIX}/etc/nitro/SYS/setup<<EOF
 #!/bin/sh
 
-cp /etc/MAKEDEV /dev
 cd /dev
 sh MAKEDEV -M -M all
 cd -
