@@ -2,10 +2,18 @@
 
 VERS?=		11
 PKGVERS?=	11.0_2025Q3
-ARCH?=		amd64
-DIST?=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
-# for an obscure reason, packages path use uname -m...
 UNAME_M!=	uname -m
+# for an obscure reason, packages path use uname -m...
+DIST?=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
+.if !defined(ARCH)
+.  if ${UNAME_M} == "x86_64" || ${UNAME_M} == "amd64"
+ARCH=		amd64
+.  elif ${UNAME_M} == "aarch64" || ${UNAME_M} == "arm64"
+ARCH=		evbarm-aarch64
+.  else
+ARCH=		${UNAME_M}
+.  endif
+.endif
 PKGSITE?=	https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${UNAME_M}/${PKGVERS}/All
 PKGS?=		packages
 KDIST=		${DIST}
