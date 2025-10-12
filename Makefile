@@ -88,8 +88,11 @@ SVCSZ?=		128
 
 IMGSIZE?=	512
 
+ARROW="➡️ "
+CHECK="✅"
+
 kernfetch:
-	@echo "→ fetching kernel"
+	@echo "${ARROW} fetching kernel"
 	@mkdir -p kernels
 	@if [ ! -f kernels/${KERNEL} ]; then \
 		echo "fetching ${KERNEL}"; \
@@ -102,7 +105,7 @@ kernfetch:
 	fi
 
 setfetch:
-	@echo "→ fetching sets"
+	@echo "${ARROW} fetching sets"
 	@[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
 	@for s in ${SETS}; do \
 		[ -f ${SETSDIR}/$${s} ] || ${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
@@ -121,11 +124,11 @@ rescue:
 
 base:
 	@${MAKE} setfetch SETS="${BASE}"
-	@echo "→ creating root filesystem (${IMGSIZE}M)"
+	@echo "${ARROW} creating root filesystem (${IMGSIZE}M)"
 	@${SUDO} ./mkimg.sh -i ${SERVICE}-${ARCH}.img -s ${SERVICE} \
 		-m ${IMGSIZE} -x "${BASE}" ${EXTRAS}
 	@${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
-	@echo "done ✓ image ready: ${SERVICE}-${ARCH}.img"
+	@echo "done ${CHECK} image ready: ${SERVICE}-${ARCH}.img"
 
 prof:
 	${MAKE} setfetch SETS="${PROF}"
@@ -156,13 +159,13 @@ live:	kernfetch
 
 buildimg:
 	@mkdir -p images
-	@echo "→ building the builder image"
+	@echo "${ARROW} building the builder image"
 	@${MAKE} MOUNTRO=y SERVICE=build IMGSIZE=320 base
 	@mv -f build-${ARCH}.img images/
 
 fetchimg:
 	@mkdir -p images
-	@echo "→ fetching builder image"
+	@echo "${ARROW} fetching builder image"
 	@if [ ! -f images/${BUILDIMG} ]; then \
 		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
 	fi
@@ -175,11 +178,11 @@ build:
 	@rm -f tmp/build-*
 	# save variables for sourcing in the build vm
 	@echo "${ENVVARS}"|sed 's/\ /\n/g' > tmp/build-${SERVICE}
-	@echo "→ starting the builder microvm"
+	@echo "${ARROW} starting the builder microvm"
 	@./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 512 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
 	# wait till the build is finished, guest removes the lock
 	@while [ -f tmp/build-${SERVICE} ]; do sleep 0.2; done
-	@echo "→ killing the builder microvm"
+	@echo "${ARROW} killing the builder microvm"
 	@kill $$(cat qemu-${.TARGET}.pid)
 	@${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
