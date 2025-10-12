@@ -2,12 +2,7 @@
 
 # bare minimum
 mknod -m 600 dev/console c 0 0
-mknod -m 600 dev/constty c 0 1
-mknod -m 666 dev/tty c 1 0
 mknod -m 666 dev/null c 2 2
-mknod -m 666 dev/stdin c 22 0
-mknod -m 666 dev/stdout c 22 1
-mknod -m 666 dev/stderr c 22 2
 
 mkdir -p packages
 VERSION=0.4.1
