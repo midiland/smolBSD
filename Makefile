@@ -100,10 +100,9 @@ ARROW="➡️ "
 CHECK="✅"
 
 kernfetch:
-	@echo "${ARROW} fetching kernel"
 	@mkdir -p kernels
 	@if [ ! -f kernels/${KERNEL} ]; then \
-		echo "fetching ${KERNEL}"; \
+		echo "${ARROW} fetching kernel"; \
 		if [ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ]; then \
 			${FETCH} -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
 		else \
@@ -165,7 +164,7 @@ live:	kernfetch
 	echo "fetching ${LIVEIMG}"
 	[ -f ${LIVEIMG} ] || curl -o- -L ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
 
-buildimg:
+buildimg: kernfetch
 	@mkdir -p images
 	@echo "${ARROW} building the builder image"
 	@${MAKE} MOUNTRO=y SERVICE=build IMGSIZE=320 base
@@ -178,7 +177,7 @@ fetchimg:
 		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
 	fi
 
-build:
+build:	kernfetch
 	@if [ ! -f images/${.TARGET}-${ARCH}.img ]; then \
 		${MAKE} buildimg; \
 	fi
