@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>smolBSD — build your own minimal BSD system</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'IBM Plex Mono', monospace; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeInUp 0.8s ease forwards; opacity: 0; }
+    img[alt="smolBSD logo"] {
+      filter: drop-shadow(0 0 8px #f59e0b33);
+}
+  </style>
+</head>
+
+<body class="bg-black text-gray-300 selection:bg-amber-500 selection:text-black">
+  <!-- Hero -->
+  <section class="min-h-screen flex flex-col justify-center items-center
+text-center p-8 bg-gradient-to-b from-black via-zinc-900 to-black">
+    <div class="flex flex-col md:flex-row items-center justify-center gap-6
+fade-up">
+      <img src="smolBSD.png" alt="smolBSD logo" class="w-24 h-24 md:w-28 md:h-28
+opacity-90 hover:opacity-100 transition duration-500">
+      <h1 class="text-6xl md:text-8xl font-bold text-white">
+        smol<span class="text-amber-500">BSD</span>
+      </h1>
+    </div>
+
+    <p class="text-lg md:text-2xl text-gray-400 mt-6 mb-8 fade-up"
+style="animation-delay: .2s">
+      build your own minimal BSD UNIX system
+    </p>
+
+    <div class="space-x-4 fade-up" style="animation-delay: .4s">
+      <a href="https://github.com/NetBSDfr/smolBSD" class="px-6 py-3
+bg-amber-500 text-black font-semibold rounded-lg hover:bg-amber-400
+transition">GitHub</a>
+      <a href="#about" class="px-6 py-3 border border-amber-400 text-amber-400
+font-semibold rounded-lg hover:bg-amber-400 hover:text-black transition">Get
+Started</a>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="max-w-5xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <h2 class="text-3xl text-white mb-6 font-semibold">About</h2>
+      <p class="text-gray-400 leading-relaxed">
+        <strong>smolBSD</strong> is a meta-operating system built on top of NetBSD.  
+        It lets you compose your own UNIX environment — from a single-purpose microservice system to a fully-custom OS image — in just a few minutes.
+      </p>
+      <p class="text-gray-400 leading-relaxed mt-4">
+        The smolBSD environment uses the <strong>netbsd-MICROVM</strong> kernel as its foundation, leveraging the same portable, reliable codebase that powers NetBSD itself.  
+        You decide what to include — sshd, httpd, or your own service — and smolBSD builds a coherent, minimal, bootable image ready to run anywhere.
+      </p>
+    </div>
+    <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto text-sm border border-zinc-800">
+$ bmake SERVICE=bozohttpd build
+➡️   starting the builder microvm
+➡️   host filesystem mounted on /mnt
+➡️   fetching sets
+➡️   creating root filesystem (512M)
+done ✅ image ready: bozohttpd-amd64.img
+    </pre>
+  </section>
+
+  <!-- Features -->
+  <section class="bg-zinc-950 py-24">
+    <div class="max-w-5xl mx-auto text-center mb-12">
+      <h2 class="text-3xl text-white font-semibold mb-4">Why smolBSD</h2>
+      <p class="text-gray-400">Build BSD systems like you build software — fast, reproducible, and minimal.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto px-6">
+      <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
+        <h3 class="text-xl text-amber-400 mb-2">🧩 Composable</h3>
+        <p class="text-gray-400 text-sm">Pick only the components you need — from kernel to services.</p>
+      </div>
+      <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
+        <h3 class="text-xl text-amber-400 mb-2">⚙️ Reproducible</h3>
+        <p class="text-gray-400 text-sm">Every build is deterministic, portable, and easy to version-control.</p>
+      </div>
+      <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
+        <h3 class="text-xl text-amber-400 mb-2">🚀 Instant Boot</h3>
+        <p class="text-gray-400 text-sm">Powered by netbsd-MICROVM — boot to service in milliseconds.</p>
+      </div>
+      <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
+        <h3 class="text-xl text-amber-400 mb-2">💻 Universal</h3>
+        <p class="text-gray-400 text-sm">Runs anywhere QEMU or Firecracker runs — cloud, CI, edge, or laptop.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="max-w-4xl mx-auto px-6 py-24 text-center">
+    <h2 class="text-3xl text-white mb-6 font-semibold">Quick Start</h2>
+    <p class="text-gray-400 mb-6">Build and boot your own BSD system in seconds:</p>
+    <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto text-left text-sm border border-zinc-800">
+$ git clone https://github.com/NetBSDfr/smolBSD
+$ cd smolBSD
+$ bmake SERVICE=sshd build
+➡️   starting the builder microvm
+➡️   host filesystem mounted on /mnt
+➡️   fetching sets
+➡️   creating root filesystem (512M)
+done ✅ image ready: sshd-amd64.img
+➡️   killing the builder microvm
+
+$ ./startnb.sh -f etc/sshd.conf 
+[   1.0092096] kernel boot time: 14ms
+Starting sshd.
+Server listening on :: port 22.
+Server listening on 0.0.0.0 port 22.
+    </pre>
+    <a href="https://github.com/NetBSDfr/smolBSD/releases" class="inline-block mt-6 px-6 py-3 bg-amber-500 text-black font-semibold rounded-lg hover:bg-amber-400 transition">
+      Download
+    </a>
+  </section>
+
+  <!-- Community -->
+  <section class="bg-zinc-950 py-24 text-center">
+    <h2 class="text-3xl text-white mb-6 font-semibold">Community</h2>
+    <p class="text-gray-400 max-w-3xl mx-auto mb-8">
+      smolBSD is an independent project built on top of NetBSD.  
+      Join us, share your micro-systems, or contribute new services and build recipes.
+    </p>
+    <div class="space-x-6 text-amber-400 text-2xl">
+      <a href="https://github.com/NetBSDfr/smolBSD" class="hover:text-amber-300">GitHub</a>
+      <a href="https://mastodon.bsd.cafe/@imil" class="hover:text-amber-300">Mastodon</a>
+      <a href="mailto:contact@smolbsd.org" class="hover:text-amber-300">Email</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="text-center text-gray-600 py-12 text-sm border-t border-gray-800">
+    © 2025 smolBSD
+  </footer>
+</body>
+</html>
+
