@@ -105,7 +105,6 @@ $ git clone https://github.com/NetBSDfr/smolBSD
 $ cd smolBSD
 $ bmake SERVICE=sshd build
 ➡️   starting the builder microvm
-➡️   host filesystem mounted on /mnt
 ➡️   fetching sets
 ➡️   creating root filesystem (512M)
 done ✅ image ready: sshd-amd64.img
@@ -121,6 +120,100 @@ Server listening on 0.0.0.0 port 22.
       Download
     </a>
   </section>
+
+<!-- Examples -->
+<section id="examples" class="bg-black py-24">
+  <div class="max-w-5xl mx-auto px-6">
+    <h2 class="text-3xl text-white font-semibold mb-12
+text-center">Examples</h2>
+
+    <!-- Example 1: bozohttpd -->
+    <div class="grid md:grid-cols-2 gap-8 mb-16 items-center">
+      <div>
+        <h3 class="text-2xl text-amber-400 font-semibold mb-4">bozohttpd</h3>
+        <p class="text-gray-400 leading-relaxed">
+          A complete static web server in a few megabytes.  
+          smolBSD builds a minimal system with <code>bozohttpd</code>
+preconfigured and ready to serve content immediately on boot.
+        </p>
+      </div>
+      <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
+text-sm border border-zinc-800">
+$ bmake SERVICE=bozohttpd build
+➡️   starting the builder microvm
+➡️   fetching sets
+➡️   creating root filesystem (512M)
+done ✅ image ready: bozohttpd-amd64.img
+
+$ ./startnb.sh -f etc/bozohttpd.conf
+[   1.001231] kernel boot time: 10ms
+Starting bozohttpd on :80
+listening on 0.0.0.0:80
+      </pre>
+    </div>
+
+    <!-- Example 2: nbakery -->
+    <div class="grid md:grid-cols-2 gap-8 mb-16 items-center
+md:flex-row-reverse">
+      <div class="md:order-2">
+        <h3 class="text-2xl text-amber-400 font-semibold mb-4">nbakery</h3>
+        <p class="text-gray-400 leading-relaxed">
+          A lightweight build and image creation service based entirely on
+NetBSD tools.  
+          The <code>nbakery</code> image gives you a taste of a preconfigured NetBSD environment with all the well known tools.
+        </p>
+      </div>
+      <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
+text-sm border border-zinc-800 md:order-1">
+$ bmake SERVICE=nbakery build
+➡️   starting the builder microvm
+➡️   fetching sets
+➡️   creating root filesystem (512M)
+done ✅ image ready: nbakery-amd64.img
+
+$ ./startnb.sh -f etc/nbakery.conf
+[   1.008374] kernel boot time: 11ms
+
+Welcome to the (n)bakery! 🧁
+
+💪 doas <command> to run command as root
+📦 pkgin to manage packages
+🚪 exit to cleanly shutdown, ^a-x to exit qemu
+🪟 you are inside a tmux with prefix ^q
+      </pre>
+    </div>
+
+    <!-- Example 3: nitrosshd -->
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      <div>
+        <h3 class="text-2xl text-amber-400 font-semibold mb-4">nitrosshd</h3>
+        <p class="text-gray-400 leading-relaxed">
+          A minimal secure shell server started with <code>nitro</code>,
+designed to launch instantly and provide remote access with zero unnecessary
+services.  
+          Ideal for an SSH bouncer.
+        </p>
+      </div>
+      <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
+text-sm border border-zinc-800">
+$ bmake SERVICE=nitrosshd build
+➡️   starting the builder microvm
+➡️   fetching sets
+➡️   creating root filesystem (512M)
+done ✅ image ready: nitrosshd-amd64.img
+
+$ ./startnb.sh -f etc/sshd.conf
+[   1.011598] kernel boot time: 12ms
+Created tmpfs /dev (1835008 byte, 3552 inodes)
+Starting sshd.
+Server listening on :: port 22.
+Server listening on 0.0.0.0 port 22.
+      </pre>
+    </div>
+
+  </div>
+</section>
+
 
   <!-- Community -->
   <section class="bg-zinc-950 py-24 text-center">
