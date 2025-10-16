@@ -96,7 +96,7 @@ SVCSZ?=		128
 
 IMGSIZE?=	512
 
-ARROW="➡️ "
+ARROW="➡️"
 CHECK="✅"
 
 kernfetch:
@@ -135,7 +135,7 @@ base:
 	@${SUDO} ./mkimg.sh -i ${SERVICE}-${ARCH}.img -s ${SERVICE} \
 		-m ${IMGSIZE} -x "${BASE}" ${EXTRAS}
 	@${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
-	@echo "done ${CHECK} image ready: ${SERVICE}-${ARCH}.img"
+	@echo "${CHECK} image ready: ${SERVICE}-${ARCH}.img"
 
 prof:
 	${MAKE} setfetch SETS="${PROF}"

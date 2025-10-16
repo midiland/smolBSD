@@ -62,11 +62,11 @@ Started</a>
     </div>
     <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto text-sm border border-zinc-800">
 $ bmake SERVICE=bozohttpd build
-➡️   starting the builder microvm
-➡️   host filesystem mounted on /mnt
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: bozohttpd-amd64.img
+➡️ starting the builder microvm
+➡️ host filesystem mounted on /mnt
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: bozohttpd-amd64.img
     </pre>
   </section>
 
@@ -104,11 +104,11 @@ done ✅ image ready: bozohttpd-amd64.img
 $ git clone https://github.com/NetBSDfr/smolBSD
 $ cd smolBSD
 $ bmake SERVICE=sshd build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: sshd-amd64.img
-➡️   killing the builder microvm
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: sshd-amd64.img
+➡️ killing the builder microvm
 
 $ ./startnb.sh -f etc/sshd.conf 
 [   1.0092096] kernel boot time: 14ms
@@ -140,10 +140,10 @@ preconfigured and ready to serve content immediately on boot.
       <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
 text-sm border border-zinc-800">
 $ bmake SERVICE=bozohttpd build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: bozohttpd-amd64.img
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: bozohttpd-amd64.img
 
 $ ./startnb.sh -f etc/bozohttpd.conf
 [   1.001231] kernel boot time: 10ms
@@ -166,10 +166,10 @@ NetBSD tools.
       <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
 text-sm border border-zinc-800 md:order-1">
 $ bmake SERVICE=nbakery build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: nbakery-amd64.img
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: nbakery-amd64.img
 
 $ ./startnb.sh -f etc/nbakery.conf
 [   1.008374] kernel boot time: 11ms
@@ -197,10 +197,10 @@ services.
       <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
 text-sm border border-zinc-800">
 $ bmake SERVICE=nitrosshd build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: nitrosshd-amd64.img
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: nitrosshd-amd64.img
 
 $ ./startnb.sh -f etc/sshd.conf
 [   1.011598] kernel boot time: 12ms
