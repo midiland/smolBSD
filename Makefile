@@ -77,7 +77,7 @@ UNAME_S!=	uname
 .if ${UNAME_S} == "Linux"
 DDUNIT=		M
 .endif
-FETCH=		curl -L
+FETCH=		curl -L -s
 .if ${UNAME_S} == "NetBSD"
 FETCH=		ftp
 .endif
@@ -162,7 +162,7 @@ prof:
 
 live:	kernfetch
 	echo "fetching ${LIVEIMG}"
-	[ -f ${LIVEIMG} ] || curl -o- -L ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
+	[ -f ${LIVEIMG} ] || ${FETCH} -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
 
 buildimg: kernfetch
 	@mkdir -p images
@@ -174,7 +174,7 @@ fetchimg:
 	@mkdir -p images
 	@echo "${ARROW} fetching builder image"
 	@if [ ! -f images/${BUILDIMG} ]; then \
-		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
+		${FETCH} -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
 	fi
 
 build:	kernfetch
