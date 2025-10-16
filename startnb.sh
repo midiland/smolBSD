@@ -33,12 +33,6 @@ _USAGE_
 	exit 1
 }
 
-which uuidgen 1>/dev/null
-if [ $? -eq 1 ]; then
-	echo "uuidgen not available"
-	exit 1
-fi
-
 # Check if VirtualBox VM is running
 if pgrep VirtualBoxVM >/dev/null 2>&1; then
 	echo "Unable to start KVM: VirtualBox is running"
@@ -47,7 +41,7 @@ fi
 
 options="f:k:a:p:i:m:n:c:r:l:p:w:x:t:hbdsv"
 
-uuid="$(uuidgen | cut -d- -f1)"
+uuid="$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c8)"
 
 # and possibly override its values
 while getopts "$options" opt

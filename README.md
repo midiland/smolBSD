@@ -26,7 +26,6 @@ Warning those are _NetBSD-current_ kernels!
   - `curl`
   - `git`
   - `make` (`bmake` if running on Linux or MacOS)
-  - `uuid-runtime` (for uuidgen)
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
   - `nm`
