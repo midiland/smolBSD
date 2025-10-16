@@ -1,5 +1,6 @@
 /.idea
 mnt/
+tmp/
 *.img
 sets/
 netbsd-*
