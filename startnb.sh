@@ -101,9 +101,6 @@ fi
 
 [ -n "$sharerw" ] && sharerw=",share-rw=on"
 
-# Disable share for now as FreeBSD qemu does not support -fsdev XXX
-[ -n "$share" ] && [ "$(uname -s)" = "FreeBSD" ] && share='' && sharerew=''
-
 # use VirtIO console when available, if not, emulated ISA serial console
 if nm $kernel 2>&1 | grep -q viocon_earlyinit; then
 	console=viocon
