@@ -127,7 +127,7 @@ if [ -n "$is_linux" ]; then
 	mount -o loop $img $mnt
 	mountfs="ext2fs"
 elif [ -n "$is_freebsd" ]; then
-	vnd=$(mdconfig -f $img)
+	vnd=$(mdconfig -l -f $img || mdconfig -f $img)
 	newfs -o time -O2 /dev/${vnd}
 	mount -o noatime /dev/${vnd} $mnt
 	mountfs="ffs"
