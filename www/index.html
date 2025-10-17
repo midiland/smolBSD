@@ -78,19 +78,19 @@ $ bmake SERVICE=bozohttpd build
     </div>
     <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto px-6">
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">🧩 Composable</h3>
+        <h3 class="text-xl text-amber-400 mb-2">🧩&nbsp;Composable</h3>
         <p class="text-gray-400 text-sm">Pick only the components you need — from kernel to services.</p>
       </div>
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">⚙️ Reproducible</h3>
+        <h3 class="text-xl text-amber-400 mb-2">⚙️&nbsp;Reproducible</h3>
         <p class="text-gray-400 text-sm">Every build is deterministic, portable, and easy to version-control.</p>
       </div>
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">🚀 Instant Boot</h3>
+        <h3 class="text-xl text-amber-400 mb-2">🚀&nbsp;Instant Boot</h3>
         <p class="text-gray-400 text-sm">Powered by netbsd-MICROVM — boot to service in milliseconds.</p>
       </div>
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">💻 Universal</h3>
+        <h3 class="text-xl text-amber-400 mb-2">💻&nbsp;Universal</h3>
         <p class="text-gray-400 text-sm">Runs anywhere QEMU or Firecracker runs — cloud, CI, edge, or laptop.</p>
       </div>
     </div>
@@ -103,6 +103,7 @@ $ bmake SERVICE=bozohttpd build
     <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto text-left text-sm border border-zinc-800">
 $ git clone https://github.com/NetBSDfr/smolBSD
 $ cd smolBSD
+$ cat ~/.ssh/id_ed25519.pub >> service/sshd/etc/mykey.pub
 $ bmake SERVICE=sshd build
 ➡️ starting the builder microvm
 ➡️ fetching sets
@@ -115,6 +116,8 @@ $ ./startnb.sh -f etc/sshd.conf
 Starting sshd.
 Server listening on :: port 22.
 Server listening on 0.0.0.0 port 22.
+
+$ ssh -p 2022 ssh@localhost
     </pre>
     <a href="https://github.com/NetBSDfr/smolBSD/releases" class="inline-block mt-6 px-6 py-3 bg-amber-500 text-black font-semibold rounded-lg hover:bg-amber-400 transition">
       Download
