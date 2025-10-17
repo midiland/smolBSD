@@ -57,8 +57,10 @@ sets=${sets:-"rescue.tar.xz"}
 rootdir=${rootdir:-}
 kernel=${kernel:-}
 curlsh=${curlsh:-}
+rofs=${rofs:-}
 ADDSETS=${ADDSETS:-}
 ADDPKGS=${ADDPKGS:-}
+SVCIMG=${SVCIMG:-}
 
 OS=$(uname -s)
 TAR=tar
@@ -207,7 +209,7 @@ fi
 # backup MAKEDEV so imgbuilder rc can copy it
 cp dev/MAKEDEV etc/
 # unionfs with ext2 leads to i/o error
-sed -i '' -e 's/-o union//g' dev/MAKEDEV
+sed -i'' -e 's/-o union//g' dev/MAKEDEV
 # record wanted pkgsrc version
 echo "PKGVERS=$PKGVERS" > etc/pkgvers
 
