@@ -102,6 +102,9 @@ Q=@
 ARROW="➡️"
 CHECK="✅"
 
+help:
+	$Qgrep '.*:$$' Makefile
+
 kernfetch:
 	$Qmkdir -p kernels
 	$Qif [ ! -f kernels/${KERNEL} ]; then \
