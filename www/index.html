@@ -103,6 +103,7 @@ $ bmake SERVICE=bozohttpd build
     <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto text-left text-sm border border-zinc-800">
 $ git clone https://github.com/NetBSDfr/smolBSD
 $ cd smolBSD
+$ cat ~/.ssh/id_ed25519.pub >> service/sshd/etc/mykey.pub
 $ bmake SERVICE=sshd build
 ➡️ starting the builder microvm
 ➡️ fetching sets
