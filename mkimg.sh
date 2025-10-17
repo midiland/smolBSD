@@ -194,7 +194,7 @@ fi
 # warning, postinst operations are done on the builder
 
 [ -d ../service/${svc}/postinst ] && \
-	for x in ../service/${svc}/postinst/*.sh
+    for x in $(set +f; ls ../service/${svc}/postinst/*.sh)
 	do
 		# if SVCIMG variable exists, only process its script
 		if [ -n "$SVCIMG" ]; then
