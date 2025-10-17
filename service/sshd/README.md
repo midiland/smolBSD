@@ -7,11 +7,11 @@ Add the desired SSH public keys in the `service/sshd/etc` directory in file(s) e
 
 Building on GNU/Linux or MacOS
 ```sh
-$ bmake SERVICE=nitrosshd build
+$ bmake SERVICE=sshd build
 ```
 Building on NetBSD
 ```sh
-$ make SERVICE=nitrosshd base
+$ make SERVICE=sshd base
 ```
 Start the service:
 ```sh
