@@ -209,7 +209,7 @@ fi
 # backup MAKEDEV so imgbuilder rc can copy it
 cp dev/MAKEDEV etc/
 # unionfs with ext2 leads to i/o error
-sed -i'' -e 's/-o union//g' dev/MAKEDEV
+sed -ie 's/-o union//g' dev/MAKEDEV
 # record wanted pkgsrc version
 echo "PKGVERS=$PKGVERS" > etc/pkgvers
 
