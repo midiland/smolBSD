@@ -17,6 +17,10 @@ Start the service:
 ```sh
 $ ./startnb.sh -f etc/sshd.conf
 ```
-By default it listens at port 2022, you can change it in `etc/nitrosshd.conf`.
+You can now `ssh` to the service using the `ssh` user:
+```sh
+$ ssh -p 2022 ssh@localhost
+```
+By default it listens at port 2022, you can change it in `etc/sshd.conf`.
 
 [1]: https://github.com/NetBSDfr/smolBSD/tree/main/service/build
