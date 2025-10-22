@@ -5,7 +5,8 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'README.md'
+      - '**.md'
+      - 'www/**'
   workflow_dispatch:
     inputs:
       img:
