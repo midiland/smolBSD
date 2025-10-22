@@ -17,6 +17,10 @@ Start the service:
 ```sh
 $ ./startnb.sh -f etc/nitrosshd.conf
 ```
+You can now `ssh` to the service using the `ssh` user:
+```sh
+$ ssh -p 2022 ssh@localhost
+```
 By default it listens at port 2022, you can change it in `etc/nitrosshd.conf`.
 
 [1]: https://github.com/leahneukirchen/nitro
