@@ -104,7 +104,7 @@ fi
 # use VirtIO console when available, if not, emulated ISA serial console
 if nm $kernel 2>&1 | grep -q viocon_earlyinit; then
 	console=viocon
-	[ -z "$max_ports" ] && max_ports=3
+	[ -z "$max_ports" ] && max_ports=1
 	consdev="\
 -chardev stdio,signal=off,mux=on,id=char0 \
 -device virtio-serial-device,max_ports=${max_ports} \
