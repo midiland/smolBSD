@@ -144,6 +144,15 @@ OpenBSD)
 	fi
 	cputype="qemu64"
 	;;
+FreeBSD)
+	MACHINE=$(uname -p)
+	ACCEL=",accel=tcg"
+	# uname -m == "amd64" but qemu-system is "qemu-system-x86_64"
+	if [ "$MACHINE" = "amd64" ]; then
+		MACHINE="x86_64"
+	fi
+	cputype="qemu64"
+	;;
 *)
 	echo "Unknown hypervisor, no acceleration"
 esac
