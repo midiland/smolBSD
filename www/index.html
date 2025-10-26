@@ -62,11 +62,11 @@ Started</a>
     </div>
     <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto text-sm border border-zinc-800">
 $ bmake SERVICE=bozohttpd build
-➡️   starting the builder microvm
-➡️   host filesystem mounted on /mnt
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: bozohttpd-amd64.img
+➡️ starting the builder microvm
+➡️ host filesystem mounted on /mnt
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: bozohttpd-amd64.img
     </pre>
   </section>
 
@@ -78,19 +78,19 @@ done ✅ image ready: bozohttpd-amd64.img
     </div>
     <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto px-6">
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">🧩 Composable</h3>
+        <h3 class="text-xl text-amber-400 mb-2">🧩&nbsp;Composable</h3>
         <p class="text-gray-400 text-sm">Pick only the components you need — from kernel to services.</p>
       </div>
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">⚙️ Reproducible</h3>
+        <h3 class="text-xl text-amber-400 mb-2">⚙️&nbsp;Reproducible</h3>
         <p class="text-gray-400 text-sm">Every build is deterministic, portable, and easy to version-control.</p>
       </div>
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">🚀 Instant Boot</h3>
+        <h3 class="text-xl text-amber-400 mb-2">🚀&nbsp;Instant Boot</h3>
         <p class="text-gray-400 text-sm">Powered by netbsd-MICROVM — boot to service in milliseconds.</p>
       </div>
       <div class="p-6 border border-zinc-800 rounded-xl hover:border-amber-500 transition">
-        <h3 class="text-xl text-amber-400 mb-2">💻 Universal</h3>
+        <h3 class="text-xl text-amber-400 mb-2">💻&nbsp;Universal</h3>
         <p class="text-gray-400 text-sm">Runs anywhere QEMU or Firecracker runs — cloud, CI, edge, or laptop.</p>
       </div>
     </div>
@@ -103,12 +103,13 @@ done ✅ image ready: bozohttpd-amd64.img
     <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto text-left text-sm border border-zinc-800">
 $ git clone https://github.com/NetBSDfr/smolBSD
 $ cd smolBSD
+$ cat ~/.ssh/id_ed25519.pub >> service/sshd/etc/mykey.pub
 $ bmake SERVICE=sshd build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: sshd-amd64.img
-➡️   killing the builder microvm
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: sshd-amd64.img
+➡️ killing the builder microvm
 
 $ ./startnb.sh -f etc/sshd.conf 
 [   1.0092096] kernel boot time: 14ms
@@ -142,10 +143,10 @@ preconfigured and ready to serve content immediately on boot.
       <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
 text-sm border border-zinc-800">
 $ bmake SERVICE=bozohttpd build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: bozohttpd-amd64.img
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: bozohttpd-amd64.img
 
 $ ./startnb.sh -f etc/bozohttpd.conf
 [   1.001231] kernel boot time: 10ms
@@ -168,10 +169,10 @@ NetBSD tools.
       <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
 text-sm border border-zinc-800 md:order-1">
 $ bmake SERVICE=nbakery build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: nbakery-amd64.img
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: nbakery-amd64.img
 
 $ ./startnb.sh -f etc/nbakery.conf
 [   1.008374] kernel boot time: 11ms
@@ -199,10 +200,10 @@ services.
       <pre class="bg-zinc-950 text-gray-300 p-6 rounded-2xl overflow-x-auto
 text-sm border border-zinc-800">
 $ bmake SERVICE=nitrosshd build
-➡️   starting the builder microvm
-➡️   fetching sets
-➡️   creating root filesystem (512M)
-done ✅ image ready: nitrosshd-amd64.img
+➡️ starting the builder microvm
+➡️ fetching sets
+➡️ creating root filesystem (512M)
+✅ image ready: nitrosshd-amd64.img
 
 $ ./startnb.sh -f etc/sshd.conf
 [   1.011598] kernel boot time: 12ms
