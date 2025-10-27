@@ -94,9 +94,9 @@ service
 ```
 A microvm is seen as a "service", for each one:
 
-- there **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
-- if standard _NetBSD_ `init` is used, there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
-- image specifics **COULD**  be added in `make(1)` format in `options.mk`, i.e.
+- There **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
+- If standard _NetBSD_ `init` is used, there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
+- Image specifics **COULD**  be added in `make(1)` format in `options.mk`, i.e.
 ```sh
 $ cat service/nbakery/options.mk
 # size of resulting inage in megabytes
