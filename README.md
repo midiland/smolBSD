@@ -1,6 +1,6 @@
 # smolBSD
 
-This project aims at creating a minimal _NetBSD_ virtual machine that's able to boot and
+This project aims at creating a minimal _NetBSD_ 🚩 virtual machine that's able to boot and
 start a service in less than a second.  
 Previous _NetBSD_ installation is not required, using the provided tools the _microvm_ can be
 created from any _NetBSD_, _GNU/Linux_, MacOS system and probably more.
