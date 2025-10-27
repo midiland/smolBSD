@@ -3,7 +3,7 @@
 This project aims at creating a minimal _NetBSD_ 🚩 virtual machine that's able to boot and
 start a service in less than a second.  
 Previous _NetBSD_ installation is not required, using the provided tools the _microvm_ can be
-created from any _NetBSD_, _GNU/Linux_, MacOS system and probably more.
+created from any _NetBSD_, _GNU/Linux_, macOS system and probably more.
 
 When creating the image on a _NetBSD_ system, the image will be formatted using FFS, when
 creating the image on a _GNU/Linux_ system, the image will be formatted using _ext2_.
@@ -21,11 +21,11 @@ Warning those are _NetBSD-current_ kernels!
 
 ## Requirements
 
-- A GNU/Linux, NetBSD or MacOS operating system
+- A GNU/Linux, NetBSD or macOS operating system
 - The following tools installed
   - `curl`
   - `git`
-  - `make` (`bmake` if running on Linux or MacOS)
+  - `make` (`bmake` if running on Linux or macOS)
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
   - `nm`
@@ -168,7 +168,7 @@ $ bmake ARCH=evbarm-aarch64 kernfetch
 ```sh
 $ bmake buildimg
 ```
-  * or by simply fetching it if you are running other systems such as MacOS
+  * or by simply fetching it if you are running other systems such as macOS
 ```sh
 $ bmake ARCH=evbarm-aarch64 fetchimg
 ```
