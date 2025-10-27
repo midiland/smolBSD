@@ -135,9 +135,10 @@ And then add this to your `rc`:
 . /etc/include/basicrc
 ```
 
-## ⚠️  Warning ⚠️
+## Considerations
 
-If you use directly your host to build images, `postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
+>[!WARNING]
+> If you directly use your host to build images, `postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
 
 ## Prerequisite
 
