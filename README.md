@@ -181,7 +181,8 @@ This will spawn a microvm running the build image, and will in turn build the re
 
 ## Example of a very minimal (10MB) virtual machine
 
-> Note: you can use the ARCH variable to specify an architecture to build your image for, default is amd64.
+>[!Note]
+> You can use the ARCH variable to specify an architecture to build your image for, default is amd64.
 
 ```sh
 $ bmake rescue
