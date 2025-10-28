@@ -1,0 +1,16 @@
+case $CHOUPI in
+[yY]*)
+	STAR="⭐"
+	ARROW="➡"
+	CHECK="✅"
+	WARN="⚠️"
+	OUT="/dev/null"
+	;;
+*)
+	STAR="*"
+	ARROW=">"
+	CHECK='\'
+	WARN='!'
+	OUT="/dev/stdout"
+	;;
+esac
