@@ -93,6 +93,8 @@ fi
 -device virtio-net-device,netdev=net${uuid}0 \
 -netdev user,id=net${uuid}0,ipv6=off,$(echo "$hostfwd"|sed -E 's/(udp|tcp)?::/hostfwd=\1::/g')"
 
+[ -n "$hostfwd" ] && echo "${ARROW} port forward set: $hostfwd"
+
 [ -n "$bridgenet" ] && network="$network \
 -device virtio-net-device,netdev=net${uuid}1 \
 -netdev type=tap,id=net${uuid}1"
