@@ -121,7 +121,7 @@ else
 	consdev="-serial mon:stdio"
 	console=com
 fi
-echo "* using console: $console"
+echo "${ARROW} using console: $console"
 
 OS=$(uname -s)
 MACHINE=$(uname -m) # Linux and macos x86
