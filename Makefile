@@ -133,7 +133,7 @@ setfetch:
 
 pkgfetch:
 	@echo "${ARROW} fetching additional packages"
-	@[ -d ${PKGSDIR} ] || mkdir ${PKGSDIR}
+	@[ -d ${PKGSDIR} ] || mkdir -p ${PKGSDIR}
 	@for p in ${ADDPKGS};do \
 		[ -f ${PKGSDIR}/$${p}* ] || \
 		${FETCH} -o ${PKGSDIR}/$${p}.tgz ${PKGSITE}/$${p}*; \
