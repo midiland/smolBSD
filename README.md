@@ -275,6 +275,7 @@ The following environment variables change `mkimg.sh` behavior:
 
 * `ADDPKGS` will **untar** the packages paths listed in the variable, this is done in `postinst` stage, on the build host, where `pkgin` might not be available
 * `ADDSETS` will add the sets paths listed in the variable
+* `MINIMIZE` if set to `y`, will invoke [sailor][3] in order to minimize the produced image
 
 The following environment variables change `startnb.sh` behavior:
 
