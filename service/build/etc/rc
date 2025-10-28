@@ -22,6 +22,7 @@ if [ -n "$MINIMIZE" -a -f service/${SERVICE}/sailor.conf ]; then
 	if [ ! -d sailor ]; then
 		echo "${WARN} minimization asked but sailor not available"
 		echo "${WARN} git clone https://github.com/NetBSDfr/sailor first!"
+		sed -i'' 's/MINIMIZE/NOMINIMIZE/' tmp/build*
 	else
 		mount -t tmpfs -o -s100M tmpfs /var/db
 		mount -t tmpfs -o -s20M tmpfs /var/run
