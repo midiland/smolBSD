@@ -115,7 +115,7 @@ kernfetch:
 	$Qmkdir -p kernels
 	$Qif [ ! -f kernels/${KERNEL} ]; then \
 		echo "${ARROW} fetching kernel"; \
-		if [ "${ARCH}" = "amd64" -o "${ARCH}" = "i386" ]; then \
+		if [ "${ARCH}" = "amd64" ] || [ "${ARCH}" = "i386" ]; then \
 			${FETCH} -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
 		else \
 			${FETCH} -o- ${KDIST}/kernel/${KERNEL}.gz | \
