@@ -128,7 +128,7 @@ setfetch:
 	@[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
 	$Q@for s in ${SETS}; do \
 		[ -f ${SETSDIR}/$${s} ] || \
-		${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
+		curl -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
 	done
 
 pkgfetch:
