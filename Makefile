@@ -116,9 +116,9 @@ kernfetch:
 	$Qif [ ! -f kernels/${KERNEL} ]; then \
 		echo "${ARROW} fetching kernel"; \
 		if [ "${ARCH}" = "amd64" ] || [ "${ARCH}" = "i386" ]; then \
-			curl -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
+			${FETCH} -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
 		else \
-			curl -o- ${KDIST}/kernel/${KERNEL}.gz | \
+			curl -L -o- ${KDIST}/kernel/${KERNEL}.gz | \
 				gzip -dc > kernels/${KERNEL}; \
 		fi; \
 	fi
@@ -128,7 +128,7 @@ setfetch:
 	@[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
 	$Q@for s in ${SETS}; do \
 		[ -f ${SETSDIR}/$${s} ] || \
-		curl -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
+		${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
 	done
 
 pkgfetch:
@@ -161,7 +161,7 @@ prof:
 
 live:	kernfetch
 	$Qecho "fetching ${LIVEIMG}"
-	[ -f ${LIVEIMG} ] || curl -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
+	[ -f ${LIVEIMG} ] || curl -L -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
 
 buildimg: kernfetch
 	$Qmkdir -p images
@@ -174,7 +174,7 @@ fetchimg:
 	$Qmkdir -p images
 	$Qecho "${ARROW} fetching builder image"
 	$Qif [ ! -f images/${BUILDIMG} ]; then \
-		curl -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
+		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
 	fi
 
 build:	kernfetch
