@@ -2,6 +2,10 @@
 
 . /etc/include/basicrc
 
+# why are fds not created by MAKEDEV -MM init?
+cd /dev && sh MAKEDEV fd
+cd -
+
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/pkg/bin:/usr/pkg/sbin
 export TERM=tmux-256color
 eval $(resize) # get current window size
