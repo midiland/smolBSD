@@ -159,23 +159,6 @@ prof:
 		-k kernels/${KERNEL} -x "${PROF}" ${EXTRAS}
 	${SUDO} chown ${WHOAMI} ${.TARGET}-${ARCH}.img
 
-# for use with sailor, needs rework
-#imgbuilder:
-#	${MAKE} setfetch SETS="${BASE}"
-#	# build the building image if NOIMGBUILDERBUILD is not defined
-#	if [ -z "${NOIMGBUILDERBUILD}" ]; then \
-#		${SUDO} SVCIMG=${SVCIMG} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} \
-#			-m 512 -x "${BASE}" ${EXTRAS} && \
-#		${SUDO} chown ${USER}:${GROUP} ${.TARGET}-${ARCH}.img; \
-#	fi
-#	# now start an imgbuilder microvm and build the actual service
-#	# image unless NOSVCIMGBUILD is set (probably a GL pipeline)
-#	if [ -z "${NOSVCIMGBUILD}" ]; then \
-#		dd if=/dev/zero of=${SVCIMG}-${ARCH}.img bs=1${DDUNIT} count=${SVCSZ}; \
-#		./startnb.sh -k kernels/${KERNEL} -i ${.TARGET}-${ARCH}.img -a '-v' \
-#			-h ${SVCIMG}-${ARCH}.img -p ${PORT} ${ROOTFS} -m ${MEM}; \
-#	fi
-
 live:	kernfetch
 	$Qecho "fetching ${LIVEIMG}"
 	[ -f ${LIVEIMG} ] || ${FETCH} -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
