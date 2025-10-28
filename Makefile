@@ -1,21 +1,22 @@
+UNAME_M!=	uname -m
+
+.if !defined(ARCH)
+.  if ${UNAME_M} == "x86_64" || ${UNAME_M} == "amd64"
+ARCH=	amd64
+.  elif ${UNAME_M} == "aarch64" || ${UNAME_M} == "arm64"
+ARCH=	evbarm-aarch64
+.  else
+ARCH=	${UNAME_M}
+.  endif
+.endif
+
 .-include "service/${SERVICE}/options.mk"
 
 VERS?=		11
 PKGVERS?=	11.0_2025Q3
-UNAME_M!=	uname -m
 # for an obscure reason, packages path use uname -m...
 DIST?=		https://nycdn.netbsd.org/pub/NetBSD-daily/netbsd-${VERS}/latest/${ARCH}/binary
-.if !defined(ARCH)
-.  if ${UNAME_M} == "x86_64" || ${UNAME_M} == "amd64"
-ARCH=		amd64
-.  elif ${UNAME_M} == "aarch64" || ${UNAME_M} == "arm64"
-ARCH=		evbarm-aarch64
-.  else
-ARCH=		${UNAME_M}
-.  endif
-.endif
 PKGSITE?=	https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${UNAME_M}/${PKGVERS}/All
-PKGS?=		packages
 KDIST=		${DIST}
 WHOAMI!=	whoami
 USER!= 		id -un
@@ -29,7 +30,14 @@ SERVICE?=	${.TARGET}
 EXTRAS+=	-o
 .endif
 
-ENVVARS=	SERVICE=${SERVICE} ARCH=${ARCH} PKGVERS=${PKGVERS} MOUNTRO=${MOUNTRO}
+ENVVARS=	SERVICE=${SERVICE} \
+		ARCH=${ARCH} \
+		PKGVERS=${PKGVERS} \
+		MOUNTRO=${MOUNTRO} \
+		PKGSITE=${PKGSITE} \
+		ADDPKGS="${ADDPKGS}" \
+		MINIMIZE=${MINIMIZE}
+
 .if ${WHOAMI} != "root"
 SUDO!=		command -v doas >/dev/null && \
 		echo '${ENVVARS} doas' || \
@@ -40,6 +48,7 @@ SUDO=		${ENVVARS}
 
 SETSEXT=	tar.xz
 SETSDIR=	sets/${ARCH}
+PKGSDIR=	pkgs/${ARCH}
 
 .if ${ARCH} == "evbarm-aarch64"
 KERNEL=		netbsd-GENERIC64.img
@@ -77,10 +86,7 @@ UNAME_S!=	uname
 .if ${UNAME_S} == "Linux"
 DDUNIT=		M
 .endif
-FETCH=		curl -L -s
-.if ${UNAME_S} == "NetBSD"
-FETCH=		ftp
-.endif
+FETCH=		scripts/fetch.sh
 
 # extra remote script
 .if defined(CURLSH) && !empty(CURLSH)
@@ -118,16 +124,19 @@ kernfetch:
 	fi
 
 setfetch:
-	$Qecho "${ARROW} fetching sets"
-	$Q[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
-	$Qfor s in ${SETS}; do \
-		[ -f ${SETSDIR}/$${s} ] || ${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
+	@echo "${ARROW} fetching sets"
+	@[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
+	$Q@for s in ${SETS}; do \
+		[ -f ${SETSDIR}/$${s} ] || \
+		${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
 	done
 
 pkgfetch:
-	[ -d ${PKGS} ] || mkdir ${PKGS}
-	for p in ${ADDPKGS};do \
-		[ -f ${PKGS}/$${p}* ] || ftp -o ${PKGS}/$${p}.tgz ${PKGSITE}/$${p}*; \
+	@echo "${ARROW} fetching additional packages"
+	@[ -d ${PKGSDIR} ] || mkdir ${PKGSDIR}
+	@for p in ${ADDPKGS};do \
+		[ -f ${PKGSDIR}/$${p}* ] || \
+		${FETCH} -o ${PKGSDIR}/$${p}.tgz ${PKGSITE}/$${p}*; \
 	done
 
 rescue:
@@ -143,10 +152,11 @@ base:
 	$Q${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
 	$Qecho "${CHECK} image ready: ${SERVICE}-${ARCH}.img"
 
+#  profiling
 prof:
 	${MAKE} setfetch SETS="${PROF}"
-	${SUDO} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} -m 1024 -k kernels/${KERNEL} \
-		-x "${PROF}" ${EXTRAS}
+	${SUDO} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} -m 1024 \
+		-k kernels/${KERNEL} -x "${PROF}" ${EXTRAS}
 	${SUDO} chown ${WHOAMI} ${.TARGET}-${ARCH}.img
 
 # for use with sailor, needs rework
@@ -167,13 +177,14 @@ prof:
 #	fi
 
 live:	kernfetch
-	echo "fetching ${LIVEIMG}"
+	$Qecho "fetching ${LIVEIMG}"
 	[ -f ${LIVEIMG} ] || ${FETCH} -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
 
 buildimg: kernfetch
 	$Qmkdir -p images
 	$Qecho "${ARROW} building the builder image"
-	$Q${MAKE} MOUNTRO=y SERVICE=build IMGSIZE=320 base
+	$Q${MAKE} SERVICE=build pkgfetch
+	$Q${MAKE} SERVICE=build base
 	$Qmv -f build-${ARCH}.img images/
 
 fetchimg:
@@ -190,9 +201,9 @@ build:	kernfetch
 	$Qmkdir -p tmp
 	$Qrm -f tmp/build-*
 	# save variables for sourcing in the build vm
-	$Qecho "${ENVVARS}"|sed 's/\ /\n/g' > tmp/build-${SERVICE}
+	$Qecho "${ENVVARS}"|sed -E 's/[ \t]+([A-Z_]+)/\n\1/g;s/=[ \t]*([^\n]+)/="\1"/g' > tmp/build-${SERVICE}
 	$Qecho "${ARROW} starting the builder microvm"
-	$Q./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 512 \
+	$Q./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 1024 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
 	# wait till the build is finished, guest removes the lock
 	$Qwhile [ -f tmp/build-${SERVICE} ]; do sleep 0.2; done
