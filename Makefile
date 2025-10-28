@@ -116,9 +116,9 @@ kernfetch:
 	$Qif [ ! -f kernels/${KERNEL} ]; then \
 		echo "${ARROW} fetching kernel"; \
 		if [ "${ARCH}" = "amd64" ] || [ "${ARCH}" = "i386" ]; then \
-			${FETCH} -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
+			curl -o kernels/${KERNEL} ${KDIST}/${KERNEL}; \
 		else \
-			${FETCH} -o- ${KDIST}/kernel/${KERNEL}.gz | \
+			curl -o- ${KDIST}/kernel/${KERNEL}.gz | \
 				gzip -dc > kernels/${KERNEL}; \
 		fi; \
 	fi
@@ -161,7 +161,7 @@ prof:
 
 live:	kernfetch
 	$Qecho "fetching ${LIVEIMG}"
-	[ -f ${LIVEIMG} ] || ${FETCH} -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
+	[ -f ${LIVEIMG} ] || curl -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
 
 buildimg: kernfetch
 	$Qmkdir -p images
@@ -174,7 +174,7 @@ fetchimg:
 	$Qmkdir -p images
 	$Qecho "${ARROW} fetching builder image"
 	$Qif [ ! -f images/${BUILDIMG} ]; then \
-		${FETCH} -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
+		curl -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
 	fi
 
 build:	kernfetch
