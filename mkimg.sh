@@ -191,7 +191,7 @@ else
 		# don't prepend sets path if this is a full path
 		case $s in */*) ;; *) s="sets/${arch}/${s}" ;; esac
 		echo -n "extracting ${s}.. "
-		$TAR xfp ${s} -C ${mnt}/ || exit 1
+		$TAR Jxfp ${s} -C ${mnt}/ || exit 1
 		echo done
 	done
 
