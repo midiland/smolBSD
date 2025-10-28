@@ -24,6 +24,7 @@ if [ -n "$MINIMIZE" -a -f service/${SERVICE}/sailor.conf ]; then
 		echo "${WARN} git clone https://github.com/NetBSDfr/sailor first!"
 		sed -i'' 's/MINIMIZE/NOMINIMIZE/' tmp/build*
 	else
+		echo "${ARROW} preparing env for sailor"
 		mount -t tmpfs -o -s100M tmpfs /var/db
 		mount -t tmpfs -o -s20M tmpfs /var/run
 		# backup raw packages for later build

@@ -157,6 +157,7 @@ for pkg in ${ADDPKGS}; do
 	# minimization of the image via sailor is requested
 	# we need packages cleanly installed via pkgin
 	if [ -f /tmp/usrpkg.tgz ]; then
+		echo "${ARROW} unpacking minimal env for sailor"
 		# needed to re-create packages with pkg_tarup
 		tar xfp /tmp/usrpkg.tgz -C /
 		pkgin -y in $ADDPKGS
