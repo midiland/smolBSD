@@ -18,6 +18,6 @@ case $2 in
 		done
 	;;
 *)
-	curl -L -s -o $2 $1
+	curl -L -s -o $1 $2
 	;;
 esac
