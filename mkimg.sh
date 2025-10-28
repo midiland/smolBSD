@@ -178,7 +178,7 @@ done
 if [ -n "$MINIMIZE" -a -f service/${svc}/sailor.conf ]; then
 	cd sailor
 	echo "${ARROW} minimize image"
-	export TERM=dumb
+	export TERM=vt220
 	PKG_RCD_SCRIPTS=YES ./sailor.sh build ../service/${svc}/sailor.conf
 	cd ..
 # root fs is hand made
