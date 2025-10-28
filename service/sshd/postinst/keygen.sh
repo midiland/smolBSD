@@ -20,6 +20,7 @@ _EOF
 # we want sshd to be the main process
 echo 'sshd_flags="-D -e"' >> etc/rc.conf
 echo 'UseDNS no' >> etc/ssh/sshd_config
+sed -i'' 's/^UsePAM/# UsePAM/' etc/ssh/sshd_config
 
 ssh-add -L >etc/ssh/authorized_keys
 pubkeys="../service/sshd/etc/*.pub"
