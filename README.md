@@ -1,9 +1,9 @@
 # smolBSD
 
-This project aims at creating a minimal _NetBSD_ virtual machine that's able to boot and
+This project aims at creating a minimal _NetBSD_ 🚩 virtual machine that's able to boot and
 start a service in less than a second.  
 Previous _NetBSD_ installation is not required, using the provided tools the _microvm_ can be
-created from any _NetBSD_, _GNU/Linux_, MacOS system and probably more.
+created from any _NetBSD_, _GNU/Linux_, macOS system and probably more.
 
 When creating the image on a _NetBSD_ system, the image will be formatted using FFS, when
 creating the image on a _GNU/Linux_ system, the image will be formatted using _ext2_.
@@ -21,11 +21,11 @@ Warning those are _NetBSD-current_ kernels!
 
 ## Requirements
 
-- A GNU/Linux, NetBSD or MacOS operating system
+- A GNU/Linux, NetBSD or macOS operating system
 - The following tools installed
   - `curl`
   - `git`
-  - `make` (`bmake` if running on Linux or MacOS)
+  - `make` (`bmake` if running on Linux or macOS)
   - `qemu-system-x86_64`, `qemu-system-i386` or `qemu-system-aarch64`
   - `sudo` or `doas`
   - `nm`
@@ -94,9 +94,9 @@ service
 ```
 A microvm is seen as a "service", for each one:
 
-- there **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
-- if standard _NetBSD_ `init` is used, there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
-- image specifics **COULD**  be added in `make(1)` format in `options.mk`, i.e.
+- There **COULD** be a `postinst/anything.sh` which will be executed by `mkimg.sh` at the end of root basic filesystem preparation. **This is executed by the build host at build time**
+- If standard _NetBSD_ `init` is used, there **MUST** be an `etc/rc` file, which defines what is started at vm's boot. **This is executed by the microvm**.
+- Image specifics **COULD**  be added in `make(1)` format in `options.mk`, i.e.
 ```sh
 $ cat service/nbakery/options.mk
 # size of resulting inage in megabytes
@@ -135,9 +135,10 @@ And then add this to your `rc`:
 . /etc/include/basicrc
 ```
 
-## ⚠️  Warning ⚠️
+## Considerations
 
-If you use directly your host to build images, `postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
+>[!WARNING]
+> If you directly use your host to build images, `postinst` operations are run as `root` **in the build host: only use relative paths** in order **not** to impair your host's filesystem.
 
 ## Prerequisite
 
@@ -167,7 +168,7 @@ $ bmake ARCH=evbarm-aarch64 kernfetch
 ```sh
 $ bmake buildimg
 ```
-  * or by simply fetching it if you are running other systems such as MacOS
+  * or by simply fetching it if you are running other systems such as macOS
 ```sh
 $ bmake ARCH=evbarm-aarch64 fetchimg
 ```
@@ -180,7 +181,8 @@ This will spawn a microvm running the build image, and will in turn build the re
 
 ## Example of a very minimal (10MB) virtual machine
 
-> Note: you can use the ARCH variable to specify an architecture to build your image for, default is amd64.
+>[!Note]
+> You can use the ARCH variable to specify an architecture to build your image for, default is amd64.
 
 ```sh
 $ bmake rescue
