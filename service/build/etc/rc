@@ -1,3 +1,6 @@
+export CHOUPI=y
+
+. /etc/include/choupi
 . /etc/include/basicrc
 . /etc/include/mount9p
 
@@ -7,10 +10,30 @@ mount -t tmpfs -o -s32M tmpfs /tmp
 cp /usr/share/examples/certctl/certs.conf /etc/openssl/
 certctl rehash
 
-cd /mnt
+BASEPATH=/mnt
+
+cd $BASEPATH
 . tmp/build*
-echo "* building $SERVICE image"
-make $(cat tmp/build*|xargs) base
-echo "* build finished, Ctrl-A X to exit"
+
+export ADDPKGS
+
+# MIMINIZE this image with sailor
+if [ -n "$MINIMIZE" -a -f service/${SERVICE}/sailor.conf ]; then
+	if [ ! -d sailor ]; then
+		echo "${WARN} minimization asked but sailor not available"
+		echo "${WARN} git clone https://github.com/NetBSDfr/sailor first!"
+	else
+		mount -t tmpfs -o -s100M tmpfs /var/db
+		mount -t tmpfs -o -s20M tmpfs /var/run
+		# backup raw packages for later build
+		tar cfp /tmp/usrpkg.tgz /usr/pkg
+		mount -t tmpfs -o -s300M tmpfs /usr/pkg
+	fi
+fi
+
+echo "${ARROW} building $SERVICE image"
+cat tmp/build*|xargs
+make $(grep -v ADDPKGS tmp/build*|xargs) base
+echo "${CHECK} build finished, Ctrl-A X to exit"
 rm -f tmp/build*
 cat

@@ -6,7 +6,7 @@ usage()
 Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
 	[-a kernel parameters] [-r root disk] [-h drive2] [-p port]
 	[-t tcp serial port] [-w path] [-x qemu extra args]
-	[-b] [-n] [-s] [-d] [-v]
+	[-b] [-n] [-s] [-d] [-v] [-u]
 
 	Boot a microvm
 	-f conffile	vm config file
@@ -26,6 +26,7 @@ Usage:	${0##*/} -f conffile | -k kernel -i image [-c CPUs] [-m memory]
 	-s		don't lock image file
 	-d		daemonize
 	-v		verbose
+	-u		non-colorful output
 	-h		this help
 _USAGE_
 	# as per https://www.qemu.org/docs/master/system/invocation.html
@@ -39,7 +40,9 @@ if pgrep VirtualBoxVM >/dev/null 2>&1; then
 	exit 1
 fi
 
-options="f:k:a:p:i:m:n:c:r:l:p:w:x:t:hbdsv"
+options="f:k:a:p:i:m:n:c:r:l:p:uw:x:t:hbdsv"
+
+export CHOUPI=y
 
 uuid="$(LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c8)"
 
@@ -64,6 +67,7 @@ do
 	r) root="$OPTARG";;
 	s) sharerw=yes;;
 	t) serial_port=$OPTARG;;
+	u) CHOUPI="";;
 	v) VERBOSE=yes;;
 	w) share=$OPTARG;;
 	x) extra=$OPTARG;;
@@ -71,7 +75,9 @@ do
 	esac
 done
 
-# fallback to those
+. service/common/choupi
+
+# envvars override
 kernel=${kernel:-$KERNEL}
 img=${img:-$NBIMG}
 
@@ -158,7 +164,7 @@ FreeBSD)
 esac
 
 QEMU=${QEMU:-qemu-system-${MACHINE}}
-printf "using QEMU "
+printf "${ARROW} using QEMU "
 $QEMU --version|grep -oE 'version .*'
 
 mem=${mem:-"256"}
@@ -173,15 +179,27 @@ x86_64|i386)
 	# stack smashing with version 9.0 and 9.1
 	${QEMU} --version|egrep -q '9\.[01]' && \
 		extra="$extra -L bios -bios bios-microvm.bin"
+	case $MACHINE in
+	i386)
+		kernel=${kernel:-kernels/netbsd-SMOL386}
+		img=${img:-${vm}-i386.img}
+		;;
+	x86_64)
+		kernel=${kernel:-kernels/netbsd-SMOL}
+		img=${img:-${vm}-amd64.img}
+		;;
+	esac
 	;;
 aarch64)
 	mflags="-M virt${ACCEL},highmem=off,gic-version=3"
 	cpuflags="-cpu ${cputype}"
 	root=${root:-"ld4a"}
 	extra="$extra -device virtio-rng-pci"
+	kernel=${kernel:-kernels/netbsd-GENERIC64.img}
+	img=${img:-${vm}-evbarm-aarch64.img}
 	;;
 *)
-	echo "Unknown architecture"
+	echo "${WARN} Unknown architecture"
 esac
 
 d="-display none"
@@ -208,6 +226,8 @@ if [ -n "$max_ports" ]; then
 fi
 # QMP is available
 [ -n "${qmp_port}" ] && extra="$extra -qmp tcp:localhost:${qmp_port},server,wait=off"
+
+echo "${ARROW} booting image $img with kernel $kernel"
 
 cmd="${QEMU} -smp $cores \
 	$mflags -m $mem $cpuflags \

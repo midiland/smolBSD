@@ -18,6 +18,7 @@ Usage: $progname [-s service] [-m megabytes] [-i image] [-x set]
 	-k kernel	kernel to copy in the image
 	-c URL		URL to a script to execute as finalizer
 	-o		read-only root filesystem
+	-u		non-colorful output
 _USAGE_
 	exit 1
 }
@@ -28,7 +29,13 @@ rsynclite()
 	(cd $1 && tar cfp - .)|(cd $2 && tar xfp -)
 }
 
-options="s:m:i:r:x:k:c:oh"
+options="s:m:i:r:x:k:c:ouh"
+
+[ -f tmp/build* ] && . tmp/build*
+
+CHOUPI=y
+
+export CHOUPI
 
 while getopts "$options" opt
 do
@@ -41,6 +48,7 @@ do
 	k) kernel="$OPTARG";;
 	c) curlsh="$OPTARG";;
 	o) rofs=y;;
+	u) CHOUPI="";;
 	h) usage;;
 	*) usage;;
 	esac
@@ -64,7 +72,9 @@ SVCIMG=${SVCIMG:-}
 
 OS=$(uname -s)
 TAR=tar
-FETCH=curl
+FETCH=$(pwd)/scripts/fetch.sh
+
+. service/common/choupi
 
 is_netbsd=
 is_linux=
@@ -141,15 +151,39 @@ else # NetBSD (and probably OpenBSD)
 	mountfs="ffs"
 fi
 
-# $rootdir can be relative, don't cd mnt yet
-for d in sbin bin dev etc/include
-do
-	mkdir -p ${mnt}/$d
+# additional packages
+for pkg in ${ADDPKGS}; do
+	# case 1, artefacts created by the builder service
+	# minimization of the image via sailor is requested
+	# we need packages cleanly installed via pkgin
+	if [ -f /tmp/usrpkg.tgz ]; then
+		# needed to re-create packages with pkg_tarup
+		tar xfp /tmp/usrpkg.tgz -C /
+		pkgin -y in $ADDPKGS
+		# exit the loop, packages have been installed cleanly
+		break
+	fi
+	# case 2, no need for recorded, cleanly installed packages
+	# simply untar them to LOCALBASE
+	pkg="pkgs/${arch}/${pkg}.tgz"
+	[ ! -f ${pkg} ] && continue
+	eval $($TAR xfp $pkg -O +BUILD_INFO|grep ^LOCALBASE)
+	echo -n "extracting $pkg to ${LOCALBASE}.. "
+	mkdir -p ${mnt}/${LOCALBASE}
+	$TAR xfp ${pkg} --exclude='+*' -C ${mnt}/${LOCALBASE} || exit 1
+	echo done
 done
-# root fs built by sailor or hand made
-if [ -n "$rootdir" ]; then
+# minimization of the image via sailor is requested
+if [ -n "$MINIMIZE" -a -f service/${svc}/sailor.conf ]; then
+	cd sailor
+	echo "${ARROW} minimize image"
+	export TERM=dumb
+	PKG_RCD_SCRIPTS=YES ./sailor.sh build ../service/${svc}/sailor.conf
+	cd ..
+# root fs is hand made
+elif [ -n "$rootdir" ]; then
 	$TAR cfp - -C "$rootdir" . | $TAR xfp - -C $mnt
-# use a set and customization in services/
+# use sets and customizations in services/
 else
 	for s in ${sets} ${ADDSETS}
 	do
@@ -161,14 +195,12 @@ else
 	done
 
 fi
-# additional packages
-[ -n "$ADDPKGS" ] && for pkg in ${ADDPKGS}; do
-		eval $($TAR xfp $pkg -O +BUILD_INFO|grep ^LOCALBASE)
-		echo -n "extracting $pkg to ${LOCALBASE}.. "
-		mkdir -p ${mnt}/${LOCALBASE}
-		$TAR xfp ${pkg} -C ${mnt}/${LOCALBASE} || exit 1
-		echo done
-	done
+
+# $rootdir can be relative, don't cd mnt yet
+for d in sbin bin dev etc/include
+do
+	mkdir -p ${mnt}/$d
+done
 
 [ -n "$rofs" ] && mountopt="ro" || mountopt="rw"
 [ "$mountfs" = "ffs" ] && mountopt="${mountopt},log,noatime"
@@ -205,11 +237,14 @@ fi
 		[ -f $x ] && sh $x
 	done
 
-# newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
-# backup MAKEDEV so imgbuilder rc can copy it
-cp dev/MAKEDEV etc/
-# unionfs with ext2 leads to i/o error
-sed -ie 's/-o union//g' dev/MAKEDEV
+# we don't need to hack our way around MAKEDEV on NetBSD / builder
+if [ -z "$is_netbsd" ]; then
+	# newer NetBSD versions use tmpfs for /dev, sailor copies MAKEDEV from /dev
+	# backup MAKEDEV so imgbuilder rc can copy it
+	cp dev/MAKEDEV etc/
+	# unionfs with ext2 leads to i/o error
+	sed -i 's/-o union//g' dev/MAKEDEV
+fi
 # record wanted pkgsrc version
 echo "PKGVERS=$PKGVERS" > etc/pkgvers
 
