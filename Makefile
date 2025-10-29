@@ -11,6 +11,7 @@ ARCH=	${UNAME_M}
 .endif
 
 .-include "service/${SERVICE}/options.mk"
+.-include "service/${SERVICE}/own.mk"
 
 VERS?=		11
 PKGVERS?=	11.0_2025Q3
