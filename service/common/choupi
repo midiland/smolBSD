@@ -1,7 +1,7 @@
 case $CHOUPI in
 [yY]*)
 	STAR="⭐"
-	ARROW="➡"
+	ARROW="➡️"
 	CHECK="✅"
 	WARN="⚠️"
 	OUT="/dev/null"
