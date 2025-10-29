@@ -5,8 +5,13 @@ mknod -m 600 dev/console c 0 0
 mknod -m 666 dev/null c 2 2
 
 mkdir -p packages
-VERSION=0.4.1
-${FETCH} -o packages/nitro.tgz https://imil.net/NetBSD/nitro-${VERSION}.tgz?$RANDOM
+if [ "$ARCH" = "amd64" ]; then # I keep the binary package updated
+	VERSION=0.5
+	${FETCH} -o packages/nitro.tgz https://imil.net/NetBSD/nitro-${VERSION}.tgz?$RANDOM
+else
+	PKGARCH=${ARCH#evbarm-}
+	${FETCH} -o packages/nitro.tgz https://cdn.netbsd.org/pub/pkgsrc/packages/NetBSD/${PKGARCH}/nitro-*
+fi
 
 PREFIX=usr/pkg
 mkdir -p ${PREFIX}
