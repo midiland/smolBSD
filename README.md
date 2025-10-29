@@ -32,6 +32,9 @@ Warning those are _NetBSD-current_ kernels!
   - `bsdtar` on Linux (install with `libarchive-tools` on Debian and derivatives, `libarchive` on Arch)
 - A x86 VT-capable, or ARM64 CPU is recommended
 
+> ⚠️ **WARNING**
+> For macOS, you must install Docker to create the image correctly.
+
 ## Project structure
 
 - `mkimg.sh` creates a root filesystem image

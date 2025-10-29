@@ -82,6 +82,15 @@ FETCH=		curl -L -s
 FETCH=		ftp
 .endif
 
+# Define variables for macOS; use Docker to bypass the fuse-ext2 mount issue.
+BUILD_IMG=	buildimg
+.if ${.MAKE.OS} == "Darwin"
+IS_DARWIN=			1
+BUILD_IMG=			buildimg-docker
+DOCKER_IMAGE_NAME=	smol-bsd
+DOCKER_IMAGE_TAG= 	0.0.1
+.endif
+
 # extra remote script
 .if defined(CURLSH) && !empty(CURLSH)
 EXTRAS+=	-c ${CURLSH}
@@ -127,14 +136,18 @@ pkgfetch:
 rescue:
 	${MAKE} setfetch SETS="${RESCUE}"
 	${SUDO} ./mkimg.sh -m 20 -x "${RESCUE}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} ${.TARGET}-${ARCH}.img
+	@if [ -z "${IS_DARWIN}" ]; then \
+		${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img; \
+	fi
 
 base:
 	@${MAKE} setfetch SETS="${BASE}"
 	@echo "${ARROW} creating root filesystem (${IMGSIZE}M)"
 	@${SUDO} ./mkimg.sh -i ${SERVICE}-${ARCH}.img -s ${SERVICE} \
 		-m ${IMGSIZE} -x "${BASE}" ${EXTRAS}
-	@${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
+	@if [ -z "${IS_DARWIN}" ]; then \
+		${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img; \
+	fi
 	@echo "${CHECK} image ready: ${SERVICE}-${ARCH}.img"
 
 prof:
@@ -170,6 +183,17 @@ buildimg: kernfetch
 	@${MAKE} MOUNTRO=y SERVICE=build IMGSIZE=320 base
 	@mv -f build-${ARCH}.img images/
 
+buildimg-docker: docker-exists
+	docker run --privileged -v ./:/smolBSD -it $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) bmake SERVICE=${SERVICE} buildimg
+
+docker-exists:
+	@if docker image inspect "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}" >/dev/null 2>&1; then \
+     	echo "The image ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} already exists."; \
+    else \
+    	echo "Building ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}..."; \
+        docker build -t "${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}" .; \
+    fi
+
 fetchimg:
 	@mkdir -p images
 	@echo "${ARROW} fetching builder image"
@@ -179,7 +203,7 @@ fetchimg:
 
 build:	kernfetch
 	@if [ ! -f images/${.TARGET}-${ARCH}.img ]; then \
-		${MAKE} buildimg; \
+		${MAKE} ${BUILD_IMG}; \
 	fi
 	@mkdir -p tmp
 	@rm -f tmp/build-*
@@ -192,4 +216,6 @@ build:	kernfetch
 	@while [ -f tmp/build-${SERVICE} ]; do sleep 0.2; done
 	@echo "${ARROW} killing the builder microvm"
 	@kill $$(cat qemu-${.TARGET}.pid)
-	@${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
+	@if [ -z "${IS_DARWIN}" ]; then \
+		${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img; \
+	fi
