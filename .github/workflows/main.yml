@@ -49,7 +49,7 @@ jobs:
         run: |
           for arch in amd64 evbarm-aarch64
           do
-            bmake SERVICE=${{ inputs.service }} NOSVCIMGBUILD=yes CURLSH=${{ inputs.curlsh }} ARCH="$arch" MOUNTRO=${{ inputs.mountro || 'y' }} ${{ inputs.img || 'buildimg' }}
+            bmake SERVICE=${{ inputs.service }} CURLSH=${{ inputs.curlsh }} ARCH="$arch" MOUNTRO=${{ inputs.mountro || 'y' }} ${{ inputs.img || 'buildimg' }}
           done
 
       - name: Compress images
