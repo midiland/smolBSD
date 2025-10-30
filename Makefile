@@ -22,7 +22,8 @@ KDIST=		${DIST}
 WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
-BUILDIMG=	images/build-${ARCH}.img
+BUILDIMG=	build-${ARCH}.img
+BUILDIMGPATH=	images/${BUILDIMG}
 BUILDIMGURL=	https://github.com/NetBSDfr/smolBSD/releases/download/latest/${BUILDIMG}
 
 SERVICE?=	${.TARGET}
@@ -156,12 +157,12 @@ buildimg: fetchall
 fetchimg: fetchall
 	$Qmkdir -p images
 	$Qecho "${ARROW} fetching builder image"
-	$Qif [ ! -f ${BUILDIMG} ]; then \
-		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > ${BUILDIMG}; \
+	$Qif [ ! -f ${BUILDIMGPATH} ]; then \
+		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > ${BUILDIMGPATH}; \
 	fi
 
 build: fetchall
-	$Qif [ ! -f ${BUILDIMG} ]; then \
+	$Qif [ ! -f ${BUILDIMGPATH} ]; then \
 		${MAKE} buildimg; \
 	fi
 	$Qmkdir -p tmp
@@ -171,7 +172,7 @@ build: fetchall
 		sed -E 's/[[:blank:]]+([A-Z_]+)/\n\1/g;s/=[[:blank:]]*([^\n]+)/="\1"/g' > \
 		tmp/build-${SERVICE}
 	$Qecho "${ARROW} starting the builder microvm"
-	$Q./startnb.sh -k kernels/${KERNEL} -i ${BUILDIMG} -c 2 -m 1024 \
+	$Q./startnb.sh -k kernels/${KERNEL} -i ${BUILDIMGPATH} -c 2 -m 1024 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
 	# wait till the build is finished, guest removes the lock
 	$Qwhile [ -f tmp/build-${SERVICE} ]; do sleep 0.2; done
