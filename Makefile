@@ -31,6 +31,7 @@ SERVICE?=	${.TARGET}
 EXTRAS+=	-o
 .endif
 
+# variables to transfer to mkimg.sh
 ENVVARS=	SERVICE=${SERVICE} \
 		ARCH=${ARCH} \
 		PKGVERS=${PKGVERS} \
@@ -61,18 +62,13 @@ SETSEXT=	tgz
 .else
 KERNEL=		netbsd-SMOL
 KDIST=		https://smolbsd.org/assets
-LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-10.99.12-amd64-live.img.gz
+LIVEIMGGZ=	https://nycdn.netbsd.org/pub/NetBSD-daily/HEAD/latest/images/NetBSD-11.99.3-amd64-live.img.gz
 .endif
 
 LIVEIMG=	NetBSD-${ARCH}-live.img
 
-# sets to fetch
-RESCUE=		rescue.${SETSEXT} etc.${SETSEXT}
-BASE?=		base.${SETSEXT} etc.${SETSEXT}
-PROF=		${BASE} comp.${SETSEXT}
-COMP=		${BASE} comp.${SETSEXT}
-BOZO=		${BASE}
-IMGBUILDER=	${BASE}
+# sets to fetch, defaults to base
+SETS?=		base.${SETSEXT} etc.${SETSEXT}
 
 .if ${UNAME_M} == "x86_64"
 ROOTFS?=	-r ld0a
@@ -98,8 +94,6 @@ EXTRAS+=	-c ${CURLSH}
 MEM?=		256
 # default port redirect, gives network to the guest
 PORT?=		::22022-:22
-# default size for disk built by imgbuilder
-SVCSZ?=		128
 
 IMGSIZE?=	512
 
@@ -125,67 +119,61 @@ kernfetch:
 	fi
 
 setfetch:
-	@echo "${ARROW} fetching sets"
 	@[ -d ${SETSDIR} ] || mkdir -p ${SETSDIR}
-	$Q@for s in ${SETS}; do \
+	$Qfor s in ${SETS}; do \
 		[ -f ${SETSDIR}/$${s} ] || \
-		${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
+		( \
+			echo "${ARROW} fetching set $${s}"; \
+			${FETCH} -o ${SETSDIR}/$${s} ${DIST}/sets/$${s}; \
+		) \
 	done
 
 pkgfetch:
-	@echo "${ARROW} fetching additional packages"
 	@[ -d ${PKGSDIR} ] || mkdir -p ${PKGSDIR}
-	@for p in ${ADDPKGS};do \
+	$Qfor p in ${ADDPKGS};do \
 		[ -f ${PKGSDIR}/$${p}* ] || \
-		${FETCH} -o ${PKGSDIR}/$${p}.tgz ${PKGSITE}/$${p}*; \
+		( \
+			echo "${ARROW} fetching package $${p}"; \
+			${FETCH} -o ${PKGSDIR}/$${p}.tgz ${PKGSITE}/$${p}*; \
+		) \
 	done
 
-rescue:
-	${MAKE} setfetch SETS="${RESCUE}"
-	${SUDO} ./mkimg.sh -m 20 -x "${RESCUE}" ${EXTRAS}
-	${SUDO} chown ${USER}:${GROUP} ${.TARGET}-${ARCH}.img
+fetchall: kernfetch setfetch pkgfetch
 
-base:
-	$Q${MAKE} setfetch SETS="${BASE}"
+base: fetchall
 	$Qecho "${ARROW} creating root filesystem (${IMGSIZE}M)"
 	$Q${SUDO} ./mkimg.sh -i ${SERVICE}-${ARCH}.img -s ${SERVICE} \
-		-m ${IMGSIZE} -x "${BASE}" ${EXTRAS}
+		-m ${IMGSIZE} -x "${SETS}" ${EXTRAS}
 	$Q${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
 	$Qecho "${CHECK} image ready: ${SERVICE}-${ARCH}.img"
 
-#  profiling
-prof:
-	${MAKE} setfetch SETS="${PROF}"
-	${SUDO} ./mkimg.sh -i ${.TARGET}-${ARCH}.img -s ${.TARGET} -m 1024 \
-		-k kernels/${KERNEL} -x "${PROF}" ${EXTRAS}
-	${SUDO} chown ${WHOAMI} ${.TARGET}-${ARCH}.img
-
-live:	kernfetch
+live: kernfetch
 	$Qecho "fetching ${LIVEIMG}"
 	[ -f ${LIVEIMG} ] || curl -L -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
 
-buildimg: kernfetch
+buildimg: fetchall
 	$Qmkdir -p images
 	$Qecho "${ARROW} building the builder image"
-	$Q${MAKE} SERVICE=build pkgfetch
 	$Q${MAKE} SERVICE=build base
 	$Qmv -f build-${ARCH}.img images/
 
-fetchimg:
+fetchimg: fetchall
 	$Qmkdir -p images
 	$Qecho "${ARROW} fetching builder image"
 	$Qif [ ! -f images/${BUILDIMG} ]; then \
 		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
 	fi
 
-build:	kernfetch
+build: fetchall
 	$Qif [ ! -f images/${.TARGET}-${ARCH}.img ]; then \
 		${MAKE} buildimg; \
 	fi
 	$Qmkdir -p tmp
 	$Qrm -f tmp/build-*
 	# save variables for sourcing in the build vm
-	$Qecho "${ENVVARS}"|sed -E 's/[ \t]+([A-Z_]+)/\n\1/g;s/=[ \t]*([^\n]+)/="\1"/g' > tmp/build-${SERVICE}
+	$Qecho "${ENVVARS}" | \
+		sed -E 's/[ \t]+([A-Z_]+)/\n\1/g;s/=[ \t]*([^\n]+)/="\1"/g' > \
+		tmp/build-${SERVICE}
 	$Qecho "${ARROW} starting the builder microvm"
 	$Q./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 1024 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
@@ -194,3 +182,6 @@ build:	kernfetch
 	$Qecho "${ARROW} killing the builder microvm"
 	$Qkill $$(cat qemu-${.TARGET}.pid)
 	$Q${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
+
+rescue:
+	${MAKE} SERVICE=rescue build
