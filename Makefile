@@ -22,7 +22,7 @@ KDIST=		${DIST}
 WHOAMI!=	whoami
 USER!= 		id -un
 GROUP!= 	id -gn
-BUILDIMG=	build-${ARCH}.img
+BUILDIMG=	images/build-${ARCH}.img
 BUILDIMGURL=	https://github.com/NetBSDfr/smolBSD/releases/download/latest/${BUILDIMG}
 
 SERVICE?=	${.TARGET}
@@ -40,7 +40,7 @@ ENVVARS=	SERVICE=${SERVICE} \
 		ADDPKGS="${ADDPKGS}" \
 		MINIMIZE=${MINIMIZE}
 
-.if ${WHOAMI} != "root"
+.if ${WHOAMI} != "root" && !defined(NOSUDO) # allow non root builds
 SUDO!=		command -v doas >/dev/null && \
 		echo '${ENVVARS} doas' || \
 		echo 'sudo -E ${ENVVARS}'
@@ -96,6 +96,7 @@ MEM?=		256
 PORT?=		::22022-:22
 
 IMGSIZE?=	512
+DSTIMG?=	images/${SERVICE}-${ARCH}.img
 
 # QUIET: default to quiet mode with Q=@, use Q= for verbose
 Q=@
@@ -103,8 +104,8 @@ Q=@
 ARROW="➡️"
 CHECK="✅"
 
-help:
-	$Qgrep '.*:$$' Makefile
+help:	# This help you are reading
+	$Qgrep '^[a-z]\+:.*#' Makefile
 
 kernfetch:
 	$Qmkdir -p kernels
@@ -142,46 +143,46 @@ fetchall: kernfetch setfetch pkgfetch
 
 base: fetchall
 	$Qecho "${ARROW} creating root filesystem (${IMGSIZE}M)"
-	$Q${SUDO} ./mkimg.sh -i ${SERVICE}-${ARCH}.img -s ${SERVICE} \
+	$Qmkdir -p images
+	$Q${SUDO} ./mkimg.sh -i ${DSTIMG} -s ${SERVICE} \
 		-m ${IMGSIZE} -x "${SETS}" ${EXTRAS}
-	$Q${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
-	$Qecho "${CHECK} image ready: ${SERVICE}-${ARCH}.img"
-
-live: kernfetch
-	$Qecho "fetching ${LIVEIMG}"
-	[ -f ${LIVEIMG} ] || curl -L -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
+	$Q${SUDO} chown ${USER}:${GROUP} ${DSTIMG}
+	$Qecho "${CHECK} image ready: ${DSTIMG}"
 
 buildimg: fetchall
-	$Qmkdir -p images
 	$Qecho "${ARROW} building the builder image"
 	$Q${MAKE} SERVICE=build base
-	$Qmv -f build-${ARCH}.img images/
 
 fetchimg: fetchall
 	$Qmkdir -p images
 	$Qecho "${ARROW} fetching builder image"
-	$Qif [ ! -f images/${BUILDIMG} ]; then \
-		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > images/${BUILDIMG}; \
+	$Qif [ ! -f ${BUILDIMG} ]; then \
+		curl -L -o- ${BUILDIMGURL}.xz | xz -dc > ${BUILDIMG}; \
 	fi
 
 build: fetchall
-	$Qif [ ! -f images/${.TARGET}-${ARCH}.img ]; then \
+	$Qif [ ! -f ${BUILDIMG} ]; then \
 		${MAKE} buildimg; \
 	fi
 	$Qmkdir -p tmp
 	$Qrm -f tmp/build-*
 	# save variables for sourcing in the build vm
 	$Qecho "${ENVVARS}" | \
-		sed -E 's/[[:blank:]]+([A-Z_]+)/\n\1/g;s/=[[:blank:]]*([^[:space:]]+)/="\1"/g' > \
+		sed -E 's/[[:blank:]]+([A-Z_]+)/\n\1/g;s/=[[:blank:]]*([^\n]+)/="\1"/g' > \
 		tmp/build-${SERVICE}
 	$Qecho "${ARROW} starting the builder microvm"
-	$Q./startnb.sh -k kernels/${KERNEL} -i images/${.TARGET}-${ARCH}.img -c 2 -m 1024 \
+	$Q./startnb.sh -k kernels/${KERNEL} -i ${BUILDIMG} -c 2 -m 1024 \
 		-p ${PORT} -w . -x "-pidfile qemu-${.TARGET}.pid" &
 	# wait till the build is finished, guest removes the lock
 	$Qwhile [ -f tmp/build-${SERVICE} ]; do sleep 0.2; done
 	$Qecho "${ARROW} killing the builder microvm"
 	$Qkill $$(cat qemu-${.TARGET}.pid)
-	$Q${SUDO} chown ${USER}:${GROUP} ${SERVICE}-${ARCH}.img
+	$Q${SUDO} chown ${USER}:${GROUP} ${DSTIMG}
 
 rescue:
 	${MAKE} SERVICE=rescue build
+
+live: kernfetch
+	$Qecho "fetching ${LIVEIMG}"
+	[ -f ${LIVEIMG} ] || curl -L -o- ${LIVEIMGGZ}|gzip -dc > ${LIVEIMG}
+
